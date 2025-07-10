@@ -1,0 +1,1 @@
+FROM makeplane/plane:app-latest

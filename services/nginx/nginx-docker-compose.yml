@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: purebliss-nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ${NGINX_SSL_CERT_PATH}:/etc/nginx/certs:ro
+      - ${RAID0_MOUNT}/nginx/html:/usr/share/nginx/html:ro
+    env_file:
+      - /opt/my-secure-ha-stack/config.env
+    networks:
+      - purebliss-net
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+networks:
+  purebliss-net:
+    external: true

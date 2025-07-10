@@ -1,0 +1,22 @@
+services:
+  vault-agent:
+    build:
+      context: .
+      dockerfile: vault-agent-dockerfile
+    container_name: purebliss-vault-agent
+    command: ["vault", "agent", "-config=/etc/vault-agent/config.hcl", "-log-level=info"]
+    volumes:
+      - /opt/dev-purebliss/services/vault/vault-agent/config.hcl:/etc/vault-agent/config.hcl:ro
+      - /opt/dev-purebliss/services/vault/vault-agent/:/vault-agent/
+    env_file:
+      - /opt/my-secure-ha-stack/config.env
+    networks:
+      - purebliss-net
+    healthcheck:
+      test: ["CMD", "ls", "/vault-agent/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+networks:
+  purebliss-net:
+    external: true
