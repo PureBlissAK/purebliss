@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  purebliss-plane:
+    image: makeplane/plane:app-latest
+    container_name: purebliss-plane
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      PLANE_DB_HOST: ${POSTGRES_HOST}
+      PLANE_DB_PORT: ${POSTGRES_PORT}
+      PLANE_DB_NAME: ${POSTGRES_DB}
+      PLANE_DB_USER: ${POSTGRES_USER}
+      PLANE_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      - purebliss-postgres
+    volumes:
+      - ${PLANE_DATA_PATH}:/plane/data
+      - ${PLANE_LOG_PATH}:/var/log/plane/plane.log
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - purebliss-net
+networks:
+  purebliss-net:
+    external: true
