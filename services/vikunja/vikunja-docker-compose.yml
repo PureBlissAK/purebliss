@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  vikunja:
+    image: vikunja/vikunja:latest
+    container_name: purebliss-vikunja
+    restart: unless-stopped
+    environment:
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_HOST: purebliss-postgres
+      VIKUNJA_DATABASE_PORT: 5432
+      VIKUNJA_DATABASE_DATABASE: ${POSTGRES_DB}
+      VIKUNJA_DATABASE_USER: ${POSTGRES_USER}
+      VIKUNJA_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      VIKUNJA_SERVICE_FRONTENDURL: https://dev.purebliss.app/vikunja
+    volumes:
+      - /tmp/purebliss-storage/vikunja:/app/vikunja/files
+    networks:
+      - purebliss-net
+    ports:
+      - "8082:3456"
+
+networks:
+  purebliss-net:
+    external: true

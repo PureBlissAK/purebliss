@@ -4,6 +4,7 @@ services:
     image: postgres:16
     container_name: purebliss-postgres
     restart: unless-stopped
+    user: "999:999"
     ports:
       - "5432:5432"
     environment:

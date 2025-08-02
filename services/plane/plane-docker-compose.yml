@@ -1,24 +1,23 @@
 version: '3.8'
 services:
   purebliss-plane:
-    image: makeplane/plane:app-latest
+    image: plane/quickstart:latest
     container_name: purebliss-plane
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "8081:3456"
     environment:
-      PLANE_DB_HOST: ${POSTGRES_HOST}
-      PLANE_DB_PORT: ${POSTGRES_PORT}
-      PLANE_DB_NAME: ${POSTGRES_DB}
-      PLANE_DB_USER: ${POSTGRES_USER}
-      PLANE_DB_PASSWORD: ${POSTGRES_PASSWORD}
-    depends_on:
-      - purebliss-postgres
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_HOST: ${POSTGRES_HOST}
+      VIKUNJA_DATABASE_PORT: ${POSTGRES_PORT}
+      VIKUNJA_DATABASE_DATABASE: ${POSTGRES_DB}
+      VIKUNJA_DATABASE_USER: ${POSTGRES_USER}
+      VIKUNJA_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      VIKUNJA_SERVICE_FRONTENDURL: https://dev.purebliss.app/plane
     volumes:
-      - ${PLANE_DATA_PATH}:/plane/data
-      - ${PLANE_LOG_PATH}:/var/log/plane/plane.log
+      - ${PLANE_DATA_PATH}:/app/vikunja/files
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3456/health"]
       interval: 10s
       timeout: 5s
       retries: 5
