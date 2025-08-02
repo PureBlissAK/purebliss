@@ -1,0 +1,1217 @@
+🚀 Pure Bliss Elite Technology Manifesto & Best Practices
+This manifesto defines the non-negotiable principles and actionable best practices for achieving unparalleled excellence across the pure-bliss technology stack, accommodating both local on-premise development and seamless transition to Google Cloud Platform (GCP) for production. Adherence is the bedrock of robust, secure, cost-efficient, and high-velocity delivery.
+
+1.0. Foundational Principles: The Pillars of Elite Operations
+1.1. Strategic Immutability & The Atomic Container
+Mandate: Every container is an immutable, single-purpose, ephemeral artifact with all configuration and state rigorously externalized.
+
+Best Practices:
+
+Immutable Infrastructure: Containers are sacrosanct post-build. No runtime modifications. Changes require a new, versioned image.
+
+Single Responsibility: Each container encapsulates one primary process, enabling granular scaling and precise troubleshooting, eliminating "noisy neighbor" risks.
+
+Ephemeral Design: Containers are transient, designed for instant creation, termination, or replacement without compromising data integrity.
+
+Configuration Externalization: Environment variables, secrets, and API keys are injected at runtime via external systems (e.g., Kubernetes ConfigMaps, Secret Managers).
+
+Persistent Data Strategy: Data outlives containers via managed persistent volumes (e.g., Kubernetes PVs, Docker Volumes for local development) or cloud-native services (e.g., Google Cloud SQL, Memorys...). This principle is paramount to preventing database wipes on rebuilds.
+
+Troubleshooting:
+
+Runtime Drift: If a container behaves inconsistently, assume environmental issues or external dependencies; never attempt to modify a running container. Redeploy with a fresh image.
+
+Container Crash Loops: Check external configuration (ConfigMaps, Secrets) first. If image works elsewhere, suspect environmental dependency.
+
+1.2. Zero-Trust Security Paradigm
+Mandate: Operate under the assumption that no user, device, or service, whether internal or external, is implicitly trusted. Every request must be authenticated, authorized, and continuously validated.
+
+Best Practices:
+
+Least Privilege: Grant the absolute minimum necessary permissions to users, services, and applications.
+
+Micro-segmentation: Implement network policies to restrict communication between services to only what is explicitly allowed.
+
+Continuous Verification: Continuously monitor and validate the security posture of all entities and connections.
+
+Identity-Centric: Access is granted based on identity and context, not network location.
+
+Encryption Everywhere: Encrypt data in transit (mTLS, HTTPS) and at rest (disk encryption, database encryption).
+
+Troubleshooting:
+
+Access Denied: First verify IAM roles, service account permissions, network policies (Kubernetes NetworkPolicies, local firewall rules), and Keycloak group/role assignments.
+
+Failed mTLS Handshake: Check certificate validity, common names, and CAs between communicating services. Verify service mesh (if applicable) configuration.
+
+1.3. GitOps: The Single Source of Truth
+Mandate: All infrastructure, application deployments, and configurations are declared, version-controlled, and managed via Git, driving continuous deployment through automated reconciliation.
+
+Best Practices:
+
+Declarative Configuration: Define desired state in Git using YAML, HCL, etc.
+
+Version Control Everything: Every change, no matter how small, goes through Git.
+
+Automated Reconciliation: Use tools (e.g., Argo CD, Flux CD) to automatically synchronize the live environment with the state defined in Git.
+
+Pull Request Workflow: All changes are peer-reviewed via pull requests.
+
+Auditability: Git provides a complete audit trail of all changes.
+
+Troubleshooting:
+
+State Mismatch: Compare live state (kubectl get, terraform show, local Docker Compose state) with Git state. Check reconciliation logs from GitOps operator (Argo CD, Flux).
+
+Failed Deployment: Review GitOps operator logs for errors during application of manifests. Verify manifest syntax and validity.
+
+1.4. Comprehensive Observability & Telemetry
+Mandate: Instrument every layer of the stack to emit rich, correlated telemetry (logs, metrics, traces) for proactive monitoring, rapid debugging, and performance optimization.
+
+Best Practices:
+
+Structured Logging: All applications log in JSON format with correlation IDs. Centralize logs with Loki.
+
+Standardized Metrics: Expose Prometheus-compatible metrics from all services.
+
+Distributed Tracing: Implement OpenTelemetry for end-to-end request tracing across microservices.
+
+Synthetic Monitoring: Simulate user journeys to detect issues before users do.
+
+Alerting: Define clear, actionable alerts with Grafana based on critical metrics and log patterns.
+
+Troubleshooting:
+
+Performance Bottlenecks: Start with distributed traces (Grafana Tempo) to identify slow spans. Then drill into service-specific metrics (Prometheus) and logs (Loki).
+
+Service Unresponsiveness: Check up metric in Prometheus. Dive into container_cpu_usage, container_memory_usage and docker logs for the affected service. Use LogQL in Loki for specific error patterns.
+
+1.5. FinOps & Cost Optimization
+Mandate: Treat cloud spend as a shared responsibility, continuously optimizing resource utilization, architecting for cost-efficiency, and transparently tracking expenditures.
+
+Best Practices:
+
+Resource Limits: Set accurate CPU/memory limits for all containers in Kubernetes.
+
+Autoscaling: Implement Horizontal Pod Autoscalers (HPA) and Cluster Autoscalers for efficient resource allocation.
+
+Right-Sizing: Continuously review and right-size VM instances and managed service tiers.
+
+Spot/Preemptible Instances: Utilize for fault-tolerant, stateless workloads where appropriate.
+
+Cost Tagging: Tag all cloud resources consistently for granular cost allocation and reporting.
+
+On-Premise Consideration: While FinOps primarily targets cloud costs, on-premise hardware and energy consumption should also be considered and optimized.
+
+Troubleshooting:
+
+Unexpected Spend Spike: Review billing dashboards (GCP Billing Reports) for recent changes in service usage. Check kubectl top and Prometheus metrics for sudden resource consumption increases by pods/nodes.
+
+Under-Utilized Resources: Use Grafana dashboards with kube_pod_container_resource_limits and container_cpu_usage_seconds_total to identify over-provisioned pods.
+
+1.6. Green Software Engineering & Sustainability
+Mandate: Integrate sustainable practices throughout the software development lifecycle, minimizing environmental impact and promoting energy efficiency in our technology stack.
+
+Best Practices:
+
+Resource Efficiency: Optimize code and infrastructure for minimal CPU, memory, and network usage. Utilize autoscaling and right-sizing aggressively.
+
+Carbon-Aware Scheduling: Where possible, consider scheduling workloads in regions with cleaner energy grids.
+
+Data Minimization: Store only necessary data and implement efficient data lifecycle management.
+
+Efficient Algorithms: Prefer algorithms with lower computational complexity.
+
+Hardware Optimization: Choose energy-efficient hardware and leverage managed services that optimize underlying infrastructure.
+
+Troubleshooting:
+
+High Energy Consumption: Monitor resource utilization metrics (CPU, memory, network I/O). Identify and optimize inefficient code paths or over-provisioned resources.
+
+Increased Carbon Footprint: Analyze cloud provider carbon reports. Investigate if workload locations can be shifted to greener regions during off-peak hours.
+
+2.0. Architectural Principles: Building for Scale and Agility
+2.1. Modular Architecture & Microservices Principles
+Mandate: All systems shall be designed and built as a collection of independent, single-responsibility microservices, grouped logically to maximize clarity, independent management, and resilience. Avoid monolithic designs.
+
+Best Practices:
+
+Service Isolation: Each microservice has its own codebase, data store (or well-defined data access layer), and deployment pipeline.
+
+Loose Coupling, High Cohesion: Services should be loosely coupled via well-defined APIs and highly cohesive internally.
+
+Independent Deployment & Scaling: Enable independent development, testing, deployment, and scaling of each service.
+
+Bounded Contexts: Define clear boundaries around business capabilities to avoid complex dependencies.
+
+Troubleshooting:
+
+Inter-Service Dependencies: Use distributed tracing to visualize call graphs and identify where one service's issue might be impacting another.
+
+Deployment Failures: Focus troubleshooting on the specific microservice being deployed; its issues should not affect others.
+
+2.2. Inter-Service Communication & Integration: Seamless Concert
+Mandate: All inter-service communication shall be meticulously designed, adhering to patterns that ensure resilience, clear contracts, fault isolation, and comprehensive observability.
+
+Best Practices:
+
+Synchronous (APIs): Prefer RESTful APIs (HTTP/JSON) for request-response. Consider gRPC for high-performance internal RPCs. Utilize Kubernetes DNS for service discovery. Locally, use Docker Compose service names for discovery.
+
+Asynchronous (Messaging): Employ Message Queues (e.g., Kafka, Pub/Sub) for event-driven architectures, long-running processes, and decoupling.
+
+Strict API Contracts & Versioning: Use schema enforcement (OpenAPI, Protobuf) and clear versioning (/v1/).
+
+Resilience Patterns: Implement Timeouts, Retries (with exponential backoff), Circuit Breakers, and Bulkheads for all inter-service calls.
+
+Idempotency: Design API operations to be idempotent where possible.
+
+Data Consistency: Understand and design for eventual consistency; use Saga patterns for complex distributed transactions.
+
+Context Propagation: Propagate correlation IDs/trace spans across all service calls (OpenTelemetry).
+
+Security: Implement Mutual TLS (mTLS) for strong internal authentication/encryption and Least Privilege access.
+
+Troubleshooting:
+
+Connection Refused/Timeouts: Check firewall rules (GCP, NetworkPolicies, local firewall rules), service readiness/liveness probes, and CPU/memory limits of the target service.
+
+API Contract Mismatch: Verify client and server API versions. Use curl or Postman to test the target service API directly.
+
+Distributed Transaction Failures: Trace the request end-to-end to pinpoint the failing service. Examine logs from all services involved in the transaction.
+
+2.3. Service Mesh (Istio/Linkerd)
+Mandate: Deploy a service mesh for advanced traffic management, enhanced security, and deeper observability of inter-service communication within Kubernetes. For local on-premise development, consider a lightweight service mesh implementation or focus on application-level resilience patterns.
+
+Best Practices:
+
+Traffic Management: Utilize capabilities like intelligent routing, canary deployments, A/B testing, and traffic shifting.
+
+mTLS Enforcement: Automatically encrypt all service-to-service communication with mutual TLS without application-level changes.
+
+Policy Enforcement: Implement fine-grained access control policies for services.
+
+Observability: Gain rich telemetry (metrics, logs, traces) for all service communications out-of-the-box.
+
+Resilience: Apply circuit breaking, retries, and timeouts at the network level.
+
+Troubleshooting:
+
+Traffic Routing Issues: Check service mesh configuration (VirtualServices, DestinationRules). Use service mesh dashboards (e.g., Kiali for Istio) to visualize traffic flow.
+
+mTLS Handshake Failures: Verify service mesh control plane health and sidecar injection status for pods. Check certificate issuance.
+
+Increased Latency: Analyze service mesh sidecar resource consumption. Ensure proper resource limits and sufficient node capacity.
+
+2.4. Layered Documentation: Structured Knowledge
+Mandate: Organize best practices into a layered, interlinked documentation structure, providing foundational principles alongside specialized, actionable guidance for distinct domains (infrastructure, application development, tooling).
+
+Best Practices:
+
+Elite Manifesto: Foundational principles and high-level mandates (this document).
+
+Domain-Specific: Dedicated documents for Infrastructure Best Practices, Application Development Best Practices.
+
+Tool-Specific: Granular guides (e.g., copilot-instructions.md, runbooks).
+
+Inter-Document Linkage: Ensure liberal cross-referencing and consistent terminology.
+
+Version Control: All documentation is version-controlled in Git.
+
+Troubleshooting:
+
+Missing Information: If a developer can't find information, it indicates a gap in our tiered documentation. Create a new document or update an existing one.
+
+Outdated Docs: Implement a regular review cycle for documentation. Tie documentation updates to relevant code/infrastructure changes.
+
+3.0. Core Infrastructure Technologies
+3.1. Docker & Containerd
+Mandate: Docker and Containerd are the standard for containerization, utilized for building efficient, secure, and minimal images.
+
+Best Practices:
+
+Multi-Stage Builds: Minimize image size and attack surface.
+
+Distroless Images: Prefer distroless or Alpine-based images for smallest possible footprint.
+
+Non-Root Users: Always run containers as non-root users.
+
+Health Checks: Define robust HEALTHCHECK instructions in Dockerfiles.
+
+Resource Limits: Set CPU and memory limits in docker-compose.yml (for local on-premise development) and Kubernetes manifests (production).
+
+docker-compose.yml: Use version 3.8 for local development orchestration.
+
+Troubleshooting:
+
+Image Build Failures: Inspect Dockerfile steps, temporary build container logs. Verify base image availability.
+
+Container Not Starting: Check docker logs <container_name>, docker inspect <container_name> for exit codes, health check status. Verify entrypoint/command.
+
+Resource Exhaustion: Use docker stats locally. Check container_cpu_usage_seconds_total and container_memory_usage_bytes metrics in Prometheus.
+
+3.2. Kubernetes
+Mandate: Kubernetes is our primary container orchestration platform for production. For local on-premise development, Docker Compose is the primary orchestration tool, with Kubernetes (e.g., minikube, k3s, or Docker Desktop Kubernetes) used for environment parity testing.
+
+Best Practices:
+
+Managed Kubernetes (GCP GKE): Prefer managed services for control plane reliability in production.
+
+Namespacing: Organize resources logically using namespaces for isolation.
+
+Network Policies: Implement strict Kubernetes Network Policies for micro-segmentation.
+
+Resource Quotas & Limit Ranges: Enforce resource governance per namespace.
+
+Probes (Liveness, Readiness, Startup): Configure robust probes for application health and graceful rollout.
+
+Ingress Controllers: Use Nginx Ingress or similar for external access, configured with TLS.
+
+Role-Based Access Control (RBAC): Define granular roles and role bindings.
+
+Pod Security Standards (PSS): Enforce baseline or restricted PSS policies.
+
+Troubleshooting:
+
+Pod Not Scheduling: kubectl describe pod <pod_name> (check events for Taints, Tolerations, NodeSelectors, Resource Availability).
+
+Pod CrashLoopBackOff: kubectl logs <pod_name>, kubectl describe pod <pod_name> (check container exit code, readiness/liveness probe failures).
+
+Service Unreachable: kubectl get svc, kubectl describe svc, kubectl get ep. Check NetworkPolicies. kubectl exec -it <pod> -- curl <service_ip>.
+
+Ingress Issues: kubectl get ingress, kubectl describe ingress. Check Nginx Ingress Controller logs. Verify DNS resolution.
+
+3.3. Google Cloud Platform (GCP)
+Mandate: GCP is our cloud provider for production environments, with all resources provisioned and managed via Infrastructure as Code (Terraform) and adhering to Google's security best practices. Local on-premise development environments will simulate necessary GCP services using local containerized equivalents or mock services.
+
+Best Practices:
+
+Project Structure: Organize resources into logical GCP projects.
+
+IAM: Strict adherence to Least Privilege with fine-grained IAM roles. Use Service Accounts for workload identities.
+
+VPC Networks: Private, isolated networks with strict firewall rules.
+
+Cloud Logging & Monitoring: Centralize all GCP logs and metrics.
+
+Managed Services First: Prefer fully managed GCP services (e.g., GKE, Cloud SQL, Memorystore, Cloud Build) over self-managed components.
+
+Resource Hierarchy: Utilize Folders and Organizations for policy enforcement.
+
+Troubleshooting:
+
+Resource Not Found/Access Denied: Verify GCP project ID, resource name, and IAM permissions for the principal making the request.
+
+Network Connectivity: Use GCP VPC Flow Logs, Firewall Rules logs, and Network Intelligence Center for diagnosing network issues.
+
+Service Quotas: Check gcloud compute regions describe <region> --format='json' or GCP Quotas page if resource creation fails.
+
+3.4. Nginx (as API Gateway/Reverse Proxy)
+Mandate: Nginx serves as the high-performance reverse proxy and API Gateway, handling traffic routing, SSL termination, and initial security layers. For local on-premise development, Nginx will also be containerized and configured similarly to production, but managing local domain names (e.g., via /etc/hosts or local DNS).
+
+Best Practices:
+
+SSL/TLS Termination: All external traffic terminates TLS at Nginx.
+
+WAF Integration: Integrate with a Web Application Firewall (WAF) to protect against common web attacks.
+
+Rate Limiting: Implement application-specific rate limits to protect backend services.
+
+HTTP/2 & Brotli/Gzip: Enable for performance optimization.
+
+HSTS (HTTP Strict Transport Security): Enforce HSTS headers.
+
+Secure Headers: Configure security headers (CSP, X-XSS-Protection, etc.).
+
+Logging: Configure access and error logs in structured format, forwarded to Loki.
+
+Troubleshooting:
+
+5xx Errors: Check Nginx error logs. Verify connectivity to upstream services (proxy_pass targets).
+
+4xx Errors: Check Nginx access logs ($status). Verify client request, URL paths, and rate limit counters.
+
+SSL Handshake Errors: Verify certificate validity, chain, and private key. Check Nginx SSL configuration.
+
+nginx -t: Always test configuration before reloading/restarting.
+
+WAF Blocking: Review WAF logs for blocked requests and associated rules.
+
+3.5. Certbot (Automated TLS Certificate Management)
+Mandate: Certbot automates the acquisition and renewal of TLS certificates from Let's Encrypt, ensuring continuous, secure communication without manual intervention. For local on-premise development, use self-signed certificates or specific local CA-issued certificates for HTTPS, generated manually or via a local script.
+
+Best Practices:
+
+DNS-01 Challenge: Prefer the DNS-01 challenge for wildcard certificates and when not exposing port 80/443 directly to Certbot. Integrate with DNS providers (e.g., Google Cloud DNS via Certbot plugins).
+
+Automated Renewal: Set up cron jobs or Kubernetes cron jobs to run certbot renew regularly (e.g., twice daily) well before expiration.
+
+Certificate Storage: Store generated certificates securely (e.g., mount into Nginx container from a secure volume, or use Kubernetes Secrets).
+
+Dedicated Container/VM: Run Certbot in a dedicated, minimal container or VM, isolated from other services.
+
+Troubleshooting:
+
+Certificate Expiration: Check certbot certificates output. Verify cron job execution logs.
+
+Challenge Failure:
+
+HTTP-01: Ensure port 80/443 is open to Let's Encrypt servers and Nginx is configured to serve the .well-known/acme-challenge path correctly.
+
+DNS-01: Check DNS records (TXT record for _acme-challenge.<domain>) for correct propagation (dig TXT _acme-challenge.<domain>). Verify DNS API credentials for Certbot.
+
+Renewal Hooks: Check logs of any post-renewal hooks (e.g., nginx -s reload) for errors.
+
+3.6. Keycloak (Identity & Access Management)
+Mandate: Keycloak serves as our centralized Identity and Access Management (IAM) solution, integrating with Google Workspace SSO and providing robust authentication and authorization for all applications. Keycloak will be deployed as a containerized service locally on-premise, using a local PostgreSQL instance for its database.
+
+Best Practices:
+
+Containerized Deployment: Deploy Keycloak within Kubernetes (production) or Docker Compose (local on-premise), ensuring high availability (multiple replicas).
+
+Database Backend: Use PostgreSQL as the persistent database for Keycloak, with regular backups.
+
+TLS/HTTPS Everywhere: Configure Keycloak for HTTPS for all communication (admin console, APIs, OIDC/SAML endpoints).
+
+Realm per Application/Context: Create separate realms for distinct applications or organizational units (e.g., codeserver, planerealm, master).
+
+Client Configuration: Securely configure clients (applications) with strong client secrets (stored in Vault), appropriate redirect URIs, and valid scopes.
+
+User Federation: Integrate with Google Workspace via SAML/OIDC for centralized user management.
+
+Role-Based Access Control (RBAC): Define granular roles and assign them to users/groups for application access.
+
+Auditing: Enable auditing to track administrative actions and authentication events.
+
+Troubleshooting:
+
+Login Issues:
+
+User Not Found: Check Keycloak user federation settings, Google Workspace sync status.
+
+Invalid Credentials: Verify Keycloak user credentials or Google Workspace authentication.
+
+Redirect URI Mismatch: Check Keycloak client configuration for correct redirect URIs.
+
+Token Issuance/Validation Failure:
+
+Check Keycloak logs for errors related to JWT signing, realm configuration, or client secrets.
+
+Verify network connectivity between application and Keycloak endpoints.
+
+Keycloak Admin Console Unreachable: Check container health, network configuration, and Nginx proxy settings if accessed via Nginx.
+
+SSO Integration Problems: Review Google IDP Metadata XML, Keycloak SAML/OIDC client configuration, and logs for SAML/OIDC specific errors.
+
+3.7. Vault (Secrets Management)
+Mandate: HashiCorp Vault is the exclusive platform for dynamic secrets management, ensuring credentials are never hardcoded and have finite lifespans. Vault will be deployed as a containerized service locally on-premise for development, backed by a local PostgreSQL instance.
+
+Best Practices:
+
+High Availability: Deploy Vault in HA mode with a robust storage backend (e.g., Consul, Integrated Storage).
+
+TLS Everywhere: Encrypt all communication with Vault.
+
+Dynamic Secrets: Leverage dynamic secrets for databases, cloud providers, and other services (e.g., database/creds/plane).
+
+Lease Rotation: Configure short lease durations for dynamic secrets and ensure applications actively renew or re-request credentials.
+
+Audit Logging: Enable comprehensive audit logging to track all Vault operations.
+
+Authentication Methods: Use secure, automated auth methods (e.g., Kubernetes Auth Method, GCP IAM Auth Method) for applications.
+
+Least Privilege: Define granular Vault policies (ACLs) for minimal access.
+
+Troubleshooting:
+
+Secret Not Found/Access Denied: Verify Vault path, policy permissions for the auth method used by the application, and token validity/renewal status.
+
+Vault Unsealed Issues: Check storage backend health. Review Vault server logs for unseal process errors.
+
+Lease Expiration Issues: Check application logs for errors related to secret renewal. Verify application's Vault client configuration for lease_id and renewal attempts.
+
+Performance Bottlenecks: Monitor Vault's CPU/memory usage and API latency. Check for high load on the storage backend.
+
+3.8. PostgreSQL (Primary Data Store)
+Mandate: PostgreSQL is our relational data store, optimized for performance, reliability, and data integrity, managed with a focus on indexing, query optimization, and robust backups. For local on-premise development, a containerized PostgreSQL instance will be used with Docker Volumes for data persistence.
+
+Best Practices:
+
+Managed Service (GCP Cloud SQL): Prefer a managed service for automated backups, patching, and scaling in production.
+
+Indexing: Create composite and partial indexes strategically based on query EXPLAIN ANALYZE output.
+
+Query Optimization: Review slow queries regularly using pg_stat_statements and optimize them.
+
+Connection Pooling: Implement application-side connection pooling to minimize overhead.
+
+Replication: Use streaming replication (Read Replicas) for read-heavy workloads and disaster recovery.
+
+Backups: Implement automated, regular backups with point-in-time recovery capabilities.
+
+Security: Network isolation, strong authentication (via Vault dynamic secrets), and row-level security where applicable.
+
+3.8.7. Data Durability Across Rebuilds & Redeploys:
+
+Mandate: Databases shall never be wiped out on container rebuilds or application redeployments, especially for non-ephemeral environments (e.g., development with persistent data, staging, production).
+
+Best Practices:
+
+Separate Data Volumes: Database data must reside on dedicated, persistent volumes (e.g., Kubernetes Persistent Volumes, Docker Volumes for local dev) that are managed ** independently** of the database container's lifecycle. A container can be destroyed and recreated, but its data volume persists.
+
+External Managed Services: Strongly prefer managed database services (like GCP Cloud SQL) which inherently decouple database instances and their data from application deployments. These services handle persistence, backups, and upgrades.
+
+Schema Migration Tools: Use robust database schema migration tools (e.g., Laravel Migrations, Alembic for Python, Flyway, Liquibase) that apply incremental schema changes. Never use tools or scripts that drop and recreate entire databases or tables in environments where data needs to be preserved.
+
+Automated Backup & Restore: Implement and regularly test automated backup and restore procedures for all persistent databases. This is the ultimate safety net.
+
+CI/CD Gates: Implement stringent checks within CI/CD pipelines to prevent destructive database operations (e.g., DROP DATABASE) from executing in non-ephemeral environments.
+
+Environment Differentiation: Clearly distinguish between truly ephemeral environments (e.g., CI/CD test databases that are designed to be wiped) and persistent environments. Use environment-specific configurations to ensure destructive commands are only runnable where intended.
+
+Troubleshooting:
+
+Database Wiped After Redeploy:
+
+Check Volume Mounts: Verify that the database container has a persistent volume correctly mounted and that the database software is configured to use that volume for data storage.
+
+Container Entrypoint/Command: Inspect the Dockerfile's ENTRYPOINT/CMD and the docker-compose.yml/Kubernetes command/args for any initialization scripts that might overwrite existing data.
+
+Migration Tool Logs: Review logs from your schema migration tool. Was an unintended reset or fresh command run?
+
+Application Configuration: Check application-level database connection strings and configurations for accidental connections to ephemeral/incorrect databases.
+
+Revert and Restore: If data is lost, immediately stop operations on the affected database, restore from the most recent backup, and perform a post-mortem to identify the root cause and implement preventative measures.
+
+Migration Failure (Data Loss Risk): If a migration fails, ensure the environment is correctly configured (e.g., not trying to run a production migration against a dev database). Roll back the code and investigate the migration script's logic. Never force a migration if data loss is a risk.
+
+3.9. Redis (High-Performance Data Caching)
+Mandate: Redis deployments shall adhere to rigorous best practices for performance, security, high availability, and efficient resource utilization, serving primarily as an ephemeral, high-throughput data store. For local on-premise development, a containerized Redis instance will be used.
+
+Best Practices:
+
+Purpose-Driven Usage: Primarily for caching (TTL, LRU), Pub/Sub, distributed locks, session management, rate limiting. Not a primary data store.
+
+Connection Pooling: Applications must utilize connection pooling.
+
+Pipelining: Group multiple commands for reduced network round-trip.
+
+Efficient Data Structures: Choose memory- and CPU-efficient Redis data types.
+
+Key Design & TTL: Set appropriate EXPIRE times and maxmemory-policy.
+
+AOF & RDB: Enable AOF for crash recovery (everysec). Use RDB for full backups.
+
+High Availability: Deploy Redis Sentinel for automatic failover for single-instance, or Redis Cluster for sharding.
+
+Security: Network isolation, strong authentication (via Vault), TLS/SSL encryption.
+
+Troubleshooting:
+
+High Latency: Check redis-cli --latency or redis_latency_ms metric. Investigate network, CPU contention, or long-running commands (e.g., KEYS *).
+
+Memory Exhaustion: Check redis_memory_usage_bytes metric. Review maxmemory and maxmemory-policy. Identify and clear large keys.
+
+Low Cache Hit Ratio: Analyze application caching logic. Adjust TTLs or cache size.
+
+Sentinel Failover Issues: Check Sentinel logs for quorum issues or connectivity problems to primary/replicas.
+
+AOF/RDB Errors: Check Redis server logs for persistence errors. Verify disk space.
+
+3.10. Serverless Functions (Cloud Functions/Cloud Run)
+Mandate: Utilize serverless platforms for event-driven, stateless workloads in production. For local on-premise development, these functions can be simulated using local processes, mock event triggers, or local serverless frameworks (e.g., OpenFaaS, Knative on minikube).
+
+Best Practices:
+
+Event-Driven Architecture: Ideal for tasks triggered by events (e.g., new file uploads, database changes, API calls).
+
+Stateless Design: Functions should be stateless; externalize all persistent data.
+
+Cold Start Optimization: Minimize dependencies and package size to reduce cold start times.
+
+Concurrency & Scaling Limits: Configure appropriate concurrency and scale-to-zero settings.
+
+Observability: Ensure functions emit structured logs and metrics, integrated with Cloud Logging/Monitoring.
+
+Security: Apply least privilege IAM roles to function service accounts.
+
+Troubleshooting:
+
+Function Failures: Check Cloud Function/Cloud Run logs for errors and exceptions.
+
+Cold Starts: Analyze invocation latency metrics. Optimize function code and dependencies.
+
+Concurrency Issues: Review concurrency settings and identify potential resource contention or external API rate limits.
+
+4.0. Application Development Technologies
+4.1. Python 3.11 (Backend, AI/ML)
+Mandate: Python development adheres to PEP 8, prioritizes performance, and integrates seamlessly with our microservices architecture.
+
+Best Practices:
+
+PEP 8 Compliance: Strict adherence to PEP 8 for code style.
+
+Type Hinting: Utilize type hints (mypy) for code clarity and error prevention.
+
+Dependency Management: Use poetry or pip-tools for deterministic dependency locking.
+
+ASGI/WSGI: Use efficient servers like uvicorn for ASGI apps or gunicorn for WSGI.
+
+Asynchronous Programming: Leverage asyncio for I/O-bound operations.
+
+Vault Integration: Fetch all secrets dynamically from Vault using hvac or similar client.
+
+Input Validation: Use pydantic for robust data validation.
+
+Logging: Structured JSON logging to stdout/stderr, consumed by Loki.
+
+Troubleshooting:
+
+Performance Degredation: Use cProfile for CPU profiling. Analyze I/O bottlenecks with asyncio debugging.
+
+Dependency Conflicts: Rebuild virtual environment, check poetry.lock or requirements.txt.
+
+Runtime Errors: Detailed try-except blocks with logging. Check Loki for application-specific error logs.
+
+4.2. JavaScript/TypeScript (Node.js 20, React Native)
+Mandate: Frontend and Node.js backend services are developed using TypeScript for type safety, with React Native for mobile applications, adhering to modern web standards.
+
+Best Practices:
+
+TypeScript First: All new JavaScript code must be TypeScript.
+
+Modern ES Features: Utilize ES202X features where appropriate.
+
+React Native Component-Based: Follow a clear component hierarchy and state management (e.g., React Context, Redux, Zustand).
+
+Immutability: Prefer immutable data structures.
+
+Linting & Formatting: Enforce ESLint and Prettier for consistent code style.
+
+Dependency Management: Use npm or yarn with lock files.
+
+Input Validation: Use libraries like zod or yup for client-side and server-side validation.
+
+API Client Generation: Use tools to generate API clients from OpenAPI specs for type-safe interactions.
+
+Troubleshooting:
+
+Runtime Errors: Check browser console, Node.js process logs, or React Native debugger. Use distributed tracing for API call issues.
+
+Performance Issues: Use browser developer tools (Lighthouse, Performance tab), React Dev Tools. Profile Node.js processes with perf_hooks.
+
+Build/Transpilation Failures: Check Webpack/Babel/TypeScript compiler logs. Verify tsconfig.json and build scripts.
+
+4.3. PHP 8.2 & Laravel 10 (Backend)
+Mandate: Laravel 10 on PHP 8.2 forms the backbone of our backend services, adhering to clean architecture, TDD, and secure development practices.
+
+Best Practices:
+
+Laravel Ecosystem: Leverage Laravel's built-in features (Eloquent, Blade, Artisan, Queues) effectively.
+
+Clean Architecture/Domain-Driven Design: Structure applications with clear separation of concerns (Domain, Application, Infrastructure layers).
+
+Test-Driven Development (TDD): Write tests (PHPUnit) before code, aiming for 90%+ coverage.
+
+Dependency Injection: Use Laravel's service container for managing dependencies.
+
+Security: Utilize Laravel Sanctum for API authentication, protect against common web vulnerabilities (CSRF, XSS, SQLi).
+
+Queues: Use queues for long-running tasks and asynchronous processing.
+
+Logging: Standardized structured logging, consumed by Loki.
+
+Troubleshooting:
+
+White Screen of Death/500 Errors: Check Laravel error logs (storage/logs/laravel.log or Docker logs). Enable APP_DEBUG=true in local/dev environments only.
+
+Database Issues: Verify database connection parameters (.env), run migrations (php artisan migrate). Use php artisan tinker for direct database interaction.
+
+Queue Not Processing: Check queue worker status (php artisan queue:work --timeout=60 --tries=3), queue driver configuration, and failed jobs table.
+
+Authentication Failures: Verify Sanctum token validity, API routes, and Keycloak integration.
+
+5.0. DevOps & SDLC Best Practices
+5.1. Infrastructure as Code (IaC) with Terraform
+Mandate: All infrastructure provisioning and configuration on GCP is managed declaratively through Terraform, ensuring version control, auditability, and reproducibility. Local on-premise infrastructure setup will leverage Docker Compose for defining local services, with a clear migration path to Terraform for GCP.
+
+Best Practices:
+
+Modular Design: Use Terraform modules for reusable infrastructure components (e.g., VPCs, GKE clusters, Cloud SQL instances).
+
+State Management: Store Terraform state remotely and securely (e.g., GCS backend) with versioning and locking enabled.
+
+Workspaces: Use separate workspaces for different environments (dev, staging, prod).
+
+Automated Apply: Integrate terraform plan and terraform apply into CI/CD pipelines. Manual apply only for emergencies.
+
+Code Review: All Terraform changes are reviewed via PRs.
+
+Troubleshooting:
+
+terraform plan shows unexpected changes: Verify current state (terraform state pull) against desired state in code. Check for manual changes in GCP.
+
+terraform apply failures: Review error messages for specific GCP API errors (e.g., permission denied, resource already exists, quota limits). Check Terraform provider versions.
+
+State Locking Issues: Verify GCS bucket permissions and lock status.
+
+5.2. Advanced CI/CD Pipelines & Deployment Strategies
+Mandate: Automate the entire software delivery lifecycle using robust CI/CD pipelines, enabling rapid, secure, and reliable deployments. Pipelines will be configured to support local on-premise deployment first (e.g., Docker Compose deployments), then adapted for Kubernetes/GCP production.
+
+Best Practices:
+
+Containerized Builds: All builds occur in isolated, containerized environments.
+
+Comprehensive Automated Testing: Integrate a comprehensive suite of unit, integration, and end-to-end tests into the pipeline. These tests must run on each build and serve as a mandatory gate, aiming for 100% functional coverage for all critical paths.
+
+Immutable Artifacts: Build once, deploy many times. Store container images in a secure registry (GCR, or local Docker registry for on-premise development).
+
+Secret Injection: Inject secrets at runtime via Vault, never bake into images or store in CI.
+
+Progressive Delivery: Implement Canary Releases, Feature Flags, and A/B testing for controlled rollouts.
+
+Automated Rollbacks: Enable fast, automated rollbacks if issues are detected post-deployment.
+
+Security Scans: Integrate SAST, DAST, SCA (Trivy, Snyk) into pipelines.
+
+Troubleshooting:
+
+Pipeline Failures: Review detailed build logs (Cloud Build logs, or local CI runner logs). Identify the exact step where the failure occurred (build, test, deploy).
+
+Deployment Rollbacks: Analyze metrics that triggered the rollback (Prometheus/Grafana). Check logs of the new vs. old version.
+
+Slow Pipelines: Profile build steps. Optimize Dockerfile for caching layers. Parallelize tests.
+
+5.3. Automated Testing (Unit, Integration, E2E)
+Mandate: Maintain a comprehensive testing strategy across all layers of the stack, ensuring high code quality, functional correctness, and system reliability, with a mandatory comprehensive test run on each build.
+
+Best Practices:
+
+Unit Tests: Focused, fast tests for individual functions/components (Jest, PHPUnit, Pytest). Aim for high coverage (90%+).
+
+Integration Tests: Verify interactions between services or components (e.g., API calls, database interactions).
+
+End-to-End (E2E) Tests: Simulate user journeys to test the entire system (Cypress, Playwright). These are crucial for validating "100% functionality" from a user perspective.
+
+Contract Testing: Use contract testing (e.g., Pact) for inter-service communication to ensure API compatibility.
+
+Performance/Load Testing: Conduct regular load tests (JMeter, K6) to identify bottlenecks.
+
+Security Testing: Integrate SAST, DAST, SCA tools directly into CI/CD.
+
+Mandatory Build Gate: The entire comprehensive test suite (Unit, Integration, E2E) must pass on every build before it can proceed to deployment stages.
+
+Troubleshooting:
+
+Failing Tests: Run tests locally with debug flags. Examine test output for assertion failures.
+
+Flaky Tests: Isolate and fix non-deterministic tests. Ensure tests don't rely on external mutable state or race conditions.
+
+Low Test Coverage: Use coverage reports (e.g., pytest --cov, Jest coverage reports) to identify untested code paths.
+
+5.4. Comprehensive Observability & Monitoring
+Mandate: Instrument every layer of the stack to emit rich, correlated telemetry (logs, metrics, traces) for proactive monitoring, rapid debugging, and performance optimization.
+
+Best Practices:
+
+Structured Logging (Loki): All applications log in JSON format with correlation IDs. Centralize logs with Loki (v2.9.0).
+
+Standardized Metrics (Prometheus): Expose Prometheus-compatible metrics (v2.47.0) from all services using client libraries.
+
+Distributed Tracing (OpenTelemetry): Implement OpenTelemetry for end-to-end request tracing across microservices.
+
+Centralized Dashboards (Grafana): Utilize Grafana (v10.1.0) for custom, shared dashboards visualizing service health, performance, and business metrics.
+
+Actionable Alerting: Define clear, actionable alerts based on critical SLOs/SLIs, routed to appropriate teams.
+
+Synthetic Monitoring: Simulate user journeys to detect issues before users do.
+
+Troubleshooting:
+
+Alert Storms: Review alert configuration for sensitivity. Check dashboard for actual problem vs. alert noise.
+
+Missing Data: Verify instrumented endpoints. Check Prometheus scrape targets. Ensure logs are being correctly sent to Loki.
+
+High Cardinality Metrics: Optimize Prometheus queries and metric labels to avoid performance issues.
+
+5.5. Enhanced Security Posture & Software Supply Chain
+Mandate: Implement a multi-layered security strategy covering the entire software supply chain, from development to deployment and runtime.
+
+Best Practices:
+
+Secure Development Lifecycle (SDL): Integrate security into every phase of development.
+
+Static Application Security Testing (SAST): Run SAST tools (e.g., Semgrep) on code commits.
+
+Dynamic Application Security Testing (DAST): Conduct DAST on running applications.
+
+Software Composition Analysis (SCA): Scan for vulnerable dependencies (e.g., Trivy, Snyk).
+
+Vulnerability Management: Establish a clear process for identifying, triaging, and remediating vulnerabilities.
+
+Image Signing: Sign all container images and verify signatures before deployment (e.g., Cosign).
+
+Supply Chain Security (SLSA): Adhere to SLSA principles for build provenance and integrity.
+
+Runtime Security: Implement host-level security (auditd, AppArmor/SELinux), and consider container runtime security tools.
+
+Incident Response: Develop and practice incident response playbooks for security breaches.
+
+Troubleshooting:
+
+Failed Security Scans: Review scan reports. Identify specific vulnerabilities and remediation steps.
+
+Blocked Deployment (Security Policy): Check admission controller logs (Kubernetes) or CI/CD pipeline logs for security policy violations (e.g., unsigned image, critical CVEs).
+
+Anomalous Behavior: Review audit logs (auditd, GCP Cloud Audit Logs, Vault audit logs). Correlate with system metrics and network traffic patterns.
+
+5.6. Chaos Engineering
+Mandate: Proactively test the resilience and stability of our systems by intentionally injecting controlled failures into the infrastructure and applications.
+
+Best Practices:
+
+Hypothesis-Driven: Formulate a hypothesis about system behavior under stress.
+
+Controlled Experiments: Start with small, isolated experiments and gradually increase scope.
+
+Automated Rollbacks: Ensure automated mechanisms to stop or revert experiments if unintended consequences occur.
+
+Monitor & Observe: Leverage comprehensive observability to detect system degradation and validate hypotheses.
+
+Blameless Culture: Treat chaos engineering as a learning opportunity to improve system design.
+
+Regular Practice: Integrate chaos experiments into the regular testing and deployment cycle.
+
+Troubleshooting:
+
+Uncontrolled Cascading Failures: Immediately halt the experiment. Review the scope and magnitude of the injected fault. Enhance monitoring and automated rollback mechanisms.
+
+Undetected Issues: If an experiment fails to surface expected issues, it indicates a gap in monitoring or alerting. Improve observability to detect subtle degradations.
+
+5.7. Incident Response & Post-Mortem Culture
+Mandate: Establish a robust incident response framework and foster a blameless post-mortem culture to drive continuous learning and system resilience.
+
+Best Practices:
+
+Clear Roles & Responsibilities: Define on-call rotations, incident commander, and communication leads.
+
+Communication Plan: Establish clear internal and external communication protocols.
+
+Runbooks & Playbooks: Document detailed, actionable steps for common incidents.
+
+Post-Mortem Process: Conduct blameless post-mortems for all incidents, regardless of severity.
+
+Root Cause Analysis: Focus on systemic failures and contributing factors, not individual blame.
+
+Action Items & Tracking: Generate concrete, measurable action items from post-mortems and track their completion.
+
+Knowledge Sharing: Publish post-mortem reports internally to share lessons learned.
+
+Automation: Integrate lessons into CI/CD and chaos tests.
+
+Troubleshooting:
+
+Slow Incident Resolution: Review incident timelines. Identify delays in diagnosis, communication, or remediation steps.
+
+Recurring Incidents: Analyze post-mortem action item completion rate. If similar incidents recur, the root cause was not fully addressed, or the solution was ineffective.
+
+5.8. FinOps and Cost Optimization Strategy
+Mandate: Treat cloud spend as a shared responsibility, continuously optimizing resource utilization, architecting for cost-efficiency, and transparently tracking expenditures.
+
+Best Practices:
+
+Resource Limits & Autoscaling: Mandate proper CPU/memory limits for pods and implement Horizontal/Vertical Pod Autoscalers.
+
+Right-Sizing: Continuously review and right-size VM instances and managed service tiers.
+
+Spot/Preemptible Instances: Utilize for fault-tolerant, stateless workloads.
+
+Cost Tagging: Tag all cloud resources consistently for granular allocation.
+
+Centralized Cost Monitoring: Use GCP Billing Reports, Kubecost (if applicable), or custom dashboards.
+
+Lifecycle Management: Automate deletion of unused resources (e.g., old snapshots, untagged Docker images).
+
+Troubleshooting:
+
+Cost Spikes: Review GCP billing reports. Correlate with recent deployments or increased traffic. Use container metrics to pinpoint services consuming excess resources.
+
+Inefficient Usage: Utilize cost allocation dashboards to identify under-utilized services or resources.
+
+5.9. Developer Experience (DevEx) & AI Integration
+Mandate: Cultivate an environment where developers are empowered with efficient tools, fast feedback loops, and intelligent AI assistance, maximizing productivity and minimizing friction.
+
+Best Practices:
+
+Standardized Dev Environment (CodeServer): Provide a consistent, remote development environment (CodeServer v4.20.0).
+
+Fast Feedback Loops: Ensure quick build, test, and deployment cycles.
+
+Automated Scaffolding: Use templates/tools to quickly generate new projects or components.
+
+GitHub Copilot Integration:
+
+Organization-Level: Centrally configure organization-wide guidelines (GitHub Enterprise administrator).
+
+Repository-Level: Place .github/copilot-instructions.md in the root of each repo for specific context.
+
+No Password Entry: Copilot must never require direct password entry; it leverages existing IDE/GitHub Enterprise authentication.
+
+Context-Aware: Instructions guide Copilot to understand modularity, microservices, and specific tech stack details.
+
+Knowledge Management: Link documentation to relevant code and tools (e.g., @github #kb).
+
+Troubleshooting:
+
+Slow Development Cycles: Identify bottlenecks in local environment setup, build times, or feedback loops.
+
+Copilot Misbehavior: Review copilot-instructions.md for clarity and completeness. Provide more specific examples. Check for conflicting instructions.
+
+6.0. Local Development & On-Premise Considerations
+This section outlines specific considerations and best practices for developing and testing pure-bliss applications locally on-premise before migrating to GCP production.
+
+6.1. Local Infrastructure Orchestration (Docker Compose)
+Mandate: Use Docker Compose for orchestrating multi-container local development environments, mimicking the production Kubernetes setup as closely as possible.
+
+Best Practices:
+
+docker-compose.yml: Define all services (applications, databases, Redis, Keycloak, Vault, Nginx, observability stack) in a single or multiple docker-compose.yml files.
+
+Volume Mounts: Use Docker volumes to persist database and other stateful service data locally, preventing data loss on container recreation.
+
+Network Configuration: Define custom Docker networks within docker-compose.yml for isolated service communication.
+
+Environment Variables: Use .env files for local environment-specific configurations.
+
+Service Linking: Leverage Docker Compose service names for inter-service communication (http://service_name:port).
+
+Troubleshooting:
+
+docker compose up failures: Check individual container logs (docker logs <container_name>) for errors. Verify port conflicts.
+
+Service Communication Issues: Ensure services are on the same Docker network and using correct service names/ports.
+
+6.2. Local Observability Stack
+Mandate: Deploy a lightweight, containerized observability stack locally to provide developers with immediate feedback on application health, logs, and metrics.
+
+Best Practices:
+
+Loki, Promtail, Grafana: Deploy these as Docker Compose services to collect and visualize local container logs.
+
+Prometheus: Deploy a local Prometheus instance to scrape metrics from application containers.
+
+Pre-built Dashboards: Provide basic Grafana dashboards for local debugging.
+
+Troubleshooting:
+
+Missing Logs/Metrics: Verify promtail configuration, application logging formats, and Prometheus scrape targets.
+
+Grafana Connectivity: Ensure Grafana can connect to local Loki and Prometheus instances.
+
+6.3. Local Secrets Management (Vault)
+Mandate: Implement a local, containerized Vault instance to simulate production secrets management practices, even during development.
+
+Best Practices:
+
+Dev Mode or File Backend: For extreme simplicity, a Vault instance in "dev mode" or with a file backend can be used, though this should be purely for development and never expose to external networks.
+
+Local PostgreSQL Backend: Ideally, run Vault with a local PostgreSQL backend to mirror the production setup more closely.
+
+Auto-Unseal (Local): If using a persistent backend, a simple auto-unseal mechanism (e.g., VAULT_TOKEN environment variable for development) or manual unsealing is acceptable for local development.
+
+Vault Agent: Encourage developers to use Vault Agent sidecars or direct API calls to Vault for secret retrieval, just like in production.
+
+Troubleshooting:
+
+Vault Unsealed Issues: Ensure the local Vault instance is properly unsealed and accessible.
+
+Secret Retrieval Failures: Check local application logs and Vault logs for permission errors or invalid secret paths.
+
+6.4. Local Identity & Access Management (Keycloak)
+Mandate: Deploy a local, containerized Keycloak instance to enable realistic authentication and authorization flows during development.
+
+Best Practices:
+
+Local PostgreSQL Backend: Use a local PostgreSQL instance for Keycloak's database.
+
+Initial Realm/Client Setup: Provide scripts or pre-configured exports to quickly set up default realms, clients, and users for local testing.
+
+Local DNS/Hosts Entry: Configure local /etc/hosts entries or a local DNS resolver to map a development domain (e.g., auth.purebliss.local) to the Keycloak container.
+
+Troubleshooting:
+
+Login Redirect Issues: Verify Keycloak client redirect URIs match the local development environment URLs.
+
+Token Validation Failures: Check Keycloak and application logs for JWT signature or parsing errors.
+
+6.5. Local Code Server Environment
+Mandate: Provide a standardized local development environment using Code-Server (or similar IDE-in-a-container solution) to ensure consistency across developer machines.
+
+Best Practices:
+
+Containerized IDE: Run Code-Server in a Docker container, mounting project directories.
+
+Extensions & Settings: Pre-configure essential VS Code extensions, linters, formatters, and settings for the project.
+
+Authentication: Integrate Code-Server with the local Keycloak instance for consistent developer authentication.
+
+Troubleshooting:
+
+Performance Issues: Ensure the local machine has sufficient resources (CPU, RAM, disk I/O) for Code-Server and all other running containers.
+
+Extension Conflicts: Regularly audit and resolve conflicts between VS Code extensions.
+
+7.0. BUILD & BOOTSTRAP BEST PRACTICES: SECURE ORCHESTRATION
+Mandate: All core infrastructure services shall be built, deployed, and bootstrapped in a meticulously ordered, automated, and secure sequence, ensuring full functionality, robust security (HTTPS, SSL, TLS), and seamless inter-service communication from inception.
+The integrity of our environment begins with a perfectly orchestrated build. We eliminate "chicken-and-egg" dilemmas through disciplined sequencing and temporary, auditable bootstrap mechanisms.
+
+7.1. Foundational Prerequisites:
+
+Network Infrastructure: VPCs, subnets, firewall rules, and DNS configured via Terraform (Section 5.1). For local on-premise, this implies correctly configured local Docker networks and /etc/hosts entries.
+
+Container Images: All service images (Vault, Postgres, Redis, Keycloak, Nginx, Certbot, Loki, Prometheus, Grafana, Code-Server, Plane) built, scanned, and pushed to a secure registry (GCR, or local Docker registry for on-premise development, Section 3.1).
+
+Cloud KMS: A Cloud Key Management Service (GCP KMS) instance is provisioned for Vault's Auto-Unseal (Section 3.7) for production.
+
+GitOps Tooling: Argo CD or Flux CD is deployed and configured to monitor the kubernetes-manifests repository (Section 1.3, 5.2) for production.
+
+7.2. The Secure Build & Bootstrap Order:
+
+The following sequence ensures dependencies are met and security is layered from the ground up:
+
+Phase 0: Observability Foundation
+Prometheus (Metrics Collection)
+
+Purpose: Deploy the core metrics collection engine for the entire stack. This enables monitoring of subsequent phases.
+
+Deployment: Deploy Prometheus server (and associated node-exporters if directly managing VMs) with persistent storage for metrics. Locally, this is part of the docker-compose.yml for local observability.
+
+Configuration: Configure Prometheus to discover and scrape metrics from Kubernetes components and other services as they come online. Locally, configure to scrape from Docker Compose services.
+
+Health Check: Verify Prometheus pods are Running and Healthy, and basic targets are being scraped.
+
+Troubleshooting: Check Prometheus server logs for configuration errors or scrape target issues. Verify persistent volume claim.
+
+Loki (Log Aggregation)
+
+Purpose: Deploy the centralized log aggregation system to collect all container logs. Critical for debugging all subsequent deployments.
+
+Deployment: Deploy Loki (with its sub-components like Promtail for log collection from pods) and configure it to use persistent storage or object storage (e.g., GCS) for log chunks. Locally, this is part of the docker-compose.yml for local observability, typically using a local volume for storage.
+
+Configuration: Ensure Promtail agents are correctly deployed as DaemonSets and configured to send logs to Loki. Locally, Promtail runs as a Docker Compose service.
+
+Health Check: Verify Loki pods are Running and Healthy, and logs are being ingested.
+
+Troubleshooting: Check Loki/Promtail logs for connectivity issues or ingestion errors. Verify persistent storage/object storage access.
+
+Grafana (Visualization & Alerting)
+
+Purpose: Provide dashboards and alerting capabilities for all metrics (Prometheus) and logs (Loki).
+
+Deployment: Deploy Grafana with persistent storage for its configuration and dashboards. Locally, this is part of the docker-compose.yml for local observability.
+
+Configuration: Add Prometheus and Loki as data sources in Grafana. Import/create essential dashboards for cluster health and initial service monitoring.
+
+Health Check: Verify Grafana pod is Running and accessible. Test connectivity to Prometheus and Loki data sources from Grafana.
+
+Troubleshooting: Check Grafana logs for data source connection errors. Verify network access from Grafana to Prometheus/Loki.
+
+Phase 1: Data Persistence Foundation (Databases)
+PostgreSQL (Initial Deployment & Bootstrap)
+
+Purpose: Provide the foundational persistent storage for Keycloak and Vault's integrated storage backend.
+
+Deployment: Deploy PostgreSQL using its dedicated Kubernetes manifests (or Docker Compose for local dev).
+
+Secrets Handling (Bootstrap): For this initial phase, the connection string for Vault's backend (Postgres) will use temporary, securely managed, non-Vault credentials. These should be:
+
+Passed as environment variables (e.g., via Kubernetes Secret, docker-compose.yml environment section).
+
+Strictly limited in scope and lifespan. This is the only acceptable scenario for non-Vault managed database credentials for Vault's backend.
+
+Actionable Item: Document these temporary credentials and ensure a post-bootstrap rotation/revocation plan.
+
+Health Check: Verify PostgreSQL is Running and Healthy before proceeding.
+
+Troubleshooting:
+
+Container CrashLoopBackOff: Check docker logs postgres for database initialization errors, disk space issues, or incorrect environment variables. Use LogQL in Loki to query.
+
+Connection Refused: Verify PostgreSQL container port (5432) is exposed and network policies allow inbound connections from the Vault container.
+
+Redis (Caching & Session Management)
+
+Purpose: Provide high-performance caching for applications and Keycloak sessions.
+
+Deployment: Deploy Redis (primary-replica or Sentinel cluster for HA) using its Kubernetes manifests. Locally, this is part of the docker-compose.yml.
+
+Security: Ensure network isolation and authentication are configured (credentials for authentication will come from Vault later, for now, use a temporary secret or allow internal-only access if acceptable for bootstrap).
+
+Health Check: Verify Redis is Running and Healthy.
+
+Troubleshooting:
+
+Memory Issues: Check redis_memory_usage_bytes metric in Prometheus/Grafana. Verify maxmemory settings.
+
+Connectivity: From another container, attempt redis-cli -h <redis-service-ip> ping. Query Redis logs in Loki.
+
+Phase 2: Secrets Management Core (Vault)
+Vault Core (Deployment & Backend Configuration)
+
+Purpose: Establish the central secrets management platform.
+
+Deployment: Deploy Vault Core instances (in HA mode, e.g., Raft Integrated Storage) using their Kubernetes manifests. Locally, deploy as a Docker Compose service.
+
+Backend Connection: Configure Vault to use the PostgreSQL instance deployed in Phase 1 as its storage backend, using the temporary credentials established earlier.
+
+Auto-Unseal: Configure Vault with KMS Auto-Unseal (Section 3.7) to automate the unsealing process. Locally, consider "dev mode" or manual unseal for simplicity, or a file backend for persistence.
+
+Health Check: Verify Vault pods are Running and Unsealed.
+
+Troubleshooting:
+
+Vault Not Unsealed: Check Vault container logs for KMS connection errors or misconfigurations (query via Loki). Verify KMS key access for the Vault service account.
+
+Backend Connection Failure: Check Vault logs for connection errors to PostgreSQL. Verify the temporary PostgreSQL credentials and network connectivity.
+
+Vault Database Secret Backend Configuration (Post-Bootstrap)
+
+Purpose: Enable Vault to dynamically generate PostgreSQL credentials for applications.
+
+Action: Once Vault is unsealed, configure the PostgreSQL database secret backend within Vault. This involves:
+
+Setting up the database connection string using the initial, temporary PostgreSQL credentials.
+
+Defining roles that specify the permissions for dynamically generated users (e.g., plane-app-role, keycloak-app-role).
+
+Actionable Item: This step is crucial for the long-term security of database access.
+
+Phase 3: Identity & Access Management (Keycloak)
+Keycloak (Deployment & Initial Configuration)
+
+Purpose: Provide centralized SSO and IAM for all applications.
+
+Deployment: Deploy Keycloak instances (in HA mode) using their Kubernetes manifests. Locally, deploy as a Docker Compose service.
+
+Database Connection: Keycloak must connect to PostgreSQL using credentials dynamically generated by Vault.
+
+Mechanism: Utilize the Vault Agent Sidecar (Section 3.7) or an equivalent secure injection method to fetch credentials from Vault's database secret backend (e.g., vault read database/creds/keycloak-app-role).
+
+Initial Realm/Client Setup: Automate the creation of initial Keycloak realms (e.g., codeserver, planerealm) and clients (e.g., for CodeServer, Plane) via Keycloak's admin CLI or API, using credentials from Vault.
+
+SSO Integration: Configure Google Workspace SAML/OIDC integration. Locally, this integration can be tested with development Google Workspace accounts.
+
+Health Check: Verify Keycloak pods are Running and Healthy.
+
+Troubleshooting:
+
+Database Connection Errors: Check Keycloak logs for connection failures (via Loki). Verify Vault Agent Sidecar is correctly injecting credentials and that the Vault policy allows access to the Keycloak database role.
+
+SSO Login Failure: Check Keycloak logs for SAML/OIDC errors (via Loki). Verify Google IDP Metadata, Keycloak client settings, and redirect URIs.
+
+Automated SSO Testing
+
+Purpose: Validate the end-to-end SSO flow through Keycloak.
+
+Integration: Implement automated integration tests (e.g., using Cypress, Playwright) that simulate a user logging in via Google Workspace SSO through Keycloak to a sample application.
+
+CI/CD Gate: This test suite must be a mandatory gate in the Keycloak deployment pipeline, ensuring full functionality of the authentication flow.
+
+Troubleshooting:
+
+Test Failure: Review test logs for specific assertion failures. Check Keycloak logs for authentication errors during the test run (via Loki).
+
+Phase 4: Edge Services & Certificate Management
+Certbot (Certificate Acquisition)
+
+Purpose: Securely obtain and renew TLS certificates for Nginx.
+
+Deployment: Deploy Certbot in a dedicated container, configured for DNS-01 challenges (preferred for wildcard and non-exposed HTTP ports). Locally, use self-signed certificates or a local CA.
+
+DNS Integration: Ensure Certbot has necessary (least privilege) access to your DNS provider's API (e.g., Google Cloud DNS) to create/delete TXT records.
+
+Certificate Storage: Certificates are stored in a persistent volume accessible by Nginx, or directly injected as Kubernetes Secrets.
+
+Automated Renewal: Configure a Kubernetes CronJob to run certbot renew regularly.
+
+Troubleshooting:
+
+Certificate Not Issued/Renewed: Check Certbot container logs for challenge failures (DNS propagation issues, API key errors) (via Loki). Verify DNS provider configuration.
+
+Nginx (Reverse Proxy & SSL Termination)
+
+Purpose: Serve as the public-facing entry point, handling SSL termination, traffic routing, WAF, and rate limiting.
+
+Deployment: Deploy Nginx using its Kubernetes manifests. Locally, deploy as a Docker Compose service.
+
+SSL Configuration: Configure Nginx to use the TLS certificates obtained by Certbot (mounted from volume or Kubernetes Secret, or self-signed/local CA certificates locally).
+
+Upstream Configuration: Configure Nginx to proxy requests to Keycloak, Plane, CodeServer, and other internal services.
+
+Security: Enable WAF, HSTS, and other secure headers.
+
+Health Check: Verify Nginx pods are Running and Healthy.
+
+Troubleshooting:
+
+SSL Errors in Browser: Check Nginx SSL configuration. Verify certificate chain.
+
+5xx Errors: Check Nginx error logs (via Loki). Verify connectivity to upstream services (proxy_pass targets).
+
+Phase 4.5: Developer Tools
+Code-Server (Remote Development Environment)
+
+Purpose: Provide a standardized, remote VS Code environment for developers.
+
+Deployment: Deploy Code-Server instances, potentially with persistent home directories. Locally, deploy as a Docker Compose service.
+
+Authentication: Integrate with Keycloak for SSO login (via Nginx reverse proxy).
+
+Resource Management: Ensure appropriate CPU/memory limits and quotas.
+
+Troubleshooting:
+
+Login Issues: Verify Nginx routing to Code-Server and Keycloak integration. Check Code-Server logs for authentication errors (via Loki).
+
+Performance: Monitor Code-Server container metrics (CPU/Memory) in Grafana.
+
+Phase 5: Vault Agent (Application Secret Injection)
+Vault Agent (Deployment for Applications)
+
+Purpose: Securely inject secrets from Vault into application containers at runtime.
+
+Deployment: Deploy Vault Agent as a sidecar container alongside application pods (e.g., Plane). Locally, this sidecar pattern can be replicated with Docker Compose by ensuring the Vault Agent container starts before the application container and injects secrets as environment variables or files.
+
+Configuration: Configure Vault Agent to authenticate with Vault Core and fetch specific secrets/templates required by the application.
+
+Troubleshooting:
+
+Application Cannot Fetch Secrets: Check Vault Agent sidecar logs for authentication errors with Vault Core or policy permission issues (via Loki). Verify application is configured to read from the injected secret files.
+
+Phase 6: Application Deployment
+Plane (Primary Application)
+
+Purpose: Deploy the core application for Pure Bliss.
+
+Deployment: Deploy Plane application instances (e.g., Laravel 10/PHP 8.2, Node.js, Python) with appropriate replicas. Locally, deploy as a Docker Compose service.
+
+Dependencies: Ensure Plane connects to PostgreSQL (via Vault-managed credentials), Redis, and authenticates via Keycloak (if applicable).
+
+Observability: Confirm Plane is logging to Loki and exposing Prometheus metrics.
+
+Health Check: Verify Plane pods are Running, Healthy, and passing all probes.
+
+Troubleshooting:
+
+Application Errors: Check Plane logs for runtime errors, database connection issues, or API failures (via Loki).
+
+Performance Bottlenecks: Use distributed tracing (OpenTelemetry) and Prometheus metrics in Grafana to diagnose performance.
+
+7.3. Post-Bootstrap Security Hardening:
+
+Revoke Bootstrap Credentials: Immediately after Vault is fully operational and Keycloak/applications are using Vault-managed database credentials, revoke or rotate the temporary, non-Vault managed PostgreSQL credentials used for Vault's initial backend setup. This is a critical security step.
+
+Least Privilege Enforcement: Conduct an audit to ensure all service accounts and applications are operating with the absolute minimum necessary permissions.
+
+Continuous Monitoring: Ensure all services are fully integrated with Loki, Prometheus, and Grafana for continuous health, performance, and security monitoring.
+
+By following this meticulously defined build and bootstrap order, pure-bliss ensures that its core infrastructure is deployed securely, reliably, and without the common pitfalls of inter-service dependencies and secret management, whether developed locally on-premise or deployed to GCP production.

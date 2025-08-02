@@ -1,0 +1,5 @@
+[Tue Jul  8 01:43:50 AM UTC 2025] INFO: Data directories cleaned for Postgres and Vault
+[Tue Jul  8 01:44:15 AM UTC 2025] INFO: Vault image rebuilt with new entrypoint.
+[Tue Jul  8 01:44:20 AM UTC 2025] INFO: Postgres image rebuilt.
+[Tue Jul  8 01:44:26 AM UTC 2025] INFO: Postgres started.
+[Tue Jul  8 01:44:30 AM UTC 2025] INFO: Vault started.

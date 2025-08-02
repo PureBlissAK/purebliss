@@ -1,0 +1,111 @@
+{
+    // Editor Fundamentals for Consistency
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode", // Example, adjust based on primary language/formatter
+    "editor.tabSize": 2, // Or 4, based on your project standard
+    "editor.insertSpaces": true,
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit", // For JavaScript/TypeScript with ESLint
+        "source.fixAll.stylelint": "explicit" // For CSS/SCSS/Less with Stylelint
+        // Add similar lines for other language-specific linters if they support auto-fixing on save
+    },
+
+    // Language-Specific Linting & Formatting Integration (Examples - configure based on your tech stack)
+    // ESLint (JavaScript/TypeScript)
+    "eslint.enable": true,
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+    ],
+    "eslint.workingDirectories": [
+        { "mode": "auto" }
+    ],
+
+    // PHP (Requires extensions like felixfbecker.php-intellisense, PHP CS Fixer integration)
+    // "php.validate.executablePath": "php", // Path to your PHP executable
+    // "php.suggest.basic": false,
+
+    // Python (Requires ms-python.python extension, configure formatter like Black, linter like Flake8)
+    "python.languageServer": "Pylance",
+    "python.formatting.provider": "black",
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+
+    // Go (Requires golang.go extension)
+    "go.formatTool": "goimports",
+    "go.lintOnSave": "package",
+
+    // YAML (Kubernetes, Docker Compose, Helm, Terraform) Specific Settings
+    "yaml.format.enable": true,
+    "yaml.validate": true,
+    "yaml.schemas": {
+        // Kubernetes schema for all .yaml files (broad, but useful)
+        "kubernetes": "*.yaml",
+        // Helm values.yaml schema (if you use Helm)
+        "https://raw.githubusercontent.com/helm/helm-json-schema/main/chart-values.json": "**/values.yaml"
+        // Add more schemas as needed for specific CRDs or other YAML configurations
+    },
+
+    // Docker & Container Specific Settings
+    "docker.showAddDockerignore": false,
+    "docker.commands.attach": "interactive",
+
+    // Terminal Settings (for consistency when running commands)
+    "terminal.integrated.defaultProfile.linux": "bash", // or "zsh"
+    "terminal.integrated.defaultProfile.osx": "zsh", // or "bash"
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.fontSize": 14, // Adjust as per preference
+    "terminal.integrated.scrollback": 10000,
+
+    // Files and Folders to Exclude (for performance and cleanliness)
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/node_modules": true,
+        "**/.env": true,
+        "**/.terraform": true,
+        "**/*.tfstate": true,
+        "**/*.tfvars": true,
+        "**/__pycache__": true,
+        "**/.idea": true,
+        "**/vendor": true // For PHP, Go or other language specific vendor folders
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/.git": true,
+        "**/.vscode": true,
+        "**/.terraform": true
+    },
+
+    // Workbench Enhancements (Optional, but contributes to consistent UX)
+    "workbench.editor.showTabs": "multiple",
+    "workbench.tree.indent": 20,
+    "workbench.colorTheme": "Default Dark Modern", // Or your team's preferred theme
+
+    // Git Integration (Reinforcing Git Hygiene - Section 16)
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableCommitSigning": true, // If using GPG commit signing
+    "git.inputValidation": true,
+    "containers.commands.attach": "interactive", // Can be "always" for stricter Conventional Commits
+
+    // Extensions that support these settings (strongly recommended for installation):
+    // - Docker: `ms-azuretools.vscode-docker`
+    // - Kubernetes: `ms-kubernetes-tools.vscode-kubernetes-tools`
+    // - YAML: `redhat.vscode-yaml`
+    // - Prettier: `esbenp.prettier-vscode`
+    // - ESLint: `dbaeumer.vscode-eslint`
+    // - Python: `ms-python.python`
+    // - Terraform: `HashiCorp.terraform`
+    // - GitLens: `eamodio.gitlens` (highly recommended for Git history and blame)
+    // - DotEnv: `mikestead.dotenv` (for .env file syntax highlighting)
+}

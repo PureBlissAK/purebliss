@@ -1,0 +1,435 @@
+Vault and Vault Agent Best Practices for VS Code Copilot
+This guide outlines best practices for interacting with HashiCorp Vault and Vault Agent, specifically tailored for developers using a VS Code copilot. The goal is to ensure secure secret management throughout the development lifecycle, from local setup to understanding production deployment patterns.
+
+1. Core Principles of Secure Secret Management
+Before diving into specifics, it's crucial to understand the fundamental tenets of secure secret management:
+
+Never Hardcode Secrets: Secrets (API keys, database credentials, tokens, etc.) should never be directly written into code, configuration files, or committed to version control.
+
+Least Privilege: Applications and users should only have access to the secrets they absolutely need, and no more.
+
+Dynamic Secrets: Wherever possible, use Vault's ability to generate short-lived, on-demand credentials (e.g., temporary database users).
+
+Secrets at Runtime: Secrets should be injected into applications at runtime, not baked into build artifacts (like Docker images).
+
+Auditing: All access to secrets should be logged and auditable.
+
+Rotation: Secrets should be rotated regularly to minimize the impact of a potential compromise.
+
+2. Local Development Workflow with Vault (for Developers & Copilot)
+For local development within VS Code, developers typically interact with Vault directly using the Vault CLI. Your copilot can be a great assistant here.
+
+2.1. Initial Setup
+Install Vault CLI: Ensure the Vault CLI is installed and accessible in your terminal.
+
+# Example for macOS (Homebrew)
+brew tap hashicorp/tap
+brew install hashicorp/tap/vault
+
+# Example for Linux (download binary)
+# Refer to Vault docs for official installation methods
+
+Vault Server Access:
+
+Development Vault: For purely local testing, you can run a Vault dev server:
+
+vault server -dev -dev-listen-address="0.0.0.0:8200"
+# This will output a VAULT_TOKEN for the root token. Copy it!
+
+Shared Development Vault: If connecting to a shared development Vault instance, ensure you have the correct VAULT_ADDR (e.g., http://127.0.0.1:8200 or the IP/hostname of your dev Vault server).
+
+Set VAULT_ADDR Environment Variable:
+
+export VAULT_ADDR='http://127.0.0.1:8200' # Or your shared dev Vault address
+
+Copilot Tip: Your copilot can suggest this export command based on common Vault patterns.
+
+2.2. Authentication
+The primary method for local development is vault login using a token.
+
+Login with a Token:
+
+vault login <your_vault_token>
+# For a dev server, this is the root token printed on startup.
+# For a shared dev Vault, this token would be securely provided by an admin.
+
+Copilot Tip: Copilot can remind you to vault login if it detects subsequent vault read or vault kv get commands failing due to authentication errors.
+
+VAULT_TOKEN Environment Variable:
+When you vault login, the CLI automatically sets the VAULT_TOKEN environment variable in your current shell session. Your applications can then pick up this token.
+
+Copilot Tip: Copilot can suggest reading VAULT_TOKEN from environment variables in your application code.
+
+2.3. Reading Secrets
+Once authenticated, you can read secrets.
+
+Key-Value (KV) Secrets Engine (Version 2):
+
+vault kv get secret/my-app/db-credentials
+
+Copilot Tip: Copilot can suggest vault kv get commands based on common secret paths in your project or docker-compose.yml references.
+
+Dynamic Secrets:
+If using dynamic secrets (e.g., database credentials), the path will be different:
+
+vault read database/creds/my-role
+
+Copilot Tip: Copilot can help differentiate between static KV paths and dynamic secret paths.
+
+2.4. Integrating with Applications (Local)
+Your application code should read secrets from the VAULT_TOKEN environment variable and then use a Vault client library (e.g., hvac for Python, go-vault for Go) to fetch secrets from Vault.
+
+Example (Conceptual Python):
+
+import os
+import hvac
+
+VAULT_ADDR = os.getenv('VAULT_ADDR', 'http://127.0.0.1:8200')
+VAULT_TOKEN = os.getenv('VAULT_TOKEN')
+
+if not VAULT_TOKEN:
+    print("VAULT_TOKEN environment variable not set. Please run 'vault login'.")
+    exit(1)
+
+client = hvac.Client(url=VAULT_ADDR, token=VAULT_TOKEN)
+
+if client.is_authenticated():
+    try:
+        # Read a KV secret
+        kv_secret = client.read('secret/data/my-app/config')
+        if kv_secret:
+            print("KV Secret:", kv_secret['data']['data'])
+
+        # Read a dynamic database credential
+        db_creds = client.read('database/creds/my-app-role')
+        if db_creds:
+            print("DB Username:", db_creds['data']['username'])
+            print("DB Password:", db_creds['data']['password'])
+
+    except Exception as e:
+        print(f"Error reading secrets: {e}")
+else:
+    print("Failed to authenticate with Vault.")
+
+Copilot Tip: Copilot can assist in writing boilerplate code for Vault client initialization and secret retrieval, suggesting appropriate methods (client.read, client.is_authenticated, os.getenv).
+
+3. Production Deployment Patterns with Vault Agent
+While local development uses direct CLI interaction, production environments typically leverage Vault Agent for secure, automated secret delivery. Your copilot should understand this pattern to provide relevant context and suggestions.
+
+3.1. Vault Agent Sidecar Pattern
+Concept: A small vault-agent container runs alongside your application container (e.g., in the same Kubernetes Pod or Docker Compose setup).
+
+Authentication: The Vault Agent handles authentication to Vault using methods suitable for machines (e.g., Kubernetes Auth, AppRole, AWS IAM). It never exposes the raw credentials to the application.
+
+Secret Templating: The agent uses a templating engine (like Consul Template built-in) to fetch secrets from Vault and render them as files into a shared tmpfs (in-memory) volume.
+
+Auto-Renewal: The agent automatically renews Vault tokens and dynamic secret leases, updating the files in the shared volume.
+
+Application Reads Files: The application simply reads the secrets from the mounted files (e.g., /vault/secrets/db_password.txt). It doesn't need to know about Vault directly.
+
+3.2. Folder Structure for Vault Agent Configuration
+Host-side: You'll have a directory on the host (or in your deployment configuration) containing the Vault Agent's HCL configuration file. This is typically mounted into the Vault Agent container.
+
+my-project/
+├── docker-compose.yml
+└── vault-agent-config/
+    └── agent.hcl # Vault Agent configuration
+
+Container-side:
+
+Vault Agent Container: Mounts agent.hcl to a path like /etc/vault/agent.d/agent.hcl.
+
+Shared Volume: Both the Vault Agent and your application container mount a shared tmpfs volume, often at /vault/secrets or /run/secrets. The agent writes the secrets here, and the application reads them.
+
+# Inside your application container
+/vault/secrets/
+├── db_username
+├── db_password
+└── api_key.txt
+
+Copilot Tip: When working with docker-compose.yml or Kubernetes manifests, copilot can suggest volumes configurations for Vault Agent and shared secret mounts, and help with the command for running vault agent.
+
+4. VS Code / Copilot Specifics
+Your copilot can enhance your secure development workflow:
+
+Contextual Suggestions:
+
+Suggest vault CLI commands based on your current directory or open files (e.g., if you're in a vault-agent-config directory, suggest vault agent -config ...).
+
+Propose environment variable settings (export VAULT_ADDR=..., export VAULT_TOKEN=...).
+
+Help construct docker-compose.yml or Kubernetes YAML for Vault Agent sidecars, including volumes, environment variables, and command arguments.
+
+Security Reminders:
+
+If it detects sensitive strings being hardcoded or committed, it should flag them and suggest using Vault.
+
+Remind you not to commit .env files that contain VAULT_TOKEN or other secrets.
+
+Code Snippets:
+
+Provide boilerplate code for Vault client libraries in various languages.
+
+Suggest patterns for reading secrets from mounted files (e.g., /vault/secrets/db_password).
+
+Debugging Assistance:
+
+Help interpret Vault error messages (e.g., "permission denied" from Vault, "token expired").
+
+Suggest commands like vault token lookup or vault status.
+
+5. What NOT to Do (and Copilot should warn against)
+No Hardcoded Secrets in Code/Config: Never put VAULT_TOKEN or other sensitive credentials directly in source code or docker-compose.yml files.
+
+No Secrets in Dockerfile ENV or COPY: Avoid ENV MY_SECRET=value or COPY secrets.txt /app/secrets.txt for runtime secrets. Use RUN --mount=type=secret for build-time secrets only.
+
+No VAULT_TOKEN in .bashrc/.zshrc (for shared machines): While convenient for single-user dev, avoid putting long-lived tokens in shell startup files on shared systems. Use vault login per session.
+
+Avoid docker inspect for secrets: Remind yourself and others that docker inspect can reveal environment variables if secrets are passed that way. Prefer file-based secrets via Vault Agent.
+
+By following these best practices, your development workflow will be more secure, and your copilot can effectively assist you in managing secrets with HashiCorp Vault.
+
+Setting up HashiCorp Vault in TLS mode with Let's Encrypt certificates in a Docker environment can be challenging due to certificate management, file permissions, and network configurations. This guide outlines best practices to get it running smoothly.
+
+1. Overview of the Challenge
+Vault requires TLS for secure communication, especially in production. Let's Encrypt provides free, automated certificates. Integrating these in Docker involves:
+
+Certificate Generation: Let's Encrypt uses challenges (like HTTP-01) to verify domain ownership. This often requires a web server (like Nginx) to serve specific files.
+
+Certificate Storage: Certificates need to be stored persistently on the host and then mounted into the Vault container.
+
+Permissions: The Vault process inside the container (which runs as a non-root user, typically vault with UID 1000) needs read access to these certificate files.
+
+Vault Configuration: Vault's config.hcl must correctly point to the certificate and key files inside the container.
+
+Docker Networking: Ensuring Vault can bind to its port and communicate securely.
+
+2. Prerequisites
+Before you begin, ensure you have:
+
+A registered domain name (e.g., vault.yourdomain.com).
+
+DNS records pointing your domain to your Docker host's public IP address.
+
+Docker and Docker Compose installed on your host machine.
+
+certbot installed on your host, or you plan to use a certbot Docker container.
+
+Vault Docker image (hashicorp/vault:latest or a specific version).
+
+A dedicated directory on your host for certificates (e.g., /mnt/raid0/nginx/certs or /srv/certs).
+
+3. Certificate Acquisition with Let's Encrypt (Certbot)
+The recommended approach is to use Certbot with the webroot authenticator, often facilitated by a temporary Nginx container or a dedicated Certbot container.
+
+3.1. Host Directory Structure
+Create a well-defined directory structure on your host for Let's Encrypt certificates. Certbot typically places them in /etc/letsencrypt/. We'll use a custom path to align with your setup.
+
+/mnt/raid0/nginx/certs/
+├── live/
+│   └── dev.purebliss.app/
+│       ├── fullchain.pem -> ../../archive/dev.purebliss.app/fullchain1.pem
+│       └── privkey.pem -> ../../archive/dev.purebliss.app/privkey1.pem
+└── archive/
+    └── dev.purebliss.app/
+        ├── cert1.pem
+        ├── chain1.pem
+        ├── fullchain1.pem
+        └── privkey1.pem
+
+3.2. Obtaining Certificates (Example with Certbot Docker)
+You can use a temporary Nginx container to serve the .well-known/acme-challenge path, or run Certbot directly.
+
+Example using certbot/certbot Docker image:
+
+Prepare a webroot directory: This directory will be served by a temporary web server for Certbot's HTTP-01 challenge.
+
+sudo mkdir -p /mnt/raid0/nginx/html/.well-known/acme-challenge
+
+Run a temporary Nginx container (if not already running):
+This Nginx instance will serve the challenge files.
+
+docker run -d --name temp-nginx \
+  -p 80:80 \
+  -v /mnt/raid0/nginx/html:/usr/share/nginx/html:ro \
+  nginx:latest
+
+Run Certbot to obtain certificates:
+
+sudo docker run -it --rm --name certbot \
+  -v "/mnt/raid0/nginx/certs:/etc/letsencrypt" \
+  -v "/mnt/raid0/nginx/html:/var/www/html" \
+  certbot/certbot certonly \
+  --webroot -w /var/www/html \
+  -d dev.purebliss.app \
+  --email admin@purebliss.app \
+  --agree-tos \
+  --no-eff-email
+
+Replace dev.purebliss.app and admin@purebliss.app with your actual domain and email.
+
+This will save the certificates to /mnt/raid0/nginx/certs/live/dev.purebliss.app/ on your host.
+
+Stop the temporary Nginx container:
+
+docker stop temp-nginx && docker rm temp-nginx
+
+3.3. Automated Renewal
+Set up a cron job on your host to automatically renew certificates. Certbot handles this with its renew command.
+
+# Open crontab for editing
+sudo crontab -e
+
+# Add a line to run certbot renew twice a day (e.g., at 3 AM and 3 PM)
+# The --nginx or --apache flags can be used if you have a full Nginx/Apache setup on the host.
+# For Docker, you might need a custom renewal script that restarts your Nginx container.
+0 3,15 * * * sudo docker run --rm \
+  -v "/mnt/raid0/nginx/certs:/etc/letsencrypt" \
+  -v "/mnt/raid0/nginx/html:/var/www/html" \
+  certbot/certbot renew --webroot -w /var/www/html --post-hook "docker-compose -f /path/to/your/nginx-docker-compose.yml restart nginx" >> /var/log/certbot-renew.log 2>&1
+
+Adjust /path/to/your/nginx-docker-compose.yml accordingly.
+
+4. Vault Configuration (config.hcl)
+Your config.hcl needs to point to the correct paths for the certificates inside the Vault container.
+
+Corrected config.hcl:
+
+disable_mlock = true
+
+# Vault persistent file storage configuration
+storage "file" {
+  path = "/vault/data"
+}
+
+listener "tcp" {
+  address       = "0.0.0.0:8200" # Vault's default internal API port
+  tls_cert_file = "/vault/tls/live/dev.purebliss.app/fullchain.pem" # Correct path inside container
+  tls_key_file  = "/vault/tls/live/dev.purebliss.app/privkey.pem"  # Correct path inside container
+  tls_disable = 0 # 0 means TLS is ENABLED
+}
+
+# It's good practice to explicitly set api_addr
+api_addr = "https://0.0.0.0:8200" # Use HTTPS as TLS is enabled
+
+ui = true
+
+Key Change: The tls_cert_file and tls_key_file paths now correctly reflect the subdirectory structure created by Certbot (live/dev.purebliss.app/) relative to the mounted /vault/tls directory.
+
+5. Docker Compose Setup for Vault
+Your docker-compose.yml for Vault looks mostly correct, but let's ensure the ports mapping is suitable for your needs and that all paths are resolved.
+
+Example vault-docker-compose.yml:
+
+version: '3.8'
+
+services:
+  vault:
+    image: hashicorp/vault:1.17.3 # Use a specific version
+    container_name: purebliss-vault
+    ports:
+      # Map host port 8200 to container port 8200 for external access
+      # If host port 8200 is already in use, choose a different host port, e.g., "28200:8200"
+      - "8200:8200"
+    volumes:
+      # Persistent storage for Vault data (ensure /mnt/raid0/vault/data exists and has correct permissions)
+      - ${VAULT_DATA_PATH}:/vault/data
+      # Read-only mount for TLS certificates (ensure /mnt/raid0/vault/tls exists and has correct permissions)
+      - ${VAULT_TLS_PATH}:/vault/tls:ro
+      # Read-only mount for Vault's configuration file
+      - ./config.hcl:/vault/config/config.hcl:ro
+    env_file:
+      # Ensure this path is correct and contains VAULT_DATA_PATH and VAULT_TLS_PATH
+      - /opt/my-secure-ha-stack/config.env
+    cap_add:
+      - IPC_LOCK # Required for Vault's memory locking
+    command: server -config=/vault/config/config.hcl
+    networks:
+      - purebliss-net
+    healthcheck:
+      # Use HTTPS for health check if TLS is enabled
+      test: ["CMD", "vault", "status", "-tls-skip-verify", "-address=https://127.0.0.1:8200"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  purebliss-net:
+    external: true # Assumes this network is created manually or by another compose file
+
+ports mapping: I've uncommented it and set it to 8200:8200. If you intend to access Vault from your host or other external clients, you must expose the port. If you only intend for other containers on purebliss-net to access it, you can leave ports commented out.
+
+VAULT_DATA_PATH and VAULT_TLS_PATH: Ensure these environment variables in /opt/my-secure-ha-stack/config.env correctly point to your host paths (e.g., VAULT_DATA_PATH=/mnt/raid0/vault/data and VAULT_TLS_PATH=/mnt/raid0/nginx/certs/live/dev.purebliss.app). Wait, based on your docker inspect and ls -l output, VAULT_TLS_PATH should be /mnt/raid0/nginx/certs if you're mounting /vault/tls and expect live/dev.purebliss.app to be inside it. Let's correct that:
+
+Revised docker-compose.yml volumes section:
+
+volumes:
+  - ${VAULT_DATA_PATH}:/vault/data
+  # Mount the base certs directory from host to /vault/tls in container
+  # This makes /mnt/raid0/nginx/certs/live/dev.purebliss.app accessible at /vault/tls/live/dev.purebliss.app
+  - /mnt/raid0/nginx/certs:/vault/tls:ro # <-- Use the base path where 'live' directory resides
+  - ./config.hcl:/vault/config/config.hcl:ro
+
+And ensure your /opt/my-secure-ha-stack/config.env has:
+
+VAULT_DATA_PATH=/mnt/raid0/vault/data
+# VAULT_TLS_PATH is no longer strictly needed in volumes if you hardcode the mount source
+# Or, if you keep VAULT_TLS_PATH, ensure it's /mnt/raid0/nginx/certs
+VAULT_TLS_PATH=/mnt/raid0/nginx/certs
+
+This is critical for the paths to align.
+
+6. Host File System Permissions (Crucial for Mounted Volumes)
+The Vault process inside the container typically runs as the vault user (UID 1000, GID 1000). It needs read access to the TLS files and read/write access to the data directory.
+
+For Vault Data (/mnt/raid0/vault/data):
+
+sudo mkdir -p /mnt/raid0/vault/data
+sudo chown -R 1000:1000 /mnt/raid0/vault/data
+sudo chmod -R u+rwX,g+rwX,o-rwx /mnt/raid0/vault/data
+
+For TLS Certificates (/mnt/raid0/nginx/certs and its subdirectories):
+
+The Nginx user (often UID 101 or 33) and the Vault user (UID 1000) both need to traverse these directories.
+
+The privkey.pem should have very strict permissions (400 or 600).
+
+The fullchain.pem can be more permissive (444 or 644).
+
+Crucially, the directories themselves need o+x (execute for others) so the container's user can traverse them.
+
+# Ensure parent directories are traversable for 'others'
+sudo chmod o+x /mnt/raid0/nginx/certs
+sudo chmod o+x /mnt/raid0/nginx/certs/live
+sudo chmod o+x /mnt/raid0/nginx/certs/live/dev.purebliss.app
+sudo chmod o+x /mnt/raid0/nginx/certs/archive
+sudo chmod o+x /mnt/raid0/nginx/certs/archive/dev.purebliss.app
+
+# Set strict permissions on the actual key file (read-only for owner, no access for others)
+sudo chmod 400 /mnt/raid0/nginx/certs/archive/dev.purebliss.app/privkey1.pem
+
+# Set read-only permissions on the fullchain file (readable by others)
+sudo chmod 444 /mnt/raid0/nginx/certs/archive/dev.purebliss.app/fullchain1.pem
+
+7. Troubleshooting Tips
+Verify Mounts: After starting the container, run docker inspect purebliss-vault and check the Mounts section to confirm the host paths are correctly mapped to the container paths.
+
+Check Inside Container (if it stays running briefly):
+
+docker exec -it purebliss-vault sh
+ls -l /vault/tls/live/dev.purebliss.app/
+cat /vault/tls/live/dev.purebliss.app/fullchain.pem | head -n 5
+cat /vault/tls/live/dev.purebliss.app/privkey.pem | head -n 5
+id vault
+
+If cat fails or shows "Permission denied," your host permissions are still an issue.
+
+Temporary tls_disable = 1: If you're completely stuck, temporarily set tls_disable = 1 in config.hcl and remove tls_cert_file and tls_key_file lines. If Vault starts then, the problem is definitively with your TLS setup. Once it starts in HTTP mode, you can docker exec in and debug the TLS file access more easily.
+
+Vault Log Level: Increase Vault's log level for more verbose output:
+
+Add log_level = "debug" to your config.hcl.
+
+Or set VAULT_LOG_LEVEL=debug in your config.env file.
+
+By carefully following these steps, especially the path corrections in config.hcl and host file/directory permissions, you should be able to get Vault running with Let's Encrypt TLS in your Docker environment.
