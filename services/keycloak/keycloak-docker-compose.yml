@@ -6,17 +6,20 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+    entrypoint: ["/opt/vault-entrypoint.sh", "start-dev"]
+    volumes:
+      - ./vault-entrypoint.sh:/opt/vault-entrypoint.sh:ro
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
       KC_DB: postgres
       KC_DB_URL_HOST: ${POSTGRES_HOST}
       KC_DB_URL_PORT: ${POSTGRES_PORT}
       KC_DB_URL_DATABASE: ${POSTGRES_DB}
       KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
       KC_HOSTNAME: ${LOCAL_HOSTNAME}
       KC_PROXY: edge
+      VAULT_ADDR: ${VAULT_ADDR:-http://vault:8200}
+      VAULT_TOKEN: ${VAULT_TOKEN}
     depends_on:
       - purebliss-postgres
     healthcheck:
