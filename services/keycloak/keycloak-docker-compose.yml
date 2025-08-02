@@ -10,19 +10,20 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
-      KC_DB_URL_HOST: purebliss-postgres
+      KC_DB_URL_HOST: ${POSTGRES_HOST}
       KC_DB_URL_PORT: ${POSTGRES_PORT}
       KC_DB_URL_DATABASE: ${POSTGRES_DB}
       KC_DB_USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
       KC_HOSTNAME: ${LOCAL_HOSTNAME}
       KC_PROXY: edge
-    command: ["start-dev"]
-    # healthcheck:
-    #   test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8080' || exit 1"]
-    #   interval: 15s
-    #   timeout: 10s
-    #   retries: 8
+    depends_on:
+      - purebliss-postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks:
       - purebliss-net
 networks:

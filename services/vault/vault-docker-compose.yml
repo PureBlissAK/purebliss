@@ -9,11 +9,11 @@ services:
       - ./config.hcl:/vault/config/config.hcl:ro
     cap_add:
       - IPC_LOCK
-    command: sh -c "chown -R vault:vault /vault/data && vault server -config=/vault/config/config.hcl"
+    command: server -config=/vault/config/config.hcl
     networks:
       - purebliss-net
     healthcheck:
-      test: ["CMD", "sh", "-c", "VAULT_ADDR=http://127.0.0.1:18200 vault status || exit 0"]
+      test: ["CMD", "vault", "status"]
       interval: 10s
       timeout: 5s
       retries: 5
