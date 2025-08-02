@@ -6,11 +6,11 @@ services:
     restart: unless-stopped
     ports:
       - "8443:8443"
-    command: /bin/sh -c "pip install hvac && python /home/coder/project/get_secret.py && /usr/bin/entrypoint.sh --bind-addr 0.0.0.0:8443"
+    environment:
+      - PASSWORD=changeme
     volumes:
       - ${CODESERVER_DATA_PATH}:/home/coder/project
       - ${CODESERVER_LOG_PATH}:/var/log/codeserver/codeserver.log
-      - ./get_secret.py:/home/coder/project/get_secret.py
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8443"]
       interval: 10s
