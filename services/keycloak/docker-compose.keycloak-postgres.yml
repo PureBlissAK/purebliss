@@ -1,5 +1,27 @@
 version: '3.8'
+
 services:
+  purebliss-postgres:
+    image: postgres:16
+    container_name: purebliss-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ${POSTGRES_DATA_PATH}:/var/lib/postgresql/data
+      - ${POSTGRES_LOG_PATH}:/var/log/postgresql/postgres.log
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - purebliss-net
+
   purebliss-keycloak:
     image: quay.io/keycloak/keycloak:24.0.5
     container_name: purebliss-keycloak
@@ -18,6 +40,9 @@ services:
       KC_HOSTNAME: ${LOCAL_HOSTNAME}
       KC_PROXY: edge
     command: ["start-dev"]
+    depends_on:
+      purebliss-postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 10s
@@ -25,6 +50,7 @@ services:
       retries: 10
     networks:
       - purebliss-net
+
 networks:
   purebliss-net:
     external: true
