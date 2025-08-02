@@ -45,17 +45,25 @@ fetch_grafana_credentials() {
     # Attempt to read Grafana credentials from Vault
     local vault_secret
     if vault_secret=$(vault kv get -format=json secret/grafana 2>/dev/null); then
-        local admin_password
+        local admin_password postgres_password
         admin_password=$(echo "$vault_secret" | jq -r '.data.data.admin_password // empty')
+        postgres_password=$(echo "$vault_secret" | jq -r '.data.data.postgres_password // empty')
         
         if [[ -n "$admin_password" && "$admin_password" != "null" ]]; then
             log_info "Successfully retrieved Grafana admin password from Vault"
             export GF_SECURITY_ADMIN_PASSWORD="$admin_password"
-            return 0
         else
             log_warn "Grafana admin password not found in Vault secret"
-            return 1
         fi
+        
+        if [[ -n "$postgres_password" && "$postgres_password" != "null" ]]; then
+            log_info "Successfully retrieved PostgreSQL password from Vault for Grafana"
+            export GF_DATABASE_PASSWORD="$postgres_password"
+        else
+            log_warn "PostgreSQL password not found in Vault secret for Grafana"
+        fi
+        
+        return 0
     else
         log_warn "Failed to read secret/grafana from Vault, using fallback"
         return 1
@@ -69,6 +77,11 @@ setup_default_credentials() {
         export GF_SECURITY_ADMIN_PASSWORD="grafana_admin_changeme"
     fi
     
+    if [[ -z "${GF_DATABASE_PASSWORD:-}" ]]; then
+        log_info "Setting default PostgreSQL password for Grafana"
+        export GF_DATABASE_PASSWORD="postgres_changeme"
+    fi
+    
     log_info "Default Grafana credentials configured"
 }
 
@@ -76,6 +89,14 @@ setup_default_credentials() {
 configure_grafana() {
     # Ensure the admin user is set (default to 'admin' if not specified)
     export GF_SECURITY_ADMIN_USER="${GF_SECURITY_ADMIN_USER:-admin}"
+    
+    # Configure PostgreSQL database connection
+    export GF_DATABASE_TYPE="${GF_DATABASE_TYPE:-postgres}"
+    export GF_DATABASE_HOST="${GF_DATABASE_HOST:-purebliss-postgres}"
+    export GF_DATABASE_PORT="${GF_DATABASE_PORT:-5432}"
+    export GF_DATABASE_NAME="${GF_DATABASE_NAME:-grafana}"
+    export GF_DATABASE_USER="${GF_DATABASE_USER:-grafana}"
+    export GF_DATABASE_SSL_MODE="${GF_DATABASE_SSL_MODE:-disable}"
     
     # Set default server configuration
     export GF_SERVER_HTTP_PORT="${GF_SERVER_HTTP_PORT:-3000}"
@@ -89,6 +110,8 @@ configure_grafana() {
     
     log_info "Grafana configuration completed"
     log_info "Admin user: $GF_SECURITY_ADMIN_USER"
+    log_info "Database: $GF_DATABASE_TYPE at $GF_DATABASE_HOST:$GF_DATABASE_PORT"
+    log_info "Database name: $GF_DATABASE_NAME"
     log_info "Server port: $GF_SERVER_HTTP_PORT"
     log_info "Log level: $GF_LOG_LEVEL"
 }
