@@ -1,0 +1,56 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      KEYCLOAK_ADMIN_PASSWORD: test_keycloak_password
+      POSTGRES_PASSWORD: test_postgres_password
+      GRAFANA_ADMIN_PASSWORD: test_grafana_password
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up Docker Compose
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and start all services
+        run: |
+          docker network create purebliss-net || true
+          docker compose -f dev_scripts/docker-compose.base.yaml \
+            -f dev_scripts/docker-compose.infra.yaml \
+            -f dev_scripts/docker-compose.monitoring.yaml \
+            -f dev_scripts/docker-compose.apps.yaml up -d --build
+
+      - name: Wait for services to be healthy
+        run: |
+          sleep 30
+          docker compose -f dev_scripts/docker-compose.base.yaml \
+            -f dev_scripts/docker-compose.infra.yaml \
+            -f dev_scripts/docker-compose.monitoring.yaml \
+            -f dev_scripts/docker-compose.apps.yaml ps
+
+      - name: Run health checks
+        run: |
+          docker compose -f dev_scripts/docker-compose.base.yaml \
+            -f dev_scripts/docker-compose.infra.yaml \
+            -f dev_scripts/docker-compose.monitoring.yaml \
+            -f dev_scripts/docker-compose.apps.yaml ps
+          docker inspect --format='{{json .State.Health}}' $(docker ps -q)
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose -f dev_scripts/docker-compose.base.yaml \
+            -f dev_scripts/docker-compose.infra.yaml \
+            -f dev_scripts/docker-compose.monitoring.yaml \
+            -f dev_scripts/docker-compose.apps.yaml down
