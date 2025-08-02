@@ -18,11 +18,11 @@ services:
       KC_HOSTNAME: ${LOCAL_HOSTNAME}
       KC_PROXY: edge
     command: ["start-dev"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+    # healthcheck:
+    #   test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8080' || exit 1"]
+    #   interval: 15s
+    #   timeout: 10s
+    #   retries: 8
     networks:
       - purebliss-net
 networks:

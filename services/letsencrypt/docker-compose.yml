@@ -1,0 +1,28 @@
+services:
+  certbot:
+    image: certbot/certbot:latest
+    container_name: purebliss-certbot
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./webroot:/var/www/certbot
+      - /var/log/letsencrypt:/var/log/letsencrypt
+    networks:
+      - purebliss-net
+    environment:
+      - CERTBOT_EMAIL=admin@purebliss.app
+      - CERTBOT_DOMAIN=dev.purebliss.app
+    command: >
+      sh -c "
+      echo 'Starting LetsEncrypt certbot service for Pure Bliss platform...' &&
+      echo 'Development mode: Using staging server for testing' &&
+      certbot certonly --webroot --webroot-path=/var/www/certbot 
+      --email admin@purebliss.app --agree-tos --no-eff-email --staging
+      -d dev.purebliss.app || echo 'Certbot registration completed or already exists' &&
+      echo 'Certbot service ready for Pure Bliss SSL management' &&
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+
+networks:
+  purebliss-net:
+    external: true

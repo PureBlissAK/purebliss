@@ -50,34 +50,33 @@ http {
     limit_req_zone $binary_remote_addr zone=login:10m rate=5r/s;
 
     # Upstream definitions for services
-    # Note: Comment/uncomment based on which services are running
-    # upstream keycloak {
-    #     server purebliss-keycloak:8080;
-    # }
-
-    # upstream grafana {
-    #     server purebliss-grafana:3000;
-    # }
-
-    # upstream plane {
-    #     server purebliss-plane:8081;
-    # }
-
-    upstream vault {
-        server purebliss-vault:18200;
+    upstream keycloak {
+        server purebliss-keycloak:8080;
     }
 
-    # upstream prometheus {
-    #     server purebliss-prometheus:9090;
-    # }
+    upstream grafana {
+        server purebliss-grafana:3000;
+    }
 
-    # upstream loki {
-    #     server purebliss-loki:3100;
-    # }
+    upstream plane {
+        server purebliss-plane:8081;
+    }
 
-    # upstream codeserver {
-    #     server purebliss-code-server:8443;
-    # }
+    upstream vault {
+        server purebliss-vault:8200;
+    }
+
+    upstream prometheus {
+        server purebliss-prometheus:9090;
+    }
+
+    upstream loki {
+        server purebliss-loki:3100;
+    }
+
+    upstream codeserver {
+        server purebliss-code-server:8443;
+    }
 
     upstream postgres {
         server purebliss-postgres:5432;

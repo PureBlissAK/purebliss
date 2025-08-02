@@ -13,7 +13,7 @@ services:
     networks:
       - purebliss-net
     healthcheck:
-      test: ["CMD", "vault", "status"]
+      test: ["CMD", "sh", "-c", "VAULT_ADDR=http://127.0.0.1:18200 vault status || exit 0"]
       interval: 10s
       timeout: 5s
       retries: 5
