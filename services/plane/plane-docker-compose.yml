@@ -1,30 +1,21 @@
 version: '3.8'
 services:
   purebliss-plane:
-    image: plane/quickstart:latest
+    image: vikunja/vikunja:latest
     container_name: purebliss-plane
     restart: unless-stopped
     ports:
       - "8081:3456"
-    entrypoint: ["/opt/vault-entrypoint.sh", "/docker-entrypoint.sh"]
-    volumes:
-      - ${PLANE_DATA_PATH}:/app/plane/files
-      - ./vault-entrypoint.sh:/opt/vault-entrypoint.sh:ro
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/plane
-      REDIS_URL: redis://purebliss-redis:6379
-      PLANE_SECRET_KEY: ${PLANE_SECRET_KEY:-changeme-secret-key}
-      PLANE_DB_NAME: plane
-      PLANE_DB_USER: ${POSTGRES_USER}
-      PLANE_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      PLANE_DB_HOST: ${POSTGRES_HOST}
-      PLANE_DB_PORT: ${POSTGRES_PORT}
-      WEB_URL: https://dev.purebliss.app/plane
-      VAULT_ADDR: ${VAULT_ADDR:-http://vault:8200}
-      VAULT_TOKEN: ${VAULT_TOKEN}
-    depends_on:
-      - purebliss-postgres
-      - purebliss-redis
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_HOST: ${POSTGRES_HOST}
+      VIKUNJA_DATABASE_PORT: ${POSTGRES_PORT}
+      VIKUNJA_DATABASE_DATABASE: ${POSTGRES_DB}
+      VIKUNJA_DATABASE_USER: ${POSTGRES_USER}
+      VIKUNJA_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      VIKUNJA_SERVICE_FRONTENDURL: https://dev.purebliss.app/plane
+    volumes:
+      - ${PLANE_DATA_PATH}:/app/vikunja/files
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3456/health"]
       interval: 10s

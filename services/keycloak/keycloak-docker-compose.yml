@@ -6,27 +6,29 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
-    entrypoint: ["/opt/vault-entrypoint.sh", "start-dev"]
+    entrypoint: ["/opt/vault-entrypoint.sh"]
     volumes:
       - ./vault-entrypoint.sh:/opt/vault-entrypoint.sh:ro
     environment:
-      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
-      KC_DB: postgres
-      KC_DB_URL_HOST: ${POSTGRES_HOST}
-      KC_DB_URL_PORT: ${POSTGRES_PORT}
-      KC_DB_URL_DATABASE: ${POSTGRES_DB}
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_HOSTNAME: ${LOCAL_HOSTNAME}
-      KC_PROXY: edge
-      VAULT_ADDR: ${VAULT_ADDR:-http://vault:8200}
+      # Vault settings for credential fetch
+      VAULT_ADDR: ${VAULT_ADDR:-http://purebliss-vault:8200}
       VAULT_TOKEN: ${VAULT_TOKEN}
-    depends_on:
-      - purebliss-postgres
+      # PostgreSQL connection settings for Vault script
+      POSTGRES_HOST: purebliss-postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: keycloak
+      POSTGRES_DB: keycloak
+      # Keycloak admin user, password fetched by entrypoint
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:-admin}
+      # Proxy and hostname
+      KC_HOSTNAME: dev.purebliss.app
+      KC_PROXY: edge
+    depends_on: []
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "curl", "-s", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - purebliss-net
 networks:

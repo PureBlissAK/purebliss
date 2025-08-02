@@ -6,14 +6,12 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    entrypoint: ["/opt/vault-entrypoint.sh"]
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - ${REDIS_DATA_PATH}:/data
       - ${REDIS_LOG_PATH}:/var/log/redis/redis.log
-      - ./vault-entrypoint.sh:/opt/vault-entrypoint.sh:ro
     environment:
-      - VAULT_ADDR=${VAULT_ADDR:-http://vault:8200}
-      - VAULT_TOKEN=${VAULT_TOKEN}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
