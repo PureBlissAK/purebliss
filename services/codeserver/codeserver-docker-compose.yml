@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  purebliss-codeserver:
+    image: codercom/code-server:4.20.0
+    container_name: purebliss-codeserver
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+    environment:
+      - PASSWORD=changeme
+    volumes:
+      - ${CODESERVER_DATA_PATH}:/home/coder/project
+      - ${CODESERVER_LOG_PATH}:/var/log/codeserver/codeserver.log
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8443"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - purebliss-net
+networks:
+  purebliss-net:
+    external: true
