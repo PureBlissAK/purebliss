@@ -23,6 +23,7 @@ services:
       # Proxy and hostname
       KC_HOSTNAME: dev.purebliss.app
       KC_PROXY: edge
+      KC_HTTP_RELATIVE_PATH: /auth
     depends_on: []
     healthcheck:
       test: ["CMD", "curl", "-s", "http://localhost:8080/"]
