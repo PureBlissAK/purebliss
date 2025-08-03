@@ -10,6 +10,7 @@ services:
       - /srv/nginx/certs:/etc/nginx/certs:ro
       - ${RAID0_MOUNT}/nginx/html:/usr/share/nginx/html:ro
       - /opt/pure-bliss-dev/shared/configs/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/dev-purebliss/web:/opt/dev-purebliss/web:ro
     env_file:
       - /opt/my-secure-ha-stack/config.env
     networks:
