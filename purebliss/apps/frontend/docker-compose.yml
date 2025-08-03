@@ -1,0 +1,59 @@
+
+version: '3.8'
+services:
+  metro:
+    build: .
+    container_name: purebliss-frontend-metro
+    command: ["npm", "start"]
+    ports:
+      - "8081:8081" # Metro bundler
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+    networks:
+      - purebliss-net
+
+  static:
+    build: .
+    container_name: purebliss-frontend-static
+    command: ["npm", "run", "static"]
+    ports:
+      - "19006:19006" # Expo web development server
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=production
+    networks:
+      - purebliss-net
+
+  test:
+    build: .
+    container_name: purebliss-frontend-test
+    command: ["npm", "run", "test:watch"]
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    networks:
+      - purebliss-net
+
+
+  mock-api:
+    build: .
+    container_name: purebliss-frontend-mock-api
+    command: ["npm", "run", "mock-api"]
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - purebliss-net
+
+networks:
+  purebliss-net:
+    external: true
