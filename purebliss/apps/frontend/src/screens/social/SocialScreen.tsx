@@ -98,7 +98,7 @@ const FALLBACK_IMAGE = 'https://via.placeholder.com/400x180?text=Image+Unavailab
 const PostItem = React.memo(({ post, onShare }: { post: InstagramPost; onShare: (post: InstagramPost) => void }) => {
   const [imgError, setImgError] = useState(false);
   return (
-    <View style={styles.postCard} testID={`post-card-${post.id}`}> 
+    <View style={styles.postCard} testID={`post-card-${post.id}`}>
       <View style={styles.postHeader}>
         <Image
           source={{ uri: post.avatar }}
@@ -196,7 +196,7 @@ const SocialScreen: React.FC = () => {
   // Loading and empty states
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}> 
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text>Loading social feed...</Text>
       </View>
     );

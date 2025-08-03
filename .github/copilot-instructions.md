@@ -1,3 +1,39 @@
+# Nginx & Let’s Encrypt Integration: Pure Bliss Best Practices
+
+## Key Lessons & Troubleshooting Checklist
+
+1. **Always Reference the Correct Certificate Files**
+   - For production, use `fullchain.pem` and `privkey.pem` from Let’s Encrypt.
+   - Remove or backup any self-signed certs from `/etc/nginx/certs/` to avoid accidental use.
+
+2. **Config File Consistency**
+   - Ensure `/opt/pure-bliss-dev/shared/configs/nginx/conf.d/default.conf` is updated and saved before restarting nginx.
+   - If changes don’t take effect, verify the config inside the running container (`cat /etc/nginx/conf.d/default.conf`).
+
+3. **Container Volume Mounts**
+   - Certs and config must be mounted into the nginx container as read-only volumes.
+   - If you update certs or config on the host, restart the nginx container to reload them.
+
+4. **Verifying Live Certificate**
+   - Use `openssl s_client -connect dev.purebliss.app:443 -servername dev.purebliss.app | openssl x509 -noout -issuer -subject` to confirm which cert is being served.
+   - If the issuer is not Let’s Encrypt, check for old certs or config path errors.
+
+5. **Let’s Encrypt Directory Structure**
+   - Host: `/mnt/raid0/nginx/certs/live/dev.purebliss.app/`
+   - Container: `/etc/nginx/certs/`
+   - Mount or copy `fullchain.pem` and `privkey.pem` to the container certs directory.
+
+6. **Browser Trust**
+   - Browsers will only trust the site if the Let’s Encrypt cert is served and the domain is publicly routable.
+   - If you see `ERR_CERT_AUTHORITY_INVALID`, nginx is likely serving a self-signed or wrong cert.
+
+7. **Debugging Steps**
+   - Check config and certs inside the container, not just on the host.
+   - Remove or backup old certs to avoid confusion.
+   - Restart the nginx container after any cert or config change.
+
+> **Pro Tip:** If you’re stuck, always check the live config and certs inside the running container. Most issues are due to stale mounts, unsaved files, or leftover self-signed certs.
+
 GitHub Copilot Instructions for Pure Bliss Development - Microservices First
 This document outlines the guidelines for using Copilot Enterprise within the pure-bliss ecosystem, ensuring consistency, security, and unwavering adherence to our elite standards of modularity and microservices architecture. Copilot is trained on all Pure Bliss repositories and implicitly understands the distinct boundaries and responsibilities of each service.
 

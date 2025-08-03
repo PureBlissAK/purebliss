@@ -112,7 +112,7 @@ tmux new-session -s vault-management
 # Window 1: Vault Server Logs
 # Window 2: Configuration Management
 
-# Database Management  
+# Database Management
 tmux new-session -s database-management
 # Window 0: Database Agent (Claude)
 # Window 1: PostgreSQL Logs

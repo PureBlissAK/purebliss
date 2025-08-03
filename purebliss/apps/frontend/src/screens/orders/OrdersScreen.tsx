@@ -62,7 +62,7 @@ const OrderItem = React.memo(({ order, onCancel, onReorder }: {
   onCancel: (id: string) => void;
   onReorder: (id: string) => void;
 }) => (
-  <View style={styles.orderCard} testID={`order-card-${order.id}`}> 
+  <View style={styles.orderCard} testID={`order-card-${order.id}`}>
     <View style={styles.orderHeader}>
       <Text style={styles.orderId}>Order #{order.id}</Text>
       <Text style={styles.orderDate}>{order.date}</Text>
@@ -133,7 +133,7 @@ const OrdersScreen: React.FC = () => {
 
   if (orders.length === 0) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}> 
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text>No orders found.</Text>
       </View>
     );

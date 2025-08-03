@@ -135,13 +135,13 @@ const ProfileScreen: React.FC = () => {
     </View>
   );
 
-  const MenuItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    onPress, 
+  const MenuItem = ({
+    icon,
+    title,
+    subtitle,
+    onPress,
     showArrow = true,
-    rightComponent 
+    rightComponent
   }: {
     icon: string;
     title: string;
@@ -165,12 +165,12 @@ const ProfileScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  const ToggleMenuItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    value, 
-    onToggle 
+  const ToggleMenuItem = ({
+    icon,
+    title,
+    subtitle,
+    value,
+    onToggle
   }: {
     icon: string;
     title: string;

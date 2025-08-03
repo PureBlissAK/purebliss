@@ -1,0 +1,16 @@
+vendor/
+node_modules/
+.env
+.git
+.gitignore
+tests/coverage/
+.DS_Store
+.idea/
+.vscode/
+composer.lock
+npm-debug.log
+storage/*.key
+storage/*.log
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*

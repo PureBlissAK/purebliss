@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: purebliss-backend:latest
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: purebliss
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      SANCTUM_STATEFUL_DOMAINS: dev.purebliss.app
+      KEYCLOAK_URL: https://dev.purebliss.app/keycloak
+      VAULT_ADDR: https://vault.purebliss.app:8200
+    volumes:
+      - ./:/var/www:rw
+      - ../logs:/var/www/storage/logs:rw
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - purebliss-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+
+networks:
+  purebliss-net:
+    external: true

@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./repo/backend
+      dockerfile: Dockerfile
+    image: purebliss-backend:latest
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - APP_KEY=base64:GENERATE_THIS
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=purebliss
+      - DB_USERNAME=backend
+      - DB_PASSWORD=use_vault_dynamic_secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - SANCTUM_STATEFUL_DOMAINS=dev.purebliss.app
+      - KEYCLOAK_URL=https://dev.purebliss.app/keycloak
+      - KEYCLOAK_REALM=planerealm
+      - KEYCLOAK_CLIENT_ID=purebliss-backend
+      - KEYCLOAK_CLIENT_SECRET=use_vault_dynamic_secret
+      - LOG_CHANNEL=stack
+      - PROMETHEUS_PUSHGATEWAY_URL=http://prometheus:9091
+    networks:
+      - purebliss-net
+    depends_on:
+      - postgres
+      - redis
+      - keycloak
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./repo/backend:/var/www/html:ro
+      - ./logs:/var/www/html/storage/logs
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=purebliss
+      - POSTGRES_USER=backend
+      - POSTGRES_PASSWORD=use_vault_dynamic_secret
+    networks:
+      - purebliss-net
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backend"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    container_name: redis
+    image: redis:7
+    restart: unless-stopped
+    networks:
+      - purebliss-net
+    volumes:
+      - ./data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:24.0.5
+    restart: unless-stopped
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=use_vault_dynamic_secret
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=use_vault_dynamic_secret
+      - KC_HOSTNAME=dev.purebliss.app
+      - KC_PROXY=edge
+    networks:
+      - purebliss-net
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  purebliss-net:
+    external: true

@@ -71,34 +71,34 @@ create_agent_session() {
     local session_name="$1"
     local working_dir="$2"
     local agent_spec="$3"
-    
+
     log "Creating session: $session_name"
-    
+
     if session_exists "$session_name"; then
         warn "Session $session_name already exists. Skipping creation."
         return
     fi
-    
+
     # Create tmux session
     tmux new-session -d -s "$session_name" -c "$working_dir"
-    
+
     # Create additional windows
     tmux new-window -t "$session_name" -n "Logs" -c "$working_dir"
     tmux new-window -t "$session_name" -n "Monitoring" -c "$working_dir"
     tmux new-window -t "$session_name" -n "Shell" -c "$working_dir"
-    
+
     # Switch back to main window
     tmux select-window -t "$session_name":0
-    
+
     success "Session $session_name created successfully"
-    
+
     # Start Claude in the main window
     log "Initializing Claude agent in $session_name..."
     tmux send-keys -t "$session_name":0 "claude" Enter
-    
+
     # Wait for Claude to initialize
     sleep 5
-    
+
     # Send agent specification if provided
     if [[ -n "$agent_spec" && -f "$agent_spec" ]]; then
         log "Briefing agent with specification: $agent_spec"
@@ -111,7 +111,7 @@ Current working directory: $working_dir
 Environment: $(basename "$ENVIRONMENT_PATH")
 
 First, analyze your current environment and report your status."
-        
+
         "${ORCHESTRATOR_PATH}/send-claude-message.sh" "$session_name:0" "$briefing_message"
         success "Agent briefed successfully"
     fi
@@ -122,7 +122,7 @@ schedule_check_ins() {
     local session_name="$1"
     local interval="$2"
     local note="$3"
-    
+
     log "Scheduling check-ins for $session_name every $interval minutes"
     cd "$ORCHESTRATOR_PATH"
     ./schedule_with_note.sh "$interval" "$note" "$session_name:0"

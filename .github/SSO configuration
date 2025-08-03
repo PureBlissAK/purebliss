@@ -1,0 +1,146 @@
+Instructions for Copilot: Keycloak Application Integration
+Goal: This guide provides specific configuration instructions for popular services (Codeserver, Vault, Grafana, and Vikunja), assuming a foundational setup where Google Workspace is the primary Identity Provider (IdP) and Keycloak acts as an Identity Broker for dev.purebliss.app. This setup ensures all user identities are managed centrally in Google Workspace and all services leverage a single sign-on experience.
+
+Overview
+To integrate each service, you will first create a dedicated OpenID Connect (OIDC) Client within Keycloak. Keycloak will then handle the authentication request from the service, redirecting users to Google Workspace for login if necessary. The service applications do not need to know about Google Workspace directly; they only interact with Keycloak.
+
+Step 1: Create a Keycloak Client for each Service
+For each application you want to integrate, follow these steps in your Keycloak Admin Console:
+
+Navigate to Clients: Go to Clients in your Keycloak realm.
+
+Create a New Client: Click Create and configure the following:
+
+Client ID: A unique identifier for the service (e.g., codeserver-client, vault-client, grafana-client, vikunja-client).
+
+Client Protocol: openid-connect.
+
+Access Type: confidential for server-side applications.
+
+Configure Settings: After creation, go to the Settings tab.
+
+Root URL: The base URL of the application (e.g., https://dev.purebliss.app/codeserver).
+
+Valid Redirect URIs: The specific endpoint where the application receives the authentication callback.
+
+Codeserver: https://dev.purebliss.app/codeserver/oauth2/callback
+
+Vault: https://dev.purebliss.app/vault/ui/auth/oidc/callback
+
+Grafana: https://dev.purebliss.app/grafana/login/generic_oauth
+
+Vikunja: https://dev.purebliss.app/vikunja/api/v1/auth/oidc/callback
+
+Credentials: Go to the Credentials tab and copy the generated Client Secret. You will need this for the application's configuration.
+
+Step 2: Codeserver Integration
+This guide assumes you are using oauth2_proxy to secure Codeserver. This proxy will handle the OIDC authentication flow with Keycloak.
+
+Configuration (config.env or docker-compose.yml)
+OAUTH2_PROXY_CLIENT_ID=<your-codeserver-client-id>
+OAUTH2_PROXY_CLIENT_SECRET=<your-codeserver-client-secret>
+OAUTH2_PROXY_OIDC_ISSUER_URL=https://<your-keycloak-domain>/realms/<your-realm-name>
+OAUTH2_PROXY_REDIRECT_URL=https://dev.purebliss.app/codeserver/oauth2/callback
+OAUTH2_PROXY_PROVIDER=oidc
+OAUTH2_PROXY_WHITELIST_DOMAINS=.dev.purebliss.app
+
+Note: The OAUTH2_PROXY_OIDC_ISSUER_URL is the base URL of your Keycloak realm. oauth2_proxy will automatically discover the necessary endpoints from this URL.
+
+Step 3: HashiCorp Vault Integration
+Vault's OIDC Auth Method allows users to authenticate via Keycloak. This setup is ideal for enforcing access policies based on Google Workspace group memberships.
+
+Configuration (via Vault CLI)
+Enable OIDC Auth Method:
+
+vault auth enable oidc
+
+Configure the Auth Method:
+
+vault write auth/oidc/config \
+    oidc_discovery_url="https://<your-keycloak-domain>/realms/<your-realm-name>" \
+    oidc_client_id="vault-client" \
+    oidc_client_secret="<your-vault-client-secret>" \
+    default_role="vault-user"
+
+Create a Role:
+
+Create a role that links a Keycloak group (which is synced from Google Workspace) to a Vault policy.
+
+vault write auth/oidc/role/vault-user \
+    groups_claim="groups" \
+    bound_groups="<your-keycloak-group-name>" \
+    policies="default" \
+    oidc_scopes="openid profile email" \
+    user_claim="sub"
+
+groups_claim="groups": This value corresponds to the claim Keycloak uses for group information, which is populated from your Google Workspace group mapping.
+
+bound_groups: This is the name of the group in Keycloak that you want to grant access to.
+
+Step 4: Grafana Integration
+Grafana's Generic OAuth feature connects to Keycloak, allowing you to use Google Workspace group memberships to automatically assign Grafana roles (Viewer, Editor, Admin).
+
+Configuration (grafana.ini)
+Add the following section to your Grafana configuration file:
+
+[auth.generic_oauth]
+name = Keycloak
+enabled = true
+allow_sign_up = true
+scopes = openid email profile
+auth_url = https://<your-keycloak-domain>/realms/<your-realm-name>/protocol/openid-connect/auth
+token_url = https://<your-keycloak-domain>/realms/<your-realm-name>/protocol/openid-connect/token
+api_url = https://<your-keycloak-domain>/realms/<your-realm-name>/protocol/openid-connect/userinfo
+client_id = grafana-client
+client_secret = <your-grafana-client-secret>
+email_attribute_path = email
+name_attribute_path = preferred_username
+
+# Optional: Map Keycloak groups to Grafana roles
+role_attribute_path = contains(groups[*], '<grafana-admin-group-name>') && 'Admin' || contains(groups[*], '<grafana-editor-group-name>') && 'Editor' || 'Viewer'
+
+role_attribute_path: This powerful JMESPath expression maps a user's groups from Keycloak (which originate from Google Workspace) to a Grafana role.
+
+Step 5: Vikunja Integration
+Vikunja can be configured to use OIDC through its config.yml file. This setup allows for user provisioning and authentication to be managed by Google Workspace.
+
+Configuration (config.yml)
+Add or modify the OIDC section in your Vikunja configuration:
+
+auth:
+  oidc:
+    enabled: true
+    provider:
+      name: "Keycloak"
+      authurl: "https://<your-keycloak-domain>/realms/<your-realm-name>/protocol/openid-connect/auth"
+      tokenurl: "https://<your-keycloak-domain>/realms/<your-realm-name>/protocol/openid-connect/token"
+      userinfourl: "https://<your-keycloak-domain>/realms/<your-realm-name>/protocol/openid-connect/userinfo"
+      clientid: "vikunja-client"
+      clientsecret: "<your-vikunja-client-secret>"
+    # Map attributes from Keycloak to Vikunja
+    attributeMapping:
+      username: "preferred_username"
+      email: "email"
+      name: "name"
+
+Vikunja's attributeMapping pulls user information from Keycloak's OIDC claims, which are populated from the Google Workspace user data.
+
+VS Code Copilot Command Reference
+# Keycloak Application Integration
+# Use this to configure SSO for your services via Keycloak (federated with Google Workspace).
+
+## Codeserver Integration
+# Action: Configure `oauth2_proxy` with Keycloak OIDC client details.
+# Redirect URI: `https://dev.purebliss.app/codeserver/oauth2/callback`
+
+## Vault Integration
+# Action: Use `vault auth enable oidc` and configure the method with Keycloak discovery URL.
+# Redirect URI: `https://dev.purebliss.app/vault/ui/auth/oidc/callback`
+
+## Grafana Integration
+# Action: Edit `grafana.ini` to enable `[auth.generic_oauth]` and map roles based on Keycloak (Google) groups.
+# Redirect URI: `https://dev.purebliss.app/grafana/login/generic_oauth`
+
+## Vikunja Integration
+# Action: Edit `config.yml` to enable `auth.oidc` with Keycloak details and attribute mapping.
+# Redirect URI: `https://dev.purebliss.app/vikunja/api/v1/auth/oidc/callback`
