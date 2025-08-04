@@ -5,15 +5,36 @@ RENEW_INTERVAL="12h"
 # Ensure log directory exists
 mkdir -p /var/log/letsencrypt
 
-# Load environment variables from .env if present
-if [ -f /opt/dev-purebliss/services/letsencrypt/.env ]; then
-  . /opt/dev-purebliss/services/letsencrypt/.env
+
+# --- Vault integration for secrets ---
+# If VAULT_ADDR and VAULT_TOKEN are set, fetch secrets from Vault KV
+if [ -n "$VAULT_ADDR" ] && [ -n "$VAULT_TOKEN" ]; then
+  echo "[$(date)] INFO: Attempting to fetch secrets from Vault..." | tee -a "$LOG_FILE"
+  export VAULT_SKIP_VERIFY=1
+  # Fetch secrets from Vault KV (assume kv v2 at secret/letsencrypt)
+  export LETSENCRYPT_EMAIL=$(vault kv get -field=email secret/letsencrypt 2>/dev/null || true)
+  export LETSENCRYPT_DOMAINS=$(vault kv get -field=domains secret/letsencrypt 2>/dev/null || true)
+  export LETSENCRYPT_WEBROOT_PATH=$(vault kv get -field=webroot_path secret/letsencrypt 2>/dev/null || true)
+fi
+
+# Fallback: Load from .env if present
+if [ -z "$LETSENCRYPT_EMAIL" ] || [ -z "$LETSENCRYPT_DOMAINS" ] || [ -z "$LETSENCRYPT_WEBROOT_PATH" ]; then
+  if [ -f /opt/dev-purebliss/services/letsencrypt/.env ]; then
+    . /opt/dev-purebliss/services/letsencrypt/.env
+  fi
+fi
+
+# Fallback: Load from config.env if present
+if [ -z "$LETSENCRYPT_EMAIL" ] || [ -z "$LETSENCRYPT_DOMAINS" ] || [ -z "$LETSENCRYPT_WEBROOT_PATH" ]; then
+  if [ -f /opt/my-secure-ha-stack/config.env ]; then
+    . /opt/my-secure-ha-stack/config.env
+  fi
 fi
 
 # Required env vars
-[ -n "$LETSENCRYPT_EMAIL" ] || { echo "LETSENCRYPT_EMAIL not set"; exit 1; }
-[ -n "$LETSENCRYPT_DOMAINS" ] || { echo "LETSENCRYPT_DOMAINS not set"; exit 1; }
-[ -n "$LETSENCRYPT_WEBROOT_PATH" ] || { echo "LETSENCRYPT_WEBROOT_PATH not set"; exit 1; }
+[ -n "$LETSENCRYPT_EMAIL" ] || { echo "LETSENCRYPT_EMAIL not set (Vault, .env, config.env)"; exit 1; }
+[ -n "$LETSENCRYPT_DOMAINS" ] || { echo "LETSENCRYPT_DOMAINS not set (Vault, .env, config.env)"; exit 1; }
+[ -n "$LETSENCRYPT_WEBROOT_PATH" ] || { echo "LETSENCRYPT_WEBROOT_PATH not set (Vault, .env, config.env)"; exit 1; }
 
 # Ensure webroot exists
 if [ ! -d "$LETSENCRYPT_WEBROOT_PATH" ]; then

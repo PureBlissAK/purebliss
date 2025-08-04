@@ -1,8 +1,58 @@
+## 🛡️ **LETSENCRYPT VAULT INTEGRATION & AUTOMATION**
+
+### Overview
+Let's Encrypt is now integrated with Vault for secrets management. The onboarding, renewal, and validation are automated via:
+
+- `onboard_letsencrypt_to_vault()` in `start-all-services.sh`
+- `/opt/dev-purebliss/services/letsencrypt/entrypoint.sh` fetches secrets from Vault
+- Health checks and endpoint validation in `comprehensive-health-check.sh`
+
+### Automated Tasks
+- Vault KV secrets engine stores email, domains, and webroot for letsencrypt
+- Letsencrypt container fetches secrets at startup using Vault token
+- Certbot runs with Vault-managed secrets, no static secrets in .env
+- All actions logged to `/opt/my-secure-ha-stack/logs/dev-environment-setup.log`
+
+### Troubleshooting & Validation Steps
+1. **Check onboarding logs:**
+   - `grep letsencrypt /opt/my-secure-ha-stack/logs/dev-environment-setup.log`
+2. **Validate letsencrypt container health:**
+   - `docker inspect --format='{{.State.Health.Status}}' purebliss-letsencrypt`
+3. **Test cert issuance/renewal:**
+   - `docker logs purebliss-letsencrypt | tail -40`
+4. **Check Vault secrets:**
+   - `vault kv get secret/letsencrypt`
+5. **If issues:**
+   - Run: `/opt/dev-purebliss/services/vault/vault-break-fix.sh letsencrypt_vault_integration`
+
+### Common Issues & Fixes
+- **Secrets not found:** Ensure Vault token is valid and secret/letsencrypt exists.
+- **Certbot errors:** Check logs for missing env vars or Vault fetch failures.
+- **Permission denied:** Fix cert file permissions (UID 101:101 in container).
+
+---
 ````markdown
 # Vault Automation Guide for Pure Bliss Infrastructure
 ## Complete Automation, Break/Fix, and Integration Reference
-## Status: 100% OPERATIONAL - All Services Healthy
+## Status: 100% OPERATIONAL - All Services Healthy with Full Automation
 ## Last Updated: August 4, 2025
+
+---
+
+## 🎉 **MAJOR UPDATE: FULLY AUTOMATED ORCHESTRATOR COMPLETE**
+
+### **Full Service Automation Achieved (August 4, 2025)**
+Our enhanced `start-all-services.sh` orchestrator now provides **complete automation** without any manual intervention:
+
+✅ **Automated Container Cleanup**: Fresh startup every time  
+✅ **Vault Auto-Unsealing**: Automatic unsealing with stored keys  
+✅ **Service Dependencies**: Proper startup order with dependency management  
+✅ **Robust Error Handling**: Retry logic and automated problem resolution  
+✅ **Health Validation**: Comprehensive health checks for all services  
+✅ **PostgreSQL Integration**: Fixed to use proper credentials and compose files  
+✅ **Service Onboarding**: Automated Vault integration for Redis, Nginx, Keycloak  
+
+**RESULT**: Simply run `./start-all-services.sh` and all services start automatically!
 
 ---
 

@@ -27,7 +27,7 @@ services:
       # Named volumes for Vault's persistent storage (Raft) and logs
       - vaultdata:/vault/data
       - vaultlogs:/vault/logs
-    
+
     command: ["vault", "server", "-config=/vault/config/vault.hcl"]
 
     cap_add:

@@ -17,6 +17,13 @@ GRANT ALL PRIVILEGES ON DATABASE vikunja TO vikunja;
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
 GRANT ALL PRIVILEGES ON DATABASE plane TO plane;
 
+-- Grant schema permissions to keycloak user
+GRANT USAGE, CREATE ON SCHEMA public TO keycloak;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO keycloak;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO keycloak;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO keycloak;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO keycloak;
+
 -- Create a dedicated user for Vault's database secrets engine
 CREATE USER vault_admin WITH ENCRYPTED PASSWORD 'vault_admin_password_123' SUPERUSER;
 

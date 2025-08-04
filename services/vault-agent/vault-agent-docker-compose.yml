@@ -31,6 +31,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 15s
+    ports:
+      - "8100:8100"
 networks:
   purebliss-net:
     external: true

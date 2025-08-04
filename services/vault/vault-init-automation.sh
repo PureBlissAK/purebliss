@@ -22,17 +22,17 @@ get_master_password() {
     echo
     read -s -p "Confirm Password: " password_confirm
     echo
-    
+
     if [[ "$password" != "$password_confirm" ]]; then
         echo "❌ Passwords do not match. Exiting."
         exit 1
     fi
-    
+
     if [[ ${#password} -lt 12 ]]; then
         echo "❌ Password must be at least 12 characters. Exiting."
         exit 1
     fi
-    
+
     # Save master password securely for automation (optional)
     echo "💾 Save master password for automated unsealing? (y/N)"
     read -p "Choice: " save_password
@@ -45,7 +45,7 @@ get_master_password() {
         echo "✅ Master password saved for automation"
         echo "[$(date)] INFO: Master password saved for Vault automation" >> "$LOG_FILE"
     fi
-    
+
     echo "$password"
 }
 
@@ -73,62 +73,62 @@ is_vault_initialized() {
 # Function to initialize Vault
 initialize_vault() {
     local master_password="$1"
-    
+
     echo "🚀 Initializing Vault with 5 key shares and threshold of 3..."
-    
+
     # Initialize Vault
     local init_response
     init_response=$(curl -sk -X POST -d '{"secret_shares": 5, "secret_threshold": 3}' "$VAULT_ADDR/v1/sys/init")
-    
+
     if [[ $? -ne 0 ]]; then
         echo "❌ Failed to initialize Vault"
         echo "[$(date)] ERROR: Vault initialization failed" >> "$LOG_FILE"
         exit 1
     fi
-    
+
     # Extract keys and root token
     local unseal_keys root_token
     unseal_keys=$(echo "$init_response" | jq -r '.keys[]' | tr '\n' '|')
     root_token=$(echo "$init_response" | jq -r '.root_token')
-    
+
     # Create secure directory
     sudo mkdir -p "$VAULT_KEYS_DIR"
     sudo chown "$USER:$USER" "$VAULT_KEYS_DIR"
     chmod 700 "$VAULT_KEYS_DIR"
-    
+
     # Encrypt and save keys
     encrypt_data "$unseal_keys" "$master_password" > "$VAULT_KEYS_FILE"
     encrypt_data "$root_token" "$master_password" > "$VAULT_ROOT_TOKEN_FILE"
-    
+
     chmod 600 "$VAULT_KEYS_FILE" "$VAULT_ROOT_TOKEN_FILE"
-    
+
     echo "✅ Vault initialized successfully!"
     echo "🔐 Unseal keys and root token encrypted and saved securely"
     echo "[$(date)] SUCCESS: Vault initialized and keys encrypted" >> "$LOG_FILE"
-    
+
     return 0
 }
 
 # Function to unseal Vault
 unseal_vault() {
     local master_password="$1"
-    
+
     echo "🔓 Unsealing Vault..."
-    
+
     if [[ ! -f "$VAULT_KEYS_FILE" ]]; then
         echo "❌ Vault keys file not found: $VAULT_KEYS_FILE"
         exit 1
     fi
-    
+
     # Decrypt unseal keys
     local unseal_keys_raw unseal_keys_array
     unseal_keys_raw=$(decrypt_data "$VAULT_KEYS_FILE" "$master_password" 2>/dev/null || {
         echo "❌ Failed to decrypt Vault keys. Wrong password?"
         exit 1
     })
-    
+
     IFS='|' read -ra unseal_keys_array <<< "$unseal_keys_raw"
-    
+
     # Unseal with first 3 keys (threshold)
     for i in {0..2}; do
         if [[ -n "${unseal_keys_array[$i]:-}" ]]; then
@@ -136,7 +136,7 @@ unseal_vault() {
             curl -sk -X POST -d "{\"key\": \"${unseal_keys_array[$i]}\"}" "$VAULT_ADDR/v1/sys/unseal" >/dev/null
         fi
     done
-    
+
     # Check if unsealed
     local status_json
     status_json=$(curl -sk "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
@@ -154,12 +154,12 @@ unseal_vault() {
 # Function to get root token
 get_root_token() {
     local master_password="$1"
-    
+
     if [[ ! -f "$VAULT_ROOT_TOKEN_FILE" ]]; then
         echo "❌ Vault root token file not found: $VAULT_ROOT_TOKEN_FILE"
         exit 1
     fi
-    
+
     decrypt_data "$VAULT_ROOT_TOKEN_FILE" "$master_password" 2>/dev/null || {
         echo "❌ Failed to decrypt root token. Wrong password?"
         exit 1
@@ -174,14 +174,14 @@ main() {
         echo "Please ensure Vault container is running first."
         exit 1
     fi
-    
+
     # Get master password
     local master_password
     master_password=$(get_master_password)
-    
+
     if is_vault_initialized; then
         echo "ℹ️  Vault is already initialized"
-        
+
         # Check if Vault is sealed
         local status_json
         status_json=$(curl -sk "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
@@ -195,26 +195,26 @@ main() {
         initialize_vault "$master_password"
         unseal_vault "$master_password"
     fi
-    
+
     # Display root token for reference
     echo ""
     echo "🔑 Root Token (for administrative tasks):"
     get_root_token "$master_password"
     echo ""
     echo "💾 Save this token securely - it's also encrypted in: $VAULT_ROOT_TOKEN_FILE"
-    
+
     # Save root token to environment for automation
     local root_token
     root_token=$(get_root_token "$master_password")
     echo "export VAULT_TOKEN='$root_token'" > "$VAULT_KEYS_DIR/vault-env.sh"
     chmod 600 "$VAULT_KEYS_DIR/vault-env.sh"
-    
+
     echo ""
     echo "🎉 Vault automation setup complete!"
     echo "📁 Encrypted files saved in: $VAULT_KEYS_DIR"
     echo "🔧 To use in scripts: source $VAULT_KEYS_DIR/vault-env.sh"
     echo ""
-    
+
     echo "[$(date)] SUCCESS: Vault automation setup completed successfully" >> "$LOG_FILE"
 }
 

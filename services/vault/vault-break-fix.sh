@@ -1,3 +1,19 @@
+function vault_letsencrypt_vault_integration_fix() {
+    log_action "Fixing Letsencrypt Vault integration..."
+    # Re-run onboarding
+    if /opt/dev-purebliss/start-all-services.sh letsencrypt >> "$LOG_FILE" 2>&1; then
+        log_success "Letsencrypt onboarding to Vault re-run successfully"
+    else
+        log_warning "Letsencrypt onboarding failed, check logs"
+    fi
+    # Validate Vault secrets
+    vault kv get secret/letsencrypt >> "$LOG_FILE" 2>&1 || log_error "Vault secret/letsencrypt missing"
+    # Validate container health
+    docker inspect --format='{{.State.Health.Status}}' purebliss-letsencrypt >> "$LOG_FILE" 2>&1
+    # Check certbot logs
+    docker logs purebliss-letsencrypt --tail 40 >> "$LOG_FILE" 2>&1
+    log_action "Letsencrypt Vault integration check complete"
+}
 function vault_nginx_pki_integration_fix() {
     log_action "Fixing Nginx Vault PKI integration..."
     # Re-run onboarding and cert renewal
@@ -25,14 +41,15 @@ function vault_nginx_pki_integration_fix() {
 #!/bin/bash
 set -euo pipefail
 
-# Vault Automated Break/Fix Script
-# Pure Bliss Development Environment
-# Integrates with start-all-services.sh for automated problem resolution
+# Vault Automated Break/Fix Script for Pure Bliss Infrastructure
+# Fully Integrated with Enhanced Orchestrator start-all-services.sh
+# Provides complete automation with intelligent problem resolution
 
 LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
 VAULT_SERVICE_DIR="/opt/dev-purebliss/services/vault"
 BREAK_FIX_REPORT="$VAULT_SERVICE_DIR/vault-break-fix-report.md"
 
+# Enhanced logging functions with timestamp and context
 function log_action() {
     echo "[$(date)] VAULT_BREAKFIX: $1" >> "$LOG_FILE"
     echo "🔧 $1"
@@ -955,6 +972,9 @@ function main() {
             ;;
         "nginx_pki_integration"|"nginx_pki"|"nginx")
             vault_nginx_pki_integration_fix
+            ;;
+        "letsencrypt_vault_integration"|"letsencrypt_vault"|"letsencrypt")
+            vault_letsencrypt_vault_integration_fix
             ;;
         "kv_secrets"|"kv"|"secrets")
             vault_kv_secrets_engine_fix
