@@ -20,16 +20,20 @@ services:
       POSTGRES_DB: keycloak
       # Keycloak admin user, password fetched by entrypoint
       KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:-admin}
+      # Pass credentials directly from environment
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-keycloak_admin_changeme}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloak_password_123}
       # Proxy and hostname
       KC_HOSTNAME: dev.purebliss.app
       KC_PROXY: edge
       KC_HTTP_RELATIVE_PATH: /auth
     depends_on: []
     healthcheck:
-      test: ["CMD", "curl", "-s", "http://localhost:8080/"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && read -t1 response <&3 && exec 3<&- && exec 3>&- || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - purebliss-net
 networks:
