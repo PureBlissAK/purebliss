@@ -1,3 +1,27 @@
+function vault_nginx_pki_integration_fix() {
+    log_action "Fixing Nginx Vault PKI integration..."
+    # Re-run onboarding and cert renewal
+    if /opt/dev-purebliss/start-all-services.sh nginx >> "$LOG_FILE" 2>&1; then
+        log_success "Nginx onboarding to Vault PKI re-run successfully"
+    else
+        log_warning "Nginx onboarding failed, check logs"
+    fi
+    # Run cert renewal script
+    if /opt/dev-purebliss/services/nginx/update_vault_certificates.sh >> "$LOG_FILE" 2>&1; then
+        log_success "Nginx Vault certificate renewed"
+    else
+        log_warning "Nginx Vault certificate renewal failed"
+    fi
+    # Validate endpoint
+    if curl -sk https://dev.purebliss.app -w '%{http_code}' | grep -q 200; then
+        log_success "Nginx HTTPS endpoint is accessible"
+    else
+        log_error "Nginx HTTPS endpoint not accessible"
+    fi
+    # Check cert details
+    docker exec purebliss-nginx openssl x509 -in /etc/nginx/certs/dev.purebliss.app/fullchain.pem -noout -issuer -subject -enddate >> "$LOG_FILE" 2>&1 || true
+    log_action "Nginx PKI integration check complete"
+}
 #!/bin/bash
 set -euo pipefail
 
@@ -12,6 +36,93 @@ BREAK_FIX_REPORT="$VAULT_SERVICE_DIR/vault-break-fix-report.md"
 function log_action() {
     echo "[$(date)] VAULT_BREAKFIX: $1" >> "$LOG_FILE"
     echo "🔧 $1"
+}
+
+function log_success() {
+    echo "[$(date)] VAULT_BREAKFIX: ✅ SUCCESS: $1" >> "$LOG_FILE"
+    echo "✅ $1"
+}
+
+function log_warning() {
+    echo "[$(date)] VAULT_BREAKFIX: ⚠️  WARNING: $1" >> "$LOG_FILE"
+    echo "⚠️  $1"
+}
+
+function log_error() {
+    echo "[$(date)] VAULT_BREAKFIX: ❌ ERROR: $1" >> "$LOG_FILE"
+    echo "❌ $1"
+}
+
+function verify_vault_ready() {
+    local max_attempts=30
+    local attempt=1
+    
+    log_action "Verifying Vault is ready for operations..."
+    
+    while [[ $attempt -le $max_attempts ]]; do
+        if curl -sk https://127.0.0.1:8200/v1/sys/health >/dev/null 2>&1; then
+            if curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
+                log_success "Vault is unsealed and ready"
+                return 0
+            else
+                log_action "Vault is sealed (attempt $attempt/$max_attempts)"
+            fi
+        else
+            log_action "Vault endpoint not accessible (attempt $attempt/$max_attempts)"
+        fi
+        
+        sleep 2
+        ((attempt++))
+    done
+    
+    log_error "Vault not ready after $max_attempts attempts"
+    return 1
+}
+
+function get_service_status() {
+    local service_name="$1"
+    
+    if docker ps | grep -q "$service_name"; then
+        local health_status
+        health_status=$(docker inspect --format='{{.State.Health.Status}}' "$service_name" 2>/dev/null || echo "no_healthcheck")
+        local container_status
+        container_status=$(docker inspect --format='{{.State.Status}}' "$service_name" 2>/dev/null || echo "unknown")
+        
+        case "$health_status" in
+            "healthy")
+                echo "✅ $service_name: healthy ($container_status)"
+                ;;
+            "unhealthy")
+                echo "❌ $service_name: unhealthy ($container_status)"
+                ;;
+            "starting")
+                echo "🔄 $service_name: starting ($container_status)"
+                ;;
+            "no_healthcheck")
+                if [[ "$container_status" == "running" ]]; then
+                    echo "✅ $service_name: running (no health check)"
+                else
+                    echo "❌ $service_name: $container_status"
+                fi
+                ;;
+            *)
+                echo "⚠️  $service_name: $health_status ($container_status)"
+                ;;
+        esac
+    else
+        echo "❌ $service_name: not running"
+    fi
+}
+
+function show_service_overview() {
+    log_action "Service Status Overview:"
+    echo "=== Pure Bliss Service Status ==="
+    get_service_status "purebliss-vault"
+    get_service_status "purebliss-vault-agent"
+    get_service_status "purebliss-postgres"
+    get_service_status "purebliss-redis"
+    get_service_status "purebliss-keycloak"
+    echo ""
 }
 
 function vault_container_startup_fix() {
@@ -290,20 +401,187 @@ function vault_redis_integration_fix() {
     log_action "Redis integration validation completed"
 }
 
+function vault_keycloak_integration_fix() {
+    log_action "Fixing Keycloak-Vault-PostgreSQL integration..."
+    
+    # Check if Keycloak container is running
+    if ! docker ps | grep -q purebliss-keycloak; then
+        log_error "Keycloak container not running - cannot validate integration"
+        return 1
+    fi
+    
+    # Check health status and fix if needed
+    local keycloak_health
+    keycloak_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-keycloak 2>/dev/null || echo "no_healthcheck")
+    
+    if [[ "$keycloak_health" == "unhealthy" ]]; then
+        log_action "Keycloak health check failing - investigating..."
+        
+        # Check if health check is using unavailable tools
+        local healthcheck_test
+        healthcheck_test=$(docker inspect --format='{{json .Config.Healthcheck.Test}}' purebliss-keycloak 2>/dev/null)
+        
+        if echo "$healthcheck_test" | grep -q "curl"; then
+            log_warning "Health check using curl (not available in container)"
+            log_action "Recommend updating docker-compose.yml health check to TCP-based method"
+            echo "   Suggested health check: exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3"
+        fi
+        
+        if echo "$healthcheck_test" | grep -q "ss"; then
+            log_warning "Health check using ss (not available in container)"
+            log_action "Recommend updating docker-compose.yml health check to TCP-based method"
+        fi
+        
+        # Try restarting the container
+        log_action "Restarting Keycloak container..."
+        docker restart purebliss-keycloak
+        sleep 30
+        
+        # Check health again
+        keycloak_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-keycloak 2>/dev/null || echo "no_healthcheck")
+        if [[ "$keycloak_health" == "healthy" ]]; then
+            log_success "Keycloak health check now passing after restart"
+        fi
+    fi
+    
+    # Ensure Vault is ready for secrets
+    if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
+        log_error "Vault is sealed - cannot validate Keycloak integration"
+        return 1
+    fi
+    
+    # Ensure PostgreSQL is running
+    if ! docker ps | grep -q purebliss-postgres; then
+        log_error "PostgreSQL container not running - Keycloak requires database"
+        return 1
+    fi
+    
+    # Test Keycloak secrets in Vault
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+        export VAULT_ADDR="https://127.0.0.1:8200"
+        export VAULT_SKIP_VERIFY=1
+        export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+        
+        # Check if Keycloak secrets exist in Vault
+        if vault kv get secret/keycloak >/dev/null 2>&1; then
+            log_success "Keycloak secrets configured in Vault"
+            
+            # Validate PostgreSQL database permissions
+            if docker exec purebliss-postgres psql -U postgres -d keycloak -c "SELECT 1" >/dev/null 2>&1; then
+                log_success "Keycloak database accessible"
+                
+                # Check keycloak user permissions
+                if docker exec purebliss-postgres psql -U postgres -d keycloak -c "\du keycloak" | grep -q keycloak; then
+                    log_success "Keycloak database user configured"
+                    
+                    # Test keycloak user can access public schema
+                    if docker exec purebliss-postgres psql -U keycloak -d keycloak -c "SELECT 1" >/dev/null 2>&1; then
+                        log_success "Keycloak user schema permissions working"
+                    else
+                        log_action "Fixing Keycloak user schema permissions..."
+                        docker exec purebliss-postgres psql -U postgres -d keycloak -c "GRANT USAGE, CREATE ON SCHEMA public TO keycloak;"
+                        docker exec purebliss-postgres psql -U postgres -d keycloak -c "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO keycloak;"
+                        log_success "Keycloak schema permissions fixed"
+                    fi
+                else
+                    log_warning "Keycloak database user not found - may need setup"
+                fi
+            else
+                log_error "Cannot access Keycloak database"
+                return 1
+            fi
+            
+            # Test Keycloak endpoint accessibility using the same method as health check
+            if docker exec purebliss-keycloak bash -c "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET / HTTP/1.1\r\nHost: localhost\r\n\r\n' >&3 && read -t1 response <&3 && exec 3<&- && exec 3>&-" >/dev/null 2>&1; then
+                log_success "Keycloak endpoint responding correctly"
+            else
+                log_warning "Keycloak endpoint not responding - checking container logs..."
+                docker logs purebliss-keycloak --tail 5
+            fi
+            
+        else
+            log_action "Keycloak secrets not configured - creating default secrets..."
+            # Enable KV v2 secrets engine if not already enabled
+            vault secrets enable -version=2 kv 2>/dev/null || true
+            
+            # Create default Keycloak secrets if missing
+            vault kv put secret/keycloak \
+                admin_password="admin123" \
+                db_password="keycloak_password" || {
+                log_error "Failed to create Keycloak secrets"
+                return 1
+            }
+            log_success "Default Keycloak secrets created successfully"
+        fi
+    else
+        log_error "Vault token not found - cannot test Keycloak integration"
+        return 1
+    fi
+    
+    log_success "Keycloak integration validation completed"
+}
+
+function vault_kv_secrets_engine_fix() {
+    log_action "Ensuring KV v2 secrets engine is enabled and functional..."
+    
+    # Ensure Vault is ready
+    if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
+        log_action "Vault is sealed - cannot configure KV secrets engine"
+        return 1
+    fi
+    
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+        export VAULT_ADDR="https://127.0.0.1:8200"
+        export VAULT_SKIP_VERIFY=1
+        export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+        
+        # Check if KV v2 is enabled
+        if ! vault secrets list | grep -q "^secret/"; then
+            log_action "Enabling KV v2 secrets engine..."
+            vault secrets enable -version=2 kv || {
+                log_action "Failed to enable KV v2 secrets engine"
+                return 1
+            }
+            log_action "KV v2 secrets engine enabled successfully"
+        else
+            log_action "KV v2 secrets engine already enabled"
+        fi
+        
+        # Test KV functionality with a test secret
+        if ! vault kv get secret/test >/dev/null 2>&1; then
+            log_action "Testing KV v2 functionality..."
+            vault kv put secret/test test_key="test_value" || {
+                log_action "KV v2 test write failed"
+                return 1
+            }
+            
+            if vault kv get secret/test | grep -q "test_value"; then
+                log_action "KV v2 functionality confirmed"
+                vault kv delete secret/test 2>/dev/null || true
+            else
+                log_action "KV v2 test read failed"
+                return 1
+            fi
+        fi
+        
+    else
+        log_action "Vault token not found - cannot test KV secrets engine"
+        return 1
+    fi
+    
+    log_action "KV v2 secrets engine validation completed"
+}
+
 function vault_comprehensive_diagnostic() {
     log_action "Running comprehensive Vault diagnostic..."
     
+    # Service status overview
+    show_service_overview
+    
     # Container status
     echo "=== Container Status ==="
-    docker ps | grep vault || echo "No Vault containers running"
-    
-    # Health status
-    echo "=== Health Status ==="
-    local vault_health agent_status
-    vault_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-vault 2>/dev/null || echo "unknown")
-    agent_status=$(docker inspect --format='{{.State.Status}}' purebliss-vault-agent 2>/dev/null || echo "unknown")
-    echo "Vault Health: $vault_health"
-    echo "Agent Status: $agent_status"
+    docker ps | grep -E "(purebliss-vault|purebliss-redis|purebliss-postgres|purebliss-keycloak)" || echo "No Pure Bliss containers running"
+    echo ""
     
     # Network connectivity
     echo "=== Network Tests ==="
@@ -318,6 +596,23 @@ function vault_comprehensive_diagnostic() {
     else
         echo "❌ Vault Agent port 8100 not accessible"
     fi
+    
+    # Check if purebliss-net network exists
+    if docker network ls | grep -q purebliss-net; then
+        echo "✅ purebliss-net network exists"
+    else
+        echo "❌ purebliss-net network missing"
+    fi
+    echo ""
+    
+    # Vault status check
+    echo "=== Vault Status ==="
+    if curl -sk https://127.0.0.1:8200/v1/sys/health 2>/dev/null; then
+        echo ""
+    else
+        echo "❌ Vault API not responding"
+    fi
+    echo ""
     
     # PostgreSQL Integration Check
     echo "=== PostgreSQL Integration ==="
@@ -381,6 +676,76 @@ function vault_comprehensive_diagnostic() {
         echo "⚠️  Redis container not running - integration not testable"
     fi
     
+    # Keycloak Integration Check
+    echo "=== Keycloak Integration ==="
+    if docker ps | grep -q purebliss-keycloak; then
+        echo "✅ Keycloak container running"
+        
+        # Check Keycloak health
+        local keycloak_health
+        keycloak_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-keycloak 2>/dev/null || echo "no_healthcheck")
+        echo "Keycloak Health: $keycloak_health"
+        
+        # Check Vault KV secrets for Keycloak
+        if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+            export VAULT_ADDR="https://127.0.0.1:8200"
+            export VAULT_SKIP_VERIFY=1
+            export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+            
+            # Test KV v2 secrets engine
+            if vault secrets list | grep -q "^secret/"; then
+                echo "✅ KV v2 secrets engine enabled"
+                
+                # Test Keycloak secrets
+                if vault kv get secret/keycloak >/dev/null 2>&1; then
+                    echo "✅ Keycloak secrets configured in Vault"
+                    
+                    # Test Keycloak database access
+                    if docker exec purebliss-postgres psql -U keycloak -d keycloak -c "SELECT 1" >/dev/null 2>&1; then
+                        echo "✅ Keycloak database user access working"
+                    else
+                        echo "❌ Keycloak database user access failed"
+                    fi
+                    
+                    # Test Keycloak endpoint
+                    if curl -s "http://localhost:8080/" | grep -qE "(Keycloak|Resource not found)"; then
+                        echo "✅ Keycloak endpoint responding"
+                    else
+                        echo "❌ Keycloak endpoint not responding"
+                    fi
+                else
+                    echo "❌ Keycloak secrets not configured in Vault"
+                fi
+            else
+                echo "❌ KV v2 secrets engine not enabled"
+            fi
+        else
+            echo "⚠️  Vault token not available for Keycloak testing"
+        fi
+    else
+        echo "⚠️  Keycloak container not running - integration not testable"
+    fi
+    
+    # KV Secrets Engine Check
+    echo "=== KV v2 Secrets Engine ==="
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+        export VAULT_ADDR="https://127.0.0.1:8200"
+        export VAULT_SKIP_VERIFY=1
+        export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+        
+        if vault secrets list | grep -q "^secret/"; then
+            echo "✅ KV v2 secrets engine enabled"
+            
+            # List configured secrets
+            echo "Configured secrets:"
+            vault kv list secret/ 2>/dev/null | grep -v "^Keys$" | grep -v "^----$" | sed 's/^/  - /' || echo "  (no secrets configured)"
+        else
+            echo "❌ KV v2 secrets engine not enabled"
+        fi
+    else
+        echo "⚠️  Vault token not available for KV testing"
+    fi
+    
     # File system checks
     echo "=== File System Checks ==="
     if [[ -f "$VAULT_SERVICE_DIR/vault.hcl" ]]; then
@@ -391,18 +756,74 @@ function vault_comprehensive_diagnostic() {
     
     if [[ -f "$VAULT_SERVICE_DIR/certs/selfsigned/privkey.pem" ]]; then
         echo "✅ TLS certificates exist"
+        # Check certificate expiration
+        local cert_expiry
+        cert_expiry=$(openssl x509 -in "$VAULT_SERVICE_DIR/certs/selfsigned/fullchain.pem" -noout -enddate 2>/dev/null | cut -d= -f2)
+        echo "   Certificate expires: $cert_expiry"
     else
         echo "❌ TLS certificates missing"
     fi
     
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+        echo "✅ Vault token file exists"
+    else
+        echo "❌ Vault token file missing"
+    fi
+    echo ""
+    
     # Recent logs
     echo "=== Recent Logs ==="
-    echo "Vault Server:"
-    docker logs purebliss-vault --tail 5 2>/dev/null || echo "No logs available"
-    echo "Vault Agent:"
-    docker logs purebliss-vault-agent --tail 5 2>/dev/null || echo "No logs available"
+    echo "Vault Server (last 5 lines):"
+    docker logs purebliss-vault --tail 5 2>/dev/null | sed 's/^/  /' || echo "  No logs available"
+    echo ""
+    echo "Vault Agent (last 5 lines):"
+    docker logs purebliss-vault-agent --tail 5 2>/dev/null | sed 's/^/  /' || echo "  No logs available"
+    echo ""
     
-    log_action "Comprehensive diagnostic completed"
+    # Integration summary
+    echo "=== Integration Summary ==="
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+        export VAULT_ADDR="https://127.0.0.1:8200"
+        export VAULT_SKIP_VERIFY=1
+        export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+        
+        # Count enabled secrets engines
+        local secrets_count
+        secrets_count=$(vault secrets list 2>/dev/null | grep -c "/" || echo "0")
+        echo "Enabled secrets engines: $secrets_count"
+        
+        # Count configured secrets
+        local configured_secrets
+        configured_secrets=$(vault kv list secret/ 2>/dev/null | grep -v "^Keys$" | grep -v "^----$" | wc -l || echo "0")
+        echo "Configured KV secrets: $configured_secrets"
+        
+        # Service integration status
+        local postgres_integrated redis_integrated keycloak_integrated
+        postgres_integrated="❌"
+        redis_integrated="❌"
+        keycloak_integrated="❌"
+        
+        if vault read database/config/postgres-app >/dev/null 2>&1; then
+            postgres_integrated="✅"
+        fi
+        
+        if vault read redis/config/redis >/dev/null 2>&1; then
+            redis_integrated="✅"
+        fi
+        
+        if vault kv get secret/keycloak >/dev/null 2>&1; then
+            keycloak_integrated="✅"
+        fi
+        
+        echo "PostgreSQL Integration: $postgres_integrated"
+        echo "Redis Integration: $redis_integrated"
+        echo "Keycloak Integration: $keycloak_integrated"
+    else
+        echo "⚠️  Cannot check integrations - Vault token unavailable"
+    fi
+    echo ""
+    
+    log_success "Comprehensive diagnostic completed"
 }
 
 function vault_emergency_rebuild() {
@@ -428,7 +849,78 @@ function vault_emergency_rebuild() {
     # Verify
     vault_comprehensive_diagnostic
     
-    log_action "Emergency rebuild completed"
+    log_success "Emergency rebuild completed"
+}
+
+function vault_auto_recovery() {
+    log_action "Starting automatic service recovery..."
+    
+    # Service status check
+    show_service_overview
+    
+    # Step 1: Check if any containers are missing
+    local missing_services=()
+    
+    if ! docker ps -a | grep -q purebliss-vault; then
+        missing_services+=("vault")
+    fi
+    
+    if ! docker ps -a | grep -q purebliss-vault-agent; then
+        missing_services+=("vault-agent")
+    fi
+    
+    if [[ ${#missing_services[@]} -gt 0 ]]; then
+        log_action "Missing containers detected: ${missing_services[*]}"
+        vault_container_startup_fix
+    fi
+    
+    # Step 2: Check for unhealthy containers
+    local vault_health
+    vault_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-vault 2>/dev/null || echo "unknown")
+    
+    if [[ "$vault_health" == "unhealthy" ]]; then
+        log_action "Vault container unhealthy - attempting recovery..."
+        vault_permissions_fix
+        vault_tls_config_fix
+        docker restart purebliss-vault
+        sleep 10
+    fi
+    
+    # Step 3: Verify Vault is accessible
+    if ! verify_vault_ready; then
+        log_warning "Vault not ready - applying comprehensive fixes..."
+        vault_network_fix
+        vault_permissions_fix
+        vault_tls_config_fix
+        vault_container_startup_fix
+        
+        # Give it another chance
+        if ! verify_vault_ready; then
+            log_error "Auto-recovery failed - manual intervention may be required"
+            return 1
+        fi
+    fi
+    
+    # Step 4: Ensure KV secrets engine is working
+    vault_kv_secrets_engine_fix
+    
+    # Step 5: Test integrations
+    if docker ps | grep -q purebliss-postgres; then
+        vault_postgresql_integration_fix || log_warning "PostgreSQL integration issues detected"
+    fi
+    
+    if docker ps | grep -q purebliss-redis; then
+        vault_redis_integration_fix || log_warning "Redis integration issues detected"
+    fi
+    
+    if docker ps | grep -q purebliss-keycloak; then
+        vault_keycloak_integration_fix || log_warning "Keycloak integration issues detected"
+    fi
+    
+    log_success "Automatic service recovery completed"
+    
+    # Final status check
+    show_service_overview
 }
 
 function main() {
@@ -458,20 +950,38 @@ function main() {
         "redis_integration"|"redis")
             vault_redis_integration_fix
             ;;
+        "keycloak_integration"|"keycloak")
+            vault_keycloak_integration_fix
+            ;;
+        "nginx_pki_integration"|"nginx_pki"|"nginx")
+            vault_nginx_pki_integration_fix
+            ;;
+        "kv_secrets"|"kv"|"secrets")
+            vault_kv_secrets_engine_fix
+            ;;
         "diagnostic"|"diag")
             vault_comprehensive_diagnostic
             ;;
         "emergency"|"rebuild")
             vault_emergency_rebuild
             ;;
+        "auto_recovery"|"auto"|"recovery")
+            vault_auto_recovery
+            ;;
+        "status"|"overview")
+            show_service_overview
+            ;;
         "all"|"comprehensive")
             vault_network_fix
             vault_permissions_fix
             vault_tls_config_fix
             vault_agent_config_fix
+            vault_kv_secrets_engine_fix
             vault_container_startup_fix
             vault_postgresql_integration_fix
             vault_redis_integration_fix
+            vault_keycloak_integration_fix
+            vault_nginx_pki_integration_fix
             sleep 10
             vault_comprehensive_diagnostic
             ;;
@@ -486,7 +996,12 @@ function main() {
             echo "  agent_config        - Fix Vault Agent configuration"
             echo "  postgresql_integration - Fix PostgreSQL database integration"
             echo "  redis_integration   - Fix Redis integration and validation"
+            echo "  keycloak_integration - Fix Keycloak-Vault-PostgreSQL integration"
+            echo "  nginx_pki_integration - Fix Nginx Vault PKI onboarding and cert renewal"
+            echo "  kv_secrets          - Fix KV v2 secrets engine configuration"
             echo "  diagnostic          - Run comprehensive diagnostic"
+            echo "  auto_recovery       - Intelligent automatic service recovery"
+            echo "  status              - Show service status overview"
             echo "  emergency           - Emergency rebuild (stops/rebuilds everything)"
             echo "  all                 - Apply all fixes"
             exit 1

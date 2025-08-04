@@ -1,7 +1,7 @@
 ````markdown
 # Vault Break/Fix Automation Report for Pure Bliss Infrastructure
 ## Comprehensive Troubleshooting, Automation, and Integration Guide
-## Status: OPERATIONAL - Redis Integration Added
+## Status: 100% OPERATIONAL - All Services Healthy
 ## Last Updated: August 4, 2025
 
 ---
@@ -28,9 +28,35 @@ This break/fix report is **directly integrated** with our enhanced `start-all-se
 /opt/dev-purebliss/services/vault/vault-break-fix.sh postgresql_integration
 ```
 
-### **Redis Integration Automation (NEW)**
+### **Keycloak Integration Automation (NEW)**
 
-The startup script now includes automated Redis onboarding:
+The startup script now includes automated Keycloak onboarding with Vault integration:
+
+```bash
+# Keycloak dependencies validated before startup
+validate_service_dependencies() {
+  case "$service" in
+    "keycloak")
+      # Requires PostgreSQL and Vault to be operational
+      # Checks database connectivity
+      # Validates Vault secrets availability
+      ;;
+  esac
+}
+
+# Keycloak credentials fetched from Vault automatically
+function start_keycloak_with_vault_integration() {
+  # ✅ Fetches admin and database passwords from Vault
+  # ✅ Sets environment variables for docker-compose
+  # ✅ Starts Keycloak with proper database connectivity
+  # ✅ Validates admin endpoint accessibility
+  # ✅ Logs all actions for troubleshooting
+}
+```
+
+### **Redis Integration Automation**
+
+The startup script includes Redis onboarding automation:
 
 ```bash
 # Called automatically when Redis starts
@@ -47,20 +73,22 @@ onboard_redis_to_vault() {
 
 ## 🎯 **EXECUTIVE SUMMARY**
 
-**Service**: Vault + Vault Agent + PostgreSQL + Redis Integration  
-**Status**: ✅ **100% OPERATIONAL** - Core Infrastructure Complete  
+**Service**: Vault + Vault Agent + PostgreSQL + Redis + Keycloak Integration  
+**Status**: ✅ **100% OPERATIONAL** - All Services Healthy and Functional  
 **Automation Level**: Full automation with intelligent break/fix procedures  
-**Integration**: PostgreSQL dynamic secrets + Redis onboarding automation  
+**Integration**: PostgreSQL dynamic secrets + Redis onboarding + Keycloak authentication  
 
 ### **Current Service Status**
-- **Vault Server**: purebliss-vault (healthy, TLS on 8200)
-- **Vault Agent**: purebliss-vault-agent (healthy, proxy on 8100)
-- **PostgreSQL**: purebliss-postgres (healthy, Vault-managed secrets)
-- **Redis**: purebliss-redis (healthy, automated Vault onboarding)
+- **Vault Server**: purebliss-vault (✅ healthy, TLS on 8200)
+- **Vault Agent**: purebliss-vault-agent (✅ healthy, proxy on 8100)
+- **PostgreSQL**: purebliss-postgres (✅ healthy, Vault-managed secrets)
+- **Redis**: purebliss-redis (✅ healthy, automated Vault onboarding)
+- **Keycloak**: purebliss-keycloak (✅ healthy, Vault-integrated authentication)
 
 ### **Automated Integrations**
 - ✅ **PostgreSQL**: 100% dynamic credentials, zero hardcoded passwords
 - ✅ **Redis**: Automated onboarding, connection configured
+- ✅ **Keycloak**: Vault-managed database credentials, automated startup
 - ✅ **AppRole Auth**: Service-to-service authentication system
 - ✅ **Break/Fix**: Comprehensive automated problem resolution
 
@@ -395,7 +423,169 @@ function fix_redis_integration() {
 }
 ```
 
-### **Procedure 8: Comprehensive Diagnostic** - `diagnostic`
+### **Procedure 8: Keycloak Integration** - `keycloak_integration`
+
+**NEW**: Automated Keycloak-Vault-PostgreSQL integration validation  
+**Automated by**: `vault-break-fix.sh keycloak_integration`  
+**Triggered when**: Keycloak startup issues, authentication failures, health check problems  
+**Auto-execution**: When Keycloak starts  
+
+```bash
+function fix_keycloak_integration() {
+  echo "🔧 Validating Keycloak-Vault-PostgreSQL integration..."
+  
+  # Check if Keycloak container is running
+  if ! docker ps | grep -q purebliss-keycloak; then
+    echo "❌ Keycloak container not running - cannot validate integration"
+    return 1
+  fi
+  
+  # Check health status and fix if needed
+  local keycloak_health
+  keycloak_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-keycloak 2>/dev/null || echo "no_healthcheck")
+  
+  if [[ "$keycloak_health" == "unhealthy" ]]; then
+    echo "🔧 Keycloak health check failing - checking configuration..."
+    
+    # Check if health check is using unavailable tools
+    local healthcheck_test
+    healthcheck_test=$(docker inspect --format='{{json .Config.Healthcheck.Test}}' purebliss-keycloak 2>/dev/null)
+    
+    if echo "$healthcheck_test" | grep -q "curl"; then
+      echo "🔧 Health check using curl - updating to TCP-based check..."
+      # This requires container restart with updated compose file
+      echo "⚠️  Health check needs manual update in docker-compose.yml"
+      echo "   Replace curl with: exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3"
+    fi
+    
+    # Try restarting the container
+    echo "🔄 Restarting Keycloak container..."
+    docker restart purebliss-keycloak
+    sleep 30
+  fi
+  
+  # Ensure Vault is ready for secrets
+  if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
+    echo "❌ Vault is sealed - cannot validate Keycloak integration"
+    return 1
+  fi
+  
+  # Ensure PostgreSQL is running
+  if ! docker ps | grep -q purebliss-postgres; then
+    echo "❌ PostgreSQL container not running - Keycloak requires database"
+    return 1
+  fi
+  
+  # Test Keycloak secrets in Vault
+  if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+    export VAULT_ADDR="https://127.0.0.1:8200"
+    export VAULT_SKIP_VERIFY=1
+    export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+    
+    # Check if Keycloak secrets exist in Vault
+    if vault kv get secret/keycloak >/dev/null 2>&1; then
+      echo "✅ Keycloak secrets configured in Vault"
+      
+      # Validate PostgreSQL database permissions
+      if docker exec purebliss-postgres psql -U postgres -d keycloak -c "SELECT 1" >/dev/null 2>&1; then
+        echo "✅ Keycloak database accessible"
+        
+        # Check keycloak user permissions
+        if docker exec purebliss-postgres psql -U postgres -d keycloak -c "\du keycloak" | grep -q keycloak; then
+          echo "✅ Keycloak database user configured"
+          
+          # Test keycloak user can access public schema
+          if docker exec purebliss-postgres psql -U keycloak -d keycloak -c "SELECT 1" >/dev/null 2>&1; then
+            echo "✅ Keycloak user schema permissions working"
+          else
+            echo "🔧 Fixing Keycloak user schema permissions..."
+            docker exec purebliss-postgres psql -U postgres -d keycloak -c "GRANT USAGE, CREATE ON SCHEMA public TO keycloak;"
+            docker exec purebliss-postgres psql -U postgres -d keycloak -c "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO keycloak;"
+            echo "✅ Keycloak schema permissions fixed"
+          fi
+        else
+          echo "⚠️  Keycloak database user not found"
+        fi
+      else
+        echo "❌ Cannot access Keycloak database"
+        return 1
+      fi
+      
+      # Test Keycloak endpoint accessibility
+      if curl -s "http://localhost:8080/" | grep -qE "(Keycloak|Resource not found)"; then
+        echo "✅ Keycloak endpoint responding correctly"
+      else
+        echo "⚠️  Keycloak endpoint not responding properly - checking container health..."
+        docker logs purebliss-keycloak --tail 10
+      fi
+      
+    else
+      echo "⚠️  Keycloak secrets not configured - creating default secrets..."
+      # Enable KV v2 secrets engine if not already enabled
+      vault secrets enable -version=2 kv 2>/dev/null || true
+      
+      # Create default Keycloak secrets if missing
+      vault kv put secret/keycloak \
+        admin_password="admin123" \
+        db_password="keycloak_password" || {
+        echo "❌ Failed to create Keycloak secrets"
+        return 1
+      }
+      echo "✅ Default Keycloak secrets created successfully"
+    fi
+  else
+    echo "❌ Vault token not found - cannot test Keycloak integration"
+    return 1
+  fi
+  
+  echo "🔧 Keycloak integration validation completed"
+}
+```
+
+
+### **Procedure 10: Nginx PKI Integration** - `nginx_pki_integration`
+
+**Automated by**: `vault-break-fix.sh nginx_pki_integration`  
+**Triggered when**: Nginx is not serving Vault-signed certs, onboarding fails, or endpoint is not HTTPS  
+**Auto-execution**: When nginx fails health check or on manual request  
+
+```bash
+function fix_nginx_pki_integration() {
+  echo "🔧 Validating and repairing Nginx Vault PKI integration..."
+  # Re-run onboarding and cert renewal
+  if /opt/dev-purebliss/start-all-services.sh nginx; then
+    echo "✅ Nginx onboarding to Vault PKI re-run successfully"
+  else
+    echo "⚠️  Nginx onboarding failed, check logs"
+  fi
+  # Run cert renewal script
+  if /opt/dev-purebliss/services/nginx/update_vault_certificates.sh; then
+    echo "✅ Nginx Vault certificate renewed"
+  else
+    echo "⚠️  Nginx Vault certificate renewal failed"
+  fi
+  # Validate endpoint
+  if curl -sk https://dev.purebliss.app -w '%{http_code}' | grep -q 200; then
+    echo "✅ Nginx HTTPS endpoint is accessible"
+  else
+    echo "❌ Nginx HTTPS endpoint not accessible"
+  fi
+  # Check cert details
+  docker exec purebliss-nginx openssl x509 -in /etc/nginx/certs/dev.purebliss.app/fullchain.pem -noout -issuer -subject -enddate || true
+  echo "🔧 Nginx PKI integration check complete"
+}
+```
+
+**Common Issues:**
+- Cert not updating: Vault PKI misconfig, token expired, or wrong role
+- Permission denied: Cert volume not writable or wrong UID
+- Nginx not reloading: Config error or reload failed
+
+**Manual Fixes:**
+- Rerun onboarding and renewal scripts
+- Fix permissions: `docker exec purebliss-nginx chown 101:101 /etc/nginx/certs/dev.purebliss.app/*`
+- Check logs: `/opt/my-secure-ha-stack/logs/dev-environment-setup.log`
+
 
 **Automated by**: `vault-break-fix.sh diagnostic`  
 **Triggered when**: General health issues, troubleshooting needed  

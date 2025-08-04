@@ -1,6 +1,7 @@
 ````markdown
 # Vault Automation Guide for Pure Bliss Infrastructure
 ## Complete Automation, Break/Fix, and Integration Reference
+## Status: 100% OPERATIONAL - All Services Healthy
 ## Last Updated: August 4, 2025
 
 ---
@@ -43,8 +44,71 @@ onboard_redis_to_vault() {
 }
 ```
 
+### **Keycloak Integration Automation**
+
+The startup script includes comprehensive Keycloak integration with Vault secrets management:
+
+```bash
+# Keycloak service integration (SERVICE_ORDER position: after redis)
+start_keycloak() {
+  # Validates PostgreSQL and Vault dependencies
+  # Fetches database and admin credentials from Vault KV v2
+  # Sets environment variables for keycloak container
+  # Starts Keycloak with vault-entrypoint.sh integration
+  # Validates admin endpoint accessibility on port 8080
+  # Logs all actions to dev-environment-setup.log
+}
+```
+
+**Vault Secrets Structure for Keycloak:**
+```bash
+# secret/keycloak (KV v2 engine)
+vault kv put secret/keycloak \
+  admin_password="admin123" \
+  db_password="keycloak_password"
+```
+
 ---
 
+
+## 🚦 **NGINX PKI AUTOMATION & TROUBLESHOOTING**
+
+### Overview
+Nginx is now fully integrated with Vault PKI for dynamic TLS certificate management. The onboarding, renewal, and validation are automated via:
+
+- `onboard_nginx_to_vault()` in `start-all-services.sh`
+- `/opt/dev-purebliss/services/nginx/update_vault_certificates.sh` for cert renewal
+- Health checks and endpoint validation in `comprehensive-health-check.sh`
+
+### Automated Tasks
+- Vault PKI secrets engine enabled at `pki-nginx/`
+- Root CA generated and configured for `dev.purebliss.app`
+- PKI role `nginx-role` created for domain
+- Cert issuance and deployment automated on nginx startup
+- Cert renewal script can be run at any time
+- All actions logged to `/opt/my-secure-ha-stack/logs/dev-environment-setup.log`
+
+### Troubleshooting & Validation Steps
+1. **Check onboarding logs:**
+   - `grep nginx /opt/my-secure-ha-stack/logs/dev-environment-setup.log`
+2. **Validate nginx container health:**
+   - `docker inspect --format='{{.State.Health.Status}}' purebliss-nginx`
+3. **Test endpoint:**
+   - `curl -sk https://dev.purebliss.app -w '%{http_code}'`
+4. **Verify certificate:**
+   - `docker exec purebliss-nginx openssl x509 -in /etc/nginx/certs/dev.purebliss.app/fullchain.pem -noout -issuer -subject -enddate`
+5. **Renew certificate:**
+   - `/opt/dev-purebliss/services/nginx/update_vault_certificates.sh`
+6. **If issues:**
+   - Run: `/opt/dev-purebliss/services/vault/vault-break-fix.sh nginx_pki_integration`
+
+### Common Issues & Fixes
+- **Cert not updating:** Ensure Vault token is valid, PKI role exists, and nginx cert volume is writable.
+- **nginx not serving new cert:** Check logs, rerun onboarding, and reload nginx.
+- **Permission denied:** Fix cert file permissions (UID 101:101 in container).
+- **PKI errors:** Validate Vault PKI config and role.
+
+---
 ## 🚀 **BULLETPROOF VAULT AUTOMATION SYSTEM**
 
 ### **Core Automation Features**
@@ -63,7 +127,7 @@ vault_auto_unseal() {
 
 #### **2. Service Dependency Management**
 ```bash
-# SERVICE_ORDER: vault → postgres → vault-agent → redis → [others]
+# SERVICE_ORDER: vault → postgres → vault-agent → redis → keycloak → [others]
 # ✅ Each service validates dependencies before starting
 # ✅ Vault must be unsealed before any dependent service starts
 # ✅ Comprehensive health checks with automated fixes
@@ -190,6 +254,16 @@ sudo ./vault-manual-permissions-fix.sh
 - ✅ Dynamic credential framework ready
 - 🔄 Manual role configuration available
 
+#### **Keycloak Integration (KV v2 Secrets Management)**
+- ✅ KV v2 secrets engine enabled and configured
+- ✅ Admin and database passwords stored in secret/keycloak
+- ✅ Vault credential fetching in keycloak vault-entrypoint.sh
+- ✅ PostgreSQL schema permissions configured for keycloak user
+- ✅ Container environment variable integration working
+- ✅ Automated startup with dependency validation
+- ✅ Health check optimized for container environment (TCP-based)
+- ✅ All services reporting healthy status
+
 #### **Vault Agent Integration (Secure Proxy)**
 - ✅ AppRole-based authentication
 - ✅ API proxy on localhost:8100
@@ -199,8 +273,8 @@ sudo ./vault-manual-permissions-fix.sh
 ### **🔄 SERVICES INTEGRATED WITH AUTOMATION**
 
 ```bash
-SERVICE_ORDER=(vault postgres vault-agent redis)
-# Ready for expansion: prometheus grafana loki keycloak nginx plane
+SERVICE_ORDER=(vault postgres vault-agent redis keycloak)
+# Ready for expansion: prometheus grafana loki nginx plane
 ```
 
 ---
@@ -352,10 +426,10 @@ The automation will request manual intervention when:
 ### **Ready for Service Expansion**
 ```bash
 # Current SERVICE_ORDER
-SERVICE_ORDER=(vault postgres vault-agent redis)
+SERVICE_ORDER=(vault postgres vault-agent redis keycloak)
 
 # Ready to add when needed:
-# prometheus grafana loki keycloak nginx plane
+# prometheus grafana loki nginx plane
 ```
 
 ### **Integration Roadmap**
@@ -366,6 +440,7 @@ SERVICE_ORDER=(vault postgres vault-agent redis)
 
 ### **Automation Enhancements**
 - Redis dynamic credential role automation
+- Keycloak KV v2 secrets management with rotation
 - Let's Encrypt certificate automation
 - Production-ready AppRole credential rotation
 - Monitoring integration with Vault metrics
