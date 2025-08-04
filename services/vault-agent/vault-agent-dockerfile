@@ -1,1 +1,26 @@
 FROM hashicorp/vault:1.17.3
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Create directories for vault agent
+RUN mkdir -p /vault/agent/output /vault/agent/logs /vault/secrets /vault/templates
+
+# Create an entrypoint script
+RUN cat > /entrypoint.sh << 'SCRIPT'
+#!/bin/sh
+# Fix permissions at runtime
+chown -R vault:vault /vault/agent/output /vault/agent/logs
+chmod -R 755 /vault/agent/output /vault/agent/logs
+
+# Switch to vault user and exec vault agent
+exec su-exec vault vault agent -config=/etc/vault-agent/config.hcl
+SCRIPT
+
+RUN chmod +x /entrypoint.sh
+
+# Install su-exec for user switching
+RUN apk add --no-cache su-exec
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
