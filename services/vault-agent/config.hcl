@@ -1,6 +1,6 @@
-# Vault Agent Configuration with AppRole Auto-Authentication
-# This configuration enables automatic authentication with Vault using AppRole
-# and provides API proxy functionality for other services
+# Vault Agent Configuration for Development Mode
+# This configuration provides API proxy functionality for other services
+# Without AppRole authentication (using dev root token)
 
 # Exit after authentication - set to false to keep agent running
 exit_after_auth = false
@@ -8,28 +8,10 @@ exit_after_auth = false
 # PID file for process management
 pid_file = "/tmp/vault-agent.pid"
 
-# Auto-authentication configuration using AppRole
-auto_auth {
-    method "approle" {
-        mount_path = "auth/approle"
-        config = {
-            role_id_file_path   = "/vault/secrets/role_id"
-            secret_id_file_path = "/vault/secrets/secret_id"
-            remove_secret_id_file_after_reading = false
-        }
-    }
-
-    sink "file" {
-        config = {
-            path = "/vault/agent/output/vault-token"
-            mode = 0600
-        }
-    }
-}
-
 # Cache configuration for improved performance
 cache {
-    use_auto_auth_token = true
+    # Don't use auto auth token in dev mode
+    use_auto_auth_token = false
 }
 
 # API proxy configuration for other services to access Vault
@@ -38,9 +20,9 @@ listener "tcp" {
     tls_disable = true
 }
 
-# Vault server configuration
+# Vault server configuration - HTTP for dev mode
 vault {
-    address = "https://purebliss-vault:8200"
+    address = "http://purebliss-vault:8200"
     tls_skip_verify = true
 }
 

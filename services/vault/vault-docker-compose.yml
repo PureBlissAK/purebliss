@@ -14,6 +14,9 @@ services:
       # VAULT_SKIP_VERIFY is needed for the healthcheck and initial CLI interactions
       # with self-signed certs. Remove or use caution in production for client apps.
       VAULT_SKIP_VERIFY: "true"
+      # DEV MODE: Auto-unseals with fixed root token for development
+      VAULT_DEV_ROOT_TOKEN_ID: "dev-root-token-purebliss"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
 
     ports:
       - "8200:8200" # Vault HTTP/HTTPS listener
@@ -28,7 +31,7 @@ services:
       - vaultdata:/vault/data
       - vaultlogs:/vault/logs
 
-    command: ["vault", "server", "-config=/vault/config/vault.hcl"]
+    command: ["vault", "server", "-dev", "-dev-root-token-id=dev-root-token-purebliss", "-dev-listen-address=0.0.0.0:8200"]
 
     cap_add:
       - IPC_LOCK # Prevent Vault from being swapped to disk (security)

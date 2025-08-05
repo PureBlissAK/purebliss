@@ -44,13 +44,13 @@ function fix_letsencrypt_vault_integration() {
 ```bash
 function fix_prometheus_vault_integration() {
   echo "🔧 Validating and repairing Prometheus Vault integration..."
-  
+
   # Ensure Vault is accessible
   if ! vault status >/dev/null 2>&1; then
     echo "❌ Vault not accessible, cannot configure Prometheus"
     return 1
   fi
-  
+
   # Verify Prometheus secrets in Vault
   if ! vault kv get prometheus-config/metrics >/dev/null 2>&1; then
     echo "🔧 Creating Prometheus metrics configuration in Vault..."
@@ -60,7 +60,7 @@ function fix_prometheus_vault_integration() {
       retention_time="200h" \
       admin_password="$(openssl rand -base64 32)"
   fi
-  
+
   if ! vault kv get prometheus-config/targets >/dev/null 2>&1; then
     echo "🔧 Creating Prometheus targets configuration in Vault..."
     vault kv put prometheus-config/targets \
@@ -71,13 +71,13 @@ function fix_prometheus_vault_integration() {
       nginx_endpoint="purebliss-nginx:80" \
       grafana_endpoint="purebliss-grafana:3001"
   fi
-  
+
   # Fix data directory permissions
   if [[ -d "/tmp/purebliss-storage/prometheus" ]]; then
     sudo chown -R 65534:65534 /tmp/purebliss-storage/prometheus 2>/dev/null || true
     sudo chmod 755 /tmp/purebliss-storage/prometheus 2>/dev/null || true
   fi
-  
+
   # Restart Prometheus if needed
   if docker ps -q -f name=purebliss-prometheus >/dev/null; then
     echo "🔧 Restarting Prometheus container..."
@@ -87,7 +87,7 @@ function fix_prometheus_vault_integration() {
     cd /opt/dev-purebliss/services/prometheus
     docker-compose -f prometheus-docker-compose.yml up -d
   fi
-  
+
   # Validate health
   sleep 10
   if curl -s http://localhost:9090/-/healthy | grep -q "Healthy"; then
@@ -95,7 +95,7 @@ function fix_prometheus_vault_integration() {
   else
     echo "⚠️  Prometheus health check failed"
   fi
-  
+
   echo "🔧 Prometheus Vault integration check complete"
 }
 ```

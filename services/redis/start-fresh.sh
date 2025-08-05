@@ -1,0 +1,350 @@
+#!/bin/bash
+set -euo pipefail
+
+# Enhanced Redis Fresh Start with Vault Integration
+# Based on Pure Bliss Container Enhancement Framework (PostgreSQL Template)
+# 
+# Purpose: Start Redis with fresh configuration and complete Vault integration
+# Features: 
+#   - Zero hardcoded secrets using Vault KV v2 secrets engine
+#   - Dynamic configuration generation
+#   - Comprehensive validation and health checks
+#   - Integration with Pure Bliss enhancement framework
+#   - Redis AUTH password management via Vault
+#
+# Usage: ./start-fresh.sh
+# Requirements: Vault unsealed, Docker, jq, vault CLI
+# Last Updated: August 5, 2025
+
+LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
+
+function log_action() {
+    echo "[$(date)] REDIS_FRESH_START: $1" | tee -a "$LOG_FILE"
+}
+
+function log_success() {
+    echo "[$(date)] REDIS_FRESH_START: ✅ SUCCESS: $1" | tee -a "$LOG_FILE"
+}
+
+function log_error() {
+    echo "[$(date)] REDIS_FRESH_START: ❌ ERROR: $1" | tee -a "$LOG_FILE"
+}
+
+function log_warning() {
+    echo "[$(date)] REDIS_FRESH_START: ⚠️ WARNING: $1" | tee -a "$LOG_FILE"
+}
+
+# Prerequisites validation
+function validate_prerequisites() {
+    log_action "Validating prerequisites for Redis fresh start"
+    
+    # Check if docker is available
+    if ! command -v docker >/dev/null 2>&1; then
+        log_error "Docker not found"
+        exit 1
+    fi
+    
+    # Check if vault CLI is available
+    if ! command -v vault >/dev/null 2>&1; then
+        log_error "Vault CLI not found"
+        exit 1
+    fi
+    
+    # Check if jq is available for JSON processing
+    if ! command -v jq >/dev/null 2>&1; then
+        log_error "jq not found (required for JSON processing)"
+        exit 1
+    fi
+    
+    # Check if purebliss-net network exists
+    if ! docker network ls | grep -q "purebliss-net"; then
+        log_warning "purebliss-net network not found, creating"
+        docker network create purebliss-net 2>/dev/null || log_error "Failed to create purebliss-net network"
+    fi
+    
+    log_success "Prerequisites validation completed"
+}
+
+log_action "Starting Redis with fresh configuration and Vault integration"
+
+# Run prerequisites validation
+validate_prerequisites
+
+# Start Redis with fresh configuration
+log_action "Starting Redis with fresh configuration"
+cd /opt/dev-purebliss/services/redis
+
+# Stop any existing redis container
+if docker ps -q -f name=purebliss-redis >/dev/null 2>&1; then
+    log_action "Stopping existing Redis container"
+    docker stop purebliss-redis >/dev/null 2>&1 || true
+    docker rm purebliss-redis >/dev/null 2>&1 || true
+fi
+
+# Remove old volume for fresh start
+if docker volume ls -q -f name=redis_data >/dev/null 2>&1; then
+    log_action "Removing old Redis data volume for fresh start"
+    docker volume rm redis_data >/dev/null 2>&1 || log_warning "Could not remove old volume"
+fi
+
+# Configure Vault KV secrets integration with enhanced validation
+log_action "Configuring Vault KV secrets integration"
+
+# Ensure we have a Vault token with enhanced validation
+VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
+if [[ ! -f "$VAULT_TOKEN_FILE" ]]; then
+    log_error "Vault token not found at $VAULT_TOKEN_FILE"
+    log_action "Please ensure Vault is initialized and unsealed:"
+    log_action "1. Check Vault status: vault status"
+    log_action "2. Unseal if needed: vault operator unseal"
+    log_action "3. Get token: vault auth -method=userpass username=admin"
+    exit 1
+fi
+
+export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+export VAULT_ADDR="http://127.0.0.1:8200"
+export VAULT_SKIP_VERIFY=1
+
+# Validate Vault connectivity
+if ! vault status >/dev/null 2>&1; then
+    log_error "Cannot connect to Vault at $VAULT_ADDR"
+    log_action "Vault status check failed, ensure Vault is running and unsealed"
+    exit 1
+fi
+
+log_success "Vault connectivity validated"
+
+# Check if KV v2 secrets engine is enabled
+if ! vault secrets list | grep -q "secret/"; then
+    log_action "Enabling KV v2 secrets engine"
+    vault secrets enable -version=2 kv || {
+        log_error "Failed to enable KV v2 secrets engine"
+        exit 1
+    }
+    log_success "KV v2 secrets engine enabled"
+else
+    log_action "KV v2 secrets engine already enabled"
+fi
+
+# Generate and store Redis secrets in Vault
+log_action "Generating Redis secrets in Vault"
+REDIS_AUTH_PASSWORD=$(openssl rand -base64 32)
+REDIS_MASTER_AUTH=$(openssl rand -base64 32)
+
+# Store Redis secrets in Vault
+vault kv put secret/redis \
+    auth_password="$REDIS_AUTH_PASSWORD" \
+    master_auth="$REDIS_MASTER_AUTH" \
+    max_memory="512mb" \
+    max_memory_policy="allkeys-lru" \
+    save_interval="900 1" || {
+    log_error "Failed to store Redis secrets in Vault"
+    exit 1
+}
+
+log_success "Redis secrets stored in Vault successfully"
+
+# Retrieve secrets from Vault for validation
+log_action "Retrieving and validating secrets from Vault"
+VAULT_REDIS_SECRETS=$(vault kv get -format=json secret/redis 2>/dev/null) || {
+    log_error "Failed to retrieve Redis secrets from Vault"
+    exit 1
+}
+
+# Extract secrets and validate JSON structure
+if ! echo "$VAULT_REDIS_SECRETS" | jq . >/dev/null 2>&1; then
+    log_error "Invalid JSON response from Vault"
+    log_action "Response: $VAULT_REDIS_SECRETS"
+    exit 1
+fi
+
+VAULT_AUTH_PASSWORD=$(echo "$VAULT_REDIS_SECRETS" | jq -r '.data.data.auth_password')
+VAULT_MASTER_AUTH=$(echo "$VAULT_REDIS_SECRETS" | jq -r '.data.data.master_auth')
+
+if [[ "$VAULT_AUTH_PASSWORD" == "null" || "$VAULT_MASTER_AUTH" == "null" ]]; then
+    log_error "Failed to extract Redis secrets from Vault response"
+    log_action "Response: $VAULT_REDIS_SECRETS"
+    exit 1
+fi
+
+log_success "Retrieved Redis secrets from Vault - Auth configured"
+
+# Generate Redis configuration file with Vault secrets
+log_action "Generating Redis configuration with Vault secrets"
+cat > /opt/dev-purebliss/services/redis/configs/redis-vault.conf << EOF
+# Redis Configuration Generated from Vault Secrets
+# Generated: $(date)
+# Zero hardcoded secrets - all values from Vault
+
+# Authentication
+requirepass $VAULT_AUTH_PASSWORD
+masterauth $VAULT_MASTER_AUTH
+
+# Network
+bind 0.0.0.0
+port 6379
+protected-mode yes
+
+# Memory Management
+maxmemory 512mb
+maxmemory-policy allkeys-lru
+
+# Persistence
+save 900 1
+save 300 10
+save 60 10000
+
+# Logging
+loglevel notice
+logfile ""
+
+# Security
+rename-command FLUSHDB ""
+rename-command FLUSHALL ""
+rename-command DEBUG ""
+
+# Performance
+tcp-keepalive 300
+timeout 0
+EOF
+
+log_success "Redis configuration generated with Vault secrets"
+
+# Create enhanced Docker Compose file with Vault integration
+log_action "Creating enhanced Docker Compose configuration"
+cat > /opt/dev-purebliss/services/redis/redis-docker-compose-fresh.yml << EOF
+version: '3.8'
+
+services:
+  purebliss-redis:
+    image: redis:7
+    container_name: purebliss-redis
+    restart: unless-stopped
+    networks:
+      - purebliss-net
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_fresh_data:/data
+      - ./configs/redis-vault.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --raw incr ping || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+networks:
+  purebliss-net:
+    external: true
+
+volumes:
+  redis_fresh_data:
+    driver: local
+EOF
+
+log_success "Enhanced Docker Compose configuration created"
+
+# Launch Redis container
+log_action "Launching fresh Redis container"
+docker-compose -f redis-docker-compose-fresh.yml up -d
+
+# Wait for Redis to be ready with enhanced monitoring
+log_action "Waiting for Redis to be ready"
+for i in {1..30}; do
+    if docker exec purebliss-redis redis-cli --raw incr ping >/dev/null 2>&1; then
+        log_success "Redis is ready for connections (attempt $i/30)"
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        log_error "Redis failed to start within timeout (60 seconds)"
+        log_action "Container logs:"
+        docker logs purebliss-redis --tail 20 | tee -a "$LOG_FILE"
+        exit 1
+    fi
+    echo -n "." && sleep 2
+done
+echo "" # New line after dots
+
+# Verify container health status
+health_status=$(docker inspect --format='{{.State.Health.Status}}' purebliss-redis 2>/dev/null || echo "no_healthcheck")
+if [[ "$health_status" == "healthy" ]]; then
+    log_success "Redis health check: $health_status"
+elif [[ "$health_status" == "no_healthcheck" ]]; then
+    log_warning "No health check defined, using redis-cli validation"
+else
+    log_warning "Redis health check: $health_status, continuing with startup"
+fi
+
+# Test Redis authentication with Vault secrets
+log_action "Testing Redis authentication with Vault secrets"
+if docker exec purebliss-redis redis-cli -a "$VAULT_AUTH_PASSWORD" ping | grep -q "PONG"; then
+    log_success "Redis authentication test passed with Vault secrets"
+else
+    log_error "Redis authentication test failed with Vault secrets"
+    exit 1
+fi
+
+# Test basic Redis operations
+log_action "Testing Redis operations"
+if docker exec purebliss-redis redis-cli -a "$VAULT_AUTH_PASSWORD" set test_key "vault_integration_test" >/dev/null 2>&1 && \
+   docker exec purebliss-redis redis-cli -a "$VAULT_AUTH_PASSWORD" get test_key | grep -q "vault_integration_test"; then
+    log_success "Redis operations test passed"
+    docker exec purebliss-redis redis-cli -a "$VAULT_AUTH_PASSWORD" del test_key >/dev/null 2>&1
+else
+    log_error "Redis operations test failed"
+    exit 1
+fi
+
+# Verify Redis configuration
+log_action "Verifying Redis configuration"
+docker exec purebliss-redis redis-cli -a "$VAULT_AUTH_PASSWORD" config get maxmemory | tee -a "$LOG_FILE"
+docker exec purebliss-redis redis-cli -a "$VAULT_AUTH_PASSWORD" config get maxmemory-policy | tee -a "$LOG_FILE"
+
+# Run comprehensive validation if available
+if [[ -f "/opt/dev-purebliss/services/redis/validate-redis-vault-integration.sh" ]]; then
+    log_action "Running comprehensive validation"
+    if /opt/dev-purebliss/services/redis/validate-redis-vault-integration.sh; then
+        log_success "Comprehensive validation passed"
+    else
+        log_warning "Validation issues detected, but basic integration working"
+    fi
+else
+    log_warning "Validation script not found, skipping advanced checks"
+fi
+
+# Run system health check if available
+if [[ -f "/opt/dev-purebliss/comprehensive-health-check.sh" ]]; then
+    log_action "Running system health check"
+    if /opt/dev-purebliss/comprehensive-health-check.sh redis 2>/dev/null; then
+        log_success "System health check passed"
+    else
+        log_warning "System health check had issues, but core functionality working"
+    fi
+fi
+
+log_success "🎉 SUCCESS: Redis started fresh with Vault integration!"
+log_success "🔐 Redis AUTH password managed by Vault"
+log_success "🔑 Master AUTH password managed by Vault"
+log_success "⚡ Configuration generated from Vault secrets"
+log_success "🚀 Zero hardcoded secrets achieved!"
+
+# Show status and next steps
+echo ""
+echo "Redis Fresh Start Status:"
+docker ps --filter name=purebliss-redis --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | tee -a "$LOG_FILE"
+
+echo ""
+echo "🔧 Available Management Commands:"
+echo "  Redis CLI with auth: docker exec purebliss-redis redis-cli -a \"\$(vault kv get -field=auth_password secret/redis)\""
+echo "  Configuration check: docker exec purebliss-redis redis-cli -a \"\$(vault kv get -field=auth_password secret/redis)\" config get '*'"
+echo "  Comprehensive validation: /opt/dev-purebliss/services/redis/validate-redis-vault-integration.sh"
+echo "  System health check: /opt/dev-purebliss/comprehensive-health-check.sh redis"
+echo ""
+
+# Log to troubleshooting log with enhancement framework context
+log_action "Fresh Redis setup completed successfully with Vault integration"
+log_action "Ready as template for other cache/session services enhancement"

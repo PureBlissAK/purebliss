@@ -17,13 +17,13 @@ function vault_letsencrypt_vault_integration_fix() {
 
 function vault_prometheus_vault_integration_fix() {
     log_action "Fixing Prometheus Vault integration..."
-    
+
     # Ensure Vault is accessible
     if ! vault status >/dev/null 2>&1; then
         log_error "Vault not accessible, cannot configure Prometheus"
         return 1
     fi
-    
+
     # Verify Prometheus secrets in Vault
     if ! vault kv get prometheus-config/metrics >/dev/null 2>&1; then
         log_action "Creating Prometheus metrics configuration in Vault..."
@@ -33,7 +33,7 @@ function vault_prometheus_vault_integration_fix() {
           retention_time="200h" \
           admin_password="$(openssl rand -base64 32)" >> "$LOG_FILE" 2>&1
     fi
-    
+
     if ! vault kv get prometheus-config/targets >/dev/null 2>&1; then
         log_action "Creating Prometheus targets configuration in Vault..."
         vault kv put prometheus-config/targets \
@@ -44,13 +44,13 @@ function vault_prometheus_vault_integration_fix() {
           nginx_endpoint="purebliss-nginx:80" \
           grafana_endpoint="purebliss-grafana:3001" >> "$LOG_FILE" 2>&1
     fi
-    
+
     # Fix data directory permissions
     if [[ -d "/tmp/purebliss-storage/prometheus" ]]; then
         sudo chown -R 65534:65534 /tmp/purebliss-storage/prometheus 2>/dev/null || true
         sudo chmod 755 /tmp/purebliss-storage/prometheus 2>/dev/null || true
     fi
-    
+
     # Restart Prometheus if needed
     if docker ps -q -f name=purebliss-prometheus >/dev/null; then
         log_action "Restarting Prometheus container..."
@@ -60,7 +60,7 @@ function vault_prometheus_vault_integration_fix() {
         cd /opt/dev-purebliss/services/prometheus
         docker-compose -f prometheus-docker-compose.yml up -d >> "$LOG_FILE" 2>&1
     fi
-    
+
     # Validate health
     sleep 10
     if curl -s http://localhost:9090/-/healthy | grep -q "Healthy"; then
@@ -68,7 +68,7 @@ function vault_prometheus_vault_integration_fix() {
     else
         log_warning "Prometheus health check failed"
     fi
-    
+
     log_action "Prometheus Vault integration check complete"
 }
 function vault_nginx_pki_integration_fix() {

@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   purebliss-loki:
     image: grafana/loki:2.9.0
@@ -9,7 +8,11 @@ services:
     volumes:
       - ${LOKI_DATA_PATH}:/loki
       - ${LOKI_LOG_PATH}:/var/log/loki/loki.log
+      - ./local-config.yaml:/etc/loki/local-config.yaml:ro
     command: -config.file=/etc/loki/local-config.yaml
+    environment:
+      - VAULT_ADDR=${VAULT_ADDR:-https://purebliss-vault:8200}
+      - VAULT_SKIP_VERIFY=${VAULT_SKIP_VERIFY:-1}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
       interval: 10s

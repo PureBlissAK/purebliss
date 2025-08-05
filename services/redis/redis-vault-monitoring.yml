@@ -1,0 +1,25 @@
+# Redis Monitoring Configuration for Vault Integration
+# Prometheus metrics and health checks for Redis with Vault
+
+redis_monitoring:
+  metrics:
+    enabled: true
+    port: 6379
+    auth: vault-managed
+  health_checks:
+    - name: redis_ping
+      command: "redis-cli ping"
+      expected: "PONG"
+    - name: vault_connectivity
+      command: "nc -z purebliss-vault 8200"
+      expected: "success"
+    - name: dynamic_credentials
+      command: "vault read redis/creds/redis-role"
+      expected: "credentials_generated"
+  alerts:
+    - name: redis_down
+      condition: "redis_ping != PONG"
+      severity: critical
+    - name: vault_integration_failed
+      condition: "dynamic_credentials == failed"
+      severity: high

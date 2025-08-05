@@ -7,9 +7,6 @@ services:
     volumes:
       # Vault Agent configuration
       - ./config.hcl:/etc/vault-agent/config.hcl:ro
-      # AppRole credentials (mounted from host secrets)
-      - /opt/my-secure-ha-stack/secrets/vault-agent-role-id/role_id:/vault/secrets/role_id:ro
-      - /opt/my-secure-ha-stack/secrets/vault-agent-secret-id/secret_id:/vault/secrets/secret_id:ro
       # Output directory for generated tokens and credentials
       - ./output:/vault/agent/output
       # Templates for credential generation
@@ -17,14 +14,12 @@ services:
       # Logs directory
       - ./logs:/vault/agent/logs
     environment:
-      - VAULT_ADDR=https://purebliss-vault:8200
+      - VAULT_ADDR=http://purebliss-vault:8200
       - VAULT_SKIP_VERIFY=1
     networks:
       - purebliss-net
     cap_add:
       - IPC_LOCK
-    external_links:
-      - vault:vault
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8100/v1/sys/health"]
       interval: 30s

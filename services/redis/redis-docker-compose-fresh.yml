@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  purebliss-redis:
+    image: redis:7
+    container_name: purebliss-redis
+    restart: unless-stopped
+    networks:
+      - purebliss-net
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_fresh_data:/data
+      - ./configs/redis-vault.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --raw incr ping || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+networks:
+  purebliss-net:
+    external: true
+
+volumes:
+  redis_fresh_data:
+    driver: local

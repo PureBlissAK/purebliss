@@ -118,6 +118,93 @@ Our enhanced `start-all-services.sh` orchestrator now provides **complete automa
 
 ---
 
+## 🚀 **CONTAINER ENHANCEMENT ROADMAP FOR ALL SERVICES**
+
+### **PostgreSQL Integration: ✅ COMPLETE (Template for All Services)**
+
+**Achievement Date**: August 5, 2025
+**Status**: 100% Operational with Vault Dynamic Secrets
+**Template Files Created**:
+- `/opt/dev-purebliss/services/postgres/postgres-docker-compose-fresh.yml` - Clean container setup
+- `/opt/dev-purebliss/services/postgres/start-fresh.sh` - Vault integration automation
+- `/opt/dev-purebliss/services/postgres/init-postgres.sql` - Database initialization
+- `/opt/dev-purebliss/services/postgres/validate-setup.sh` - Integration validation
+
+**Key Patterns Established**:
+1. **Container Bootstrap**: Clean initialization with known bootstrap credentials
+2. **Vault Integration**: Automatic database secrets engine configuration
+3. **Dynamic Credentials**: Time-limited database users (1-hour TTL)
+4. **Zero Hardcoded Secrets**: Complete elimination of static passwords
+5. **Service Validation**: Comprehensive testing framework
+6. **Health Checks**: Integration with comprehensive-health-check.sh
+
+### **Container Enhancement Template Pattern**
+
+Based on our PostgreSQL success, every container enhancement follows this pattern:
+
+```bash
+# 1. Create service-specific compose file with Vault integration
+/opt/dev-purebliss/services/{service}/docker-compose-vault-enhanced.yml
+
+# 2. Create Vault integration startup script
+/opt/dev-purebliss/services/{service}/start-with-vault.sh
+
+# 3. Create service validation script
+/opt/dev-purebliss/services/{service}/validate-vault-integration.sh
+
+# 4. Update break/fix automation
+/opt/dev-purebliss/services/vault/vault-break-fix.sh {service}_vault_integration
+
+# 5. Update comprehensive health check
+/opt/dev-purebliss/comprehensive-health-check.sh (add service-specific tests)
+```
+
+### **Service Enhancement Priority Order**
+
+Based on Pure Bliss Elite microservices architecture and dependency chains:
+
+1. **✅ Vault** - Core secrets management (COMPLETE)
+2. **✅ PostgreSQL** - Primary data store with dynamic secrets (COMPLETE)
+3. **🔄 Redis** - Session/cache store with Vault database plugin (NEXT)
+4. **🔄 Keycloak** - Authentication service with Vault-managed credentials (IN PROGRESS)
+5. **🔄 Nginx** - Edge proxy with Vault PKI certificate management (READY)
+6. **⏳ Let's Encrypt** - Certificate automation with Vault secrets (PLANNED)
+7. **⏳ Prometheus** - Monitoring with Vault configuration management (PLANNED)
+8. **⏳ Grafana** - Visualization with Vault-managed data sources (PLANNED)
+9. **⏳ Loki** - Logging aggregation with Vault integration (PLANNED)
+10. **⏳ Plane** - Issue tracking with Vault database integration (PLANNED)
+
+### **Container Enhancement Scripts**
+
+#### **Universal Container Enhancement Script**
+Location: `/opt/dev-purebliss/enhance-container-with-vault.sh`
+```bash
+#!/bin/bash
+# Universal script to enhance any container with Vault integration
+# Usage: ./enhance-container-with-vault.sh <service_name> <integration_type>
+# Integration types: kv_secrets, database_dynamic, pki_certificates, app_role
+```
+
+#### **Service-Specific Enhancement Scripts**
+```bash
+# Redis Enhancement
+/opt/dev-purebliss/enhance-redis-vault-integration.sh
+
+# Keycloak Enhancement  
+/opt/dev-purebliss/enhance-keycloak-vault-integration.sh
+
+# Nginx Enhancement
+/opt/dev-purebliss/enhance-nginx-vault-pki.sh
+
+# Let's Encrypt Enhancement
+/opt/dev-purebliss/enhance-letsencrypt-vault-secrets.sh
+
+# Monitoring Stack Enhancement
+/opt/dev-purebliss/enhance-monitoring-vault-integration.sh
+```
+
+---
+
 ## 🎯 **INTEGRATION WITH START-ALL-SERVICES SCRIPT**
 
 Our enhanced `start-all-services.sh` script includes comprehensive Vault automation with automated break/fix capabilities. This guide provides the complete automation framework that the startup script leverages.

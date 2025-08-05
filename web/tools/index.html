@@ -10,7 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -21,7 +21,7 @@
             justify-content: center;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1200px;
             width: 100%;
@@ -31,12 +31,12 @@
             backdrop-filter: blur(10px);
             padding: 40px;
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 50px;
         }
-        
+
         .header h1 {
             color: #2c3e50;
             font-size: 3rem;
@@ -47,20 +47,20 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .header p {
             color: #7f8c8d;
             font-size: 1.2rem;
             font-weight: 300;
         }
-        
+
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             margin-bottom: 40px;
         }
-        
+
         .tool-card {
             background: white;
             border-radius: 15px;
@@ -71,7 +71,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .tool-card::before {
             content: '';
             position: absolute;
@@ -81,13 +81,13 @@
             height: 4px;
             background: linear-gradient(90deg, #667eea, #764ba2);
         }
-        
+
         .tool-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             border-color: #667eea;
         }
-        
+
         .tool-icon {
             width: 60px;
             height: 60px;
@@ -100,26 +100,26 @@
             font-size: 24px;
             color: white;
         }
-        
+
         .tool-title {
             font-size: 1.5rem;
             font-weight: 600;
             color: #2c3e50;
             margin-bottom: 10px;
         }
-        
+
         .tool-description {
             color: #7f8c8d;
             margin-bottom: 20px;
             line-height: 1.6;
         }
-        
+
         .tool-links {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-        
+
         .tool-link {
             display: inline-flex;
             align-items: center;
@@ -132,20 +132,20 @@
             transition: all 0.3s ease;
             font-size: 0.9rem;
         }
-        
+
         .tool-link:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        
+
         .tool-link.secondary {
             background: linear-gradient(135deg, #95a5a6, #7f8c8d);
         }
-        
+
         .tool-link.secondary:hover {
             box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
         }
-        
+
         .status-indicator {
             display: inline-block;
             width: 8px;
@@ -153,15 +153,15 @@
             border-radius: 50%;
             margin-left: 8px;
         }
-        
+
         .status-online {
             background-color: #27ae60;
         }
-        
+
         .status-offline {
             background-color: #e74c3c;
         }
-        
+
         .footer {
             text-align: center;
             color: #7f8c8d;
@@ -169,16 +169,16 @@
             padding-top: 30px;
             border-top: 1px solid #ecf0f1;
         }
-        
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .tool-links {
                 flex-direction: column;
             }
-            
+
             .container {
                 padding: 20px;
             }
@@ -191,7 +191,7 @@
             <h1>🚀 PureBliss Development Tools</h1>
             <p>Your centralized microservices dashboard for dev.purebliss.app</p>
         </div>
-        
+
         <div class="tools-grid">
             <!-- Authentication & Identity -->
             <div class="tool-card">
@@ -203,7 +203,7 @@
                     <a href="https://dev.purebliss.app:8080/" class="tool-link secondary">Direct Access</a>
                 </div>
             </div>
-            
+
             <!-- Development Environment -->
             <div class="tool-card">
                 <div class="tool-icon">💻</div>
@@ -214,7 +214,7 @@
                     <a href="https://dev.purebliss.app:8443/" class="tool-link secondary">Direct Access</a>
                 </div>
             </div>
-            
+
             <!-- Task Management -->
             <div class="tool-card">
                 <div class="tool-icon">📋</div>
@@ -225,7 +225,7 @@
                     <a href="https://dev.purebliss.app:3456/" class="tool-link secondary">Direct Access</a>
                 </div>
             </div>
-            
+
             <!-- Secrets Management -->
             <div class="tool-card">
                 <div class="tool-icon">🔒</div>
@@ -236,7 +236,7 @@
                     <a href="https://vault.purebliss.app:8200/" class="tool-link secondary">Direct Access</a>
                 </div>
             </div>
-            
+
             <!-- Monitoring & Observability -->
             <div class="tool-card">
                 <div class="tool-icon">📊</div>
@@ -247,7 +247,7 @@
                     <a href="https://dev.purebliss.app:3001/" class="tool-link secondary">Direct Access</a>
                 </div>
             </div>
-            
+
             <!-- Metrics Collection -->
             <div class="tool-card">
                 <div class="tool-icon">📈</div>
@@ -258,7 +258,7 @@
                     <a href="https://dev.purebliss.app:9090/" class="tool-link secondary">Direct Access</a>
                 </div>
             </div>
-            
+
             <!-- Log Aggregation -->
             <div class="tool-card">
                 <div class="tool-icon">📝</div>
@@ -269,7 +269,7 @@
                     <a href="https://dev.purebliss.app:3100/" class="tool-link secondary">Direct Access</a>
                 </div>
             </div>
-            
+
             <!-- Database -->
             <div class="tool-card">
                 <div class="tool-icon">🗄️</div>
@@ -279,7 +279,7 @@
                     <a href="postgresql://dev.purebliss.app:5432/" class="tool-link">Database <span class="status-indicator status-online"></span></a>
                 </div>
             </div>
-            
+
             <!-- Cache -->
             <div class="tool-card">
                 <div class="tool-icon">⚡</div>
@@ -290,28 +290,28 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="footer">
             <p>🔒 All services secured with SSL/TLS encryption | 🚀 Microservices Architecture | 💎 PureBliss Development Stack</p>
             <p style="margin-top: 10px; font-size: 0.8rem;">
-                <a href="/health" style="color: #667eea; text-decoration: none;">System Health</a> • 
-                <a href="https://github.com/PureBlissAK/purebliss" style="color: #667eea; text-decoration: none;">GitHub Repository</a> • 
+                <a href="/health" style="color: #667eea; text-decoration: none;">System Health</a> •
+                <a href="https://github.com/PureBlissAK/purebliss" style="color: #667eea; text-decoration: none;">GitHub Repository</a> •
                 <strong>Environment:</strong> Development
             </p>
         </div>
     </div>
-    
+
     <script>
         // Simple health check for status indicators
         document.addEventListener('DOMContentLoaded', function() {
             const indicators = document.querySelectorAll('.status-indicator');
-            
+
             // Simulate health checks (in production, these would be real API calls)
             indicators.forEach(indicator => {
                 // All services are currently online based on our docker ps output
                 indicator.classList.add('status-online');
             });
-            
+
             // Add click tracking for analytics
             document.querySelectorAll('.tool-link').forEach(link => {
                 link.addEventListener('click', function(e) {

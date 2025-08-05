@@ -15,14 +15,14 @@ test_service() {
     local name="$1"
     local url="$2"
     local expected_code="${3:-200}"
-    
+
     log "Testing $name at $url"
-    
+
     # Test with timeout and capture both status code and any redirects
     local result=$(timeout 10 curl -s -L -o /dev/null -w "%{http_code}|%{url_effective}" "$url" 2>/dev/null || echo "TIMEOUT|$url")
     local status_code=$(echo "$result" | cut -d'|' -f1)
     local final_url=$(echo "$result" | cut -d'|' -f2)
-    
+
     if [[ "$status_code" == "TIMEOUT" ]]; then
         log "❌ $name: TIMEOUT"
         return 1

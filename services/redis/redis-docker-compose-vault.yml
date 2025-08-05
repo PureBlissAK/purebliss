@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: purebliss-redis
+    restart: unless-stopped
+    
+    # Use custom entrypoint to fetch configuration from Vault
+    volumes:
+      - redis_data:/data
+      - ./vault-entrypoint.sh:/usr/local/bin/vault-entrypoint.sh:ro
+      - ./redis.conf.template:/usr/local/etc/redis/redis.conf.template:ro
+      - redis_config:/usr/local/etc/redis:rw
+      - redis_secrets:/run/secrets:rw
+      
+    entrypoint: ["/usr/local/bin/vault-entrypoint.sh"]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    
+    ports:
+      - "6379:6379"
+      
+    networks:
+      - purebliss-net
+      
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+      
+    depends_on:
+      vault:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+        
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp
+      
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+
+volumes:
+  redis_data:
+    driver: local
+  redis_config:
+    driver: tmpfs
+    driver_opts:
+      tmpfs-mode: "1777"
+      tmpfs-size: "10m"
+  redis_secrets:
+    driver: tmpfs
+    driver_opts:
+      tmpfs-mode: "1777"
+      tmpfs-size: "10m"
+
+networks:
+  purebliss-net:
+    external: true
