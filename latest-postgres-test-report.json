@@ -1,0 +1,29 @@
+{
+  "stress_test_report": {
+    "timestamp": "2025-08-05T10:18:49-04:00",
+    "test_duration_seconds": 4,
+    "configuration": {
+      "iterations": 2,
+      "concurrent_operations": 2,
+      "stress_level": "medium",
+      "vault_ops_per_iteration": 10,
+      "single_service_mode": true,
+      "target_service": "postgres",
+      "service_dependencies": "database,vault"
+    },
+    "metrics": {
+      "total_tests": 2,
+      "successful_tests": 0,
+      "failed_tests": 2,
+      "success_rate_percent": 0,
+      "vault_operations": 2,
+      "vault_failures": 2,
+      "vault_success_rate_percent": 0
+    },
+    "services_tested": [
+      "postgres"
+
+    ],
+    "recommendations": []
+  }
+}
