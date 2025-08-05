@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: ${NGINX_IMAGE:-nginx:latest}
+    container_name: nginx
+    restart: unless-stopped
+    environment:
+      VAULT_ADDR: http://host.docker.internal:8200
+      VAULT_SKIP_VERIFY: "true"
+      # PKI certificate paths
+      TLS_CERT_FILE: /certs/dev.purebliss.app/fullchain.pem
+      TLS_KEY_FILE: /certs/dev.purebliss.app/privkey.pem
+    volumes:
+      - ./vault-pki-entrypoint.sh:/docker-entrypoint.d/00-vault-pki.sh:ro
+      - nginx_certs:/certs
+      - nginx_data:/data
+      - ./config:/etc/nginx/conf.d:ro
+    networks:
+      - purebliss-net
+    ports:
+      - "80:80"
+      - "443:443"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || curl -fk https://localhost:443/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  nginx_certs:
+  nginx_data:
+
+networks:
+  purebliss-net:
+    external: true
+

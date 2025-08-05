@@ -1,0 +1,2 @@
+# Nginx Certificate Renewal - Check daily at 2 AM
+0 2 * * * /opt/dev-purebliss/services/nginx/renew-certificates.sh
