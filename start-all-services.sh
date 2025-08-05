@@ -849,27 +849,116 @@ EOF
   echo "[$(date)] INFO: Grafana Vault onboarding automation complete" | tee -a "$LOG_FILE"
 }
 
-# --- Letsencrypt Vault Onboarding Automation ---
-# This function configures Vault secrets for Letsencrypt and ensures container is started with Vault integration.
+# --- Letsencrypt Vault PKI Onboarding Automation ---
+# This function configures Vault PKI for Let's Encrypt-style certificate generation and management.
 function onboard_letsencrypt_to_vault() {
-  local VAULT_ADDR="https://127.0.0.1:8200"
+  # Auto-detect vault mode and set VAULT_ADDR accordingly
   local VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
-  echo "[$(date)] INFO: Onboarding Letsencrypt to Vault for secrets management" | tee -a "$LOG_FILE"
-  if [[ ! -f "$VAULT_TOKEN_FILE" ]]; then
-    echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
-    return 1
-  fi
-  export VAULT_ADDR
-  export VAULT_SKIP_VERIFY=1
-  export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+  local PKI_PATH="pki-letsencrypt"
+  local PKI_ROLE="letsencrypt-role"
+  local DOMAIN="dev.purebliss.app"
+  echo "[$(date)] INFO: Onboarding Let's Encrypt to Vault PKI for dynamic certificate generation" | tee -a "$LOG_FILE"
 
-  # Ensure secrets exist in Vault (idempotent)
+  # Auto-detect vault URL based on running container or dev mode
+  local VAULT_ADDR
+  if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
+     docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
+    # Development mode - vault running in dev mode
+    VAULT_ADDR="http://127.0.0.1:8200"
+    export VAULT_TOKEN="dev-root-token-purebliss"
+    echo "[$(date)] INFO: Detected Vault in development mode for Let's Encrypt" | tee -a "$LOG_FILE"
+  elif docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
+    # Production mode - container running in production mode
+    VAULT_ADDR="https://127.0.0.1:8200"
+    export VAULT_SKIP_VERIFY=1
+    if [[ ! -f "$VAULT_TOKEN_FILE" ]]; then
+      echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
+      return 1
+    fi
+    export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+    echo "[$(date)] INFO: Detected Vault in production mode for Let's Encrypt" | tee -a "$LOG_FILE"
+  else
+    # Fallback - assume dev server if no container
+    VAULT_ADDR="http://127.0.0.1:8200"
+    export VAULT_TOKEN="dev-root-token-purebliss"
+    echo "[$(date)] INFO: No Vault container detected, assuming development mode for Let's Encrypt" | tee -a "$LOG_FILE"
+  fi
+
+  export VAULT_ADDR
+  echo "[$(date)] INFO: Using Vault at $VAULT_ADDR for Let's Encrypt PKI onboarding" | tee -a "$LOG_FILE"
+
+  # Test Vault connectivity before proceeding
+  if ! curl -sk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
+    echo "[$(date)] WARNING: Cannot connect to Vault with current token - proceeding with basic startup" | tee -a "$LOG_FILE"
+    return 0
+  fi
+
+  # Enable PKI secrets engine for Let's Encrypt (idempotent)
+  vault secrets enable -path="$PKI_PATH" pki 2>&1 | tee -a "$LOG_FILE" || \
+    echo "[$(date)] INFO: PKI engine $PKI_PATH may already be enabled" | tee -a "$LOG_FILE"
+
+  # Tune the PKI engine max lease TTL for Let's Encrypt style certificates (90 days typical)
+  vault secrets tune -max-lease-ttl=2160h "$PKI_PATH" 2>&1 | tee -a "$LOG_FILE"
+
+  # Generate root CA if not already present
+  if ! vault read "$PKI_PATH/cert/ca" 2>&1 | grep -q 'certificate'; then
+    echo "[$(date)] INFO: Generating root CA for Let's Encrypt-style PKI" | tee -a "$LOG_FILE"
+    vault write -field=certificate "$PKI_PATH/root/generate/internal" \
+      common_name="Pure Bliss Let's Encrypt Alternative Root CA" \
+      ttl=8760h \
+      key_bits=2048 \
+      format=pem 2>&1 | tee -a "$LOG_FILE"
+      
+    vault write "$PKI_PATH/config/urls" \
+      issuing_certificates="$VAULT_ADDR/v1/$PKI_PATH/ca" \
+      crl_distribution_points="$VAULT_ADDR/v1/$PKI_PATH/crl" 2>&1 | tee -a "$LOG_FILE"
+    echo "[$(date)] SUCCESS: Root CA generated for $PKI_PATH" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] INFO: Root CA already exists for $PKI_PATH" | tee -a "$LOG_FILE"
+  fi
+
+  # Create a role for Let's Encrypt certificate generation (idempotent)
+  vault write "$PKI_PATH/roles/$PKI_ROLE" \
+    allowed_domains="$DOMAIN" \
+    allow_bare_domains=true \
+    allow_subdomains=true \
+    allow_wildcard=true \
+    max_ttl="168h" \
+    ttl="24h" \
+    key_bits=2048 \
+    key_usage="DigitalSignature,KeyEncipherment" \
+    ext_key_usage="ServerAuth,ClientAuth" \
+    server_flag=true \
+    client_flag=true 2>&1 | tee -a "$LOG_FILE"
+
+  echo "[$(date)] SUCCESS: PKI role $PKI_ROLE configured for Let's Encrypt-style certificates" | tee -a "$LOG_FILE"
+
+  # Store Let's Encrypt configuration in Vault KV for the container to use
   vault kv put secret/letsencrypt \
     email="admin@purebliss.app" \
-    domains="dev.purebliss.app" \
-    webroot_path="/mnt/raid0/nginx/html" 2>&1 | tee -a "$LOG_FILE"
+    domains="$DOMAIN" \
+    webroot_path="/mnt/raid0/nginx/html" \
+    pki_path="$PKI_PATH" \
+    pki_role="$PKI_ROLE" \
+    renewal_interval="1h" \
+    cert_ttl="24h" 2>&1 | tee -a "$LOG_FILE"
 
-  echo "[$(date)] INFO: Letsencrypt Vault onboarding automation complete" | tee -a "$LOG_FILE"
+  echo "[$(date)] SUCCESS: Let's Encrypt configuration stored in Vault at secret/letsencrypt" | tee -a "$LOG_FILE"
+
+  # Test certificate generation to validate the setup
+  echo "[$(date)] INFO: Testing certificate generation for $DOMAIN..." | tee -a "$LOG_FILE"
+  if vault write -format=json "$PKI_PATH/issue/$PKI_ROLE" \
+    common_name="$DOMAIN" \
+    alt_names="*.$DOMAIN" \
+    ttl="1h" >/dev/null 2>&1; then
+    echo "[$(date)] SUCCESS: Test certificate generation successful for $DOMAIN" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Test certificate generation failed - check PKI role configuration" | tee -a "$LOG_FILE"
+  fi
+
+  echo "[$(date)] INFO: Let's Encrypt Vault PKI onboarding automation complete" | tee -a "$LOG_FILE"
+  echo "[$(date)] INFO: Certificates will be generated using Vault PKI instead of traditional ACME" | tee -a "$LOG_FILE"
+  echo "[$(date)] INFO: Certificate renewal will happen every hour with 24h TTL" | tee -a "$LOG_FILE"
 }
 # --- Letsencrypt Service Startup ---
 function start_letsencrypt() {

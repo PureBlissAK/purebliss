@@ -6,17 +6,42 @@ services:
     container_name: purebliss-letsencrypt
     volumes:
       - ./webroot:/mnt/raid0/nginx/html
-      - ${LETSENCRYPT_CERT_PATH}:/etc/letsencrypt/live
-      - ${RAID0_MOUNT}/nginx/html:/var/www/html:ro
+      - ${LETSENCRYPT_CERT_PATH:-/mnt/raid0/nginx/certs/live}:/etc/letsencrypt/live
+      - ${RAID0_MOUNT:-/mnt/raid0}/nginx/html:/var/www/html:ro
+      - /opt/my-secure-ha-stack/secrets:/opt/my-secure-ha-stack/secrets:ro
+      - letsencrypt-logs:/var/log/letsencrypt
+    environment:
+      # Vault configuration for PKI integration
+      - VAULT_ADDR=${VAULT_ADDR:-https://127.0.0.1:8200}
+      - VAULT_TOKEN=${VAULT_TOKEN:-}
+      - VAULT_SKIP_VERIFY=${VAULT_SKIP_VERIFY:-1}
+      # Let's Encrypt configuration (fallback and Vault KV sourced)
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@purebliss.app}
+      - LETSENCRYPT_DOMAINS=${LETSENCRYPT_DOMAINS:-dev.purebliss.app}
+      - LETSENCRYPT_WEBROOT_PATH=${LETSENCRYPT_WEBROOT_PATH:-/mnt/raid0/nginx/html}
     env_file:
       - /opt/my-secure-ha-stack/config.env
     networks:
       - purebliss-net
+    # Note: depends_on vault removed for independent operation
+    # When running via start-all-services.sh, Vault will be started first
     healthcheck:
-      test: ["CMD", "ls", "/etc/letsencrypt/live"]
+      test: ["CMD", "sh", "-c", "ls /etc/letsencrypt/live/ | wc -l | grep -q '^[1-9]'"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  letsencrypt-logs:
+    driver: local
+
 networks:
   purebliss-net:
     external: true
