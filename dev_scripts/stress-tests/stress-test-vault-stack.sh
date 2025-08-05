@@ -888,7 +888,7 @@ generate_report() {
   fi
 
   # Add remediation for Postgres dynamic credentials failures
-  if grep -q "PostgreSQL dynamic credentials: FAILED" "$STRESS_LOG"; then
+  if grep -q "PostgreSQL dynamic credentials: FAILED" "$LOG_FILE"; then
     if ! jq '.stress_test_report.recommendations += [
       "Remediation for Postgres dynamic credentials failure:",
       "1. Ensure Vault database secrets engine is enabled at path database/.",
@@ -904,7 +904,7 @@ generate_report() {
   fi
 
   # Add generic remediation for any service failures
-  if grep -q "FAILED" "$STRESS_LOG"; then
+  if grep -q "FAILED" "$LOG_FILE"; then
     if ! jq '.stress_test_report.recommendations += [
       "General remediation steps for Vault/service integration failures:",
       "- Check Vault secrets engine and role configuration for the service.",
