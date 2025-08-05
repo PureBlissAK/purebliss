@@ -89,7 +89,7 @@ CERT_EXPIRES=$(docker exec purebliss-nginx openssl x509 -in /etc/nginx/certs/dev
 
 echo "[$(date)] Certificate verification:"
 echo "  Subject: $CERT_SUBJECT"
-echo "  Issuer: $CERT_ISSUER"  
+echo "  Issuer: $CERT_ISSUER"
 echo "  Expires: $CERT_EXPIRES"
 
 # Save certificate info for monitoring

@@ -1,8 +1,8 @@
 ### **Procedure 11: Letsencrypt Vault Integration** - `letsencrypt_vault_integration`
 
-**Automated by**: `vault-break-fix.sh letsencrypt_vault_integration`  
-**Triggered when**: Letsencrypt fails to fetch secrets from Vault, onboarding fails, or certbot errors  
-**Auto-execution**: When letsencrypt fails health check or on manual request  
+**Automated by**: `vault-break-fix.sh letsencrypt_vault_integration`
+**Triggered when**: Letsencrypt fails to fetch secrets from Vault, onboarding fails, or certbot errors
+**Auto-execution**: When letsencrypt fails health check or on manual request
 
 ```bash
 function fix_letsencrypt_vault_integration() {
@@ -33,6 +33,87 @@ function fix_letsencrypt_vault_integration() {
 - Fix permissions: `docker exec purebliss-letsencrypt chown 101:101 /etc/letsencrypt/live/*`
 - Check logs: `/opt/my-secure-ha-stack/logs/dev-environment-setup.log`
 
+---
+
+### **Procedure 12: Prometheus Vault Integration** - `prometheus_vault_integration`
+
+**Automated by**: `vault-break-fix.sh prometheus_vault_integration`
+**Triggered when**: Prometheus fails to start, metrics not collected, or Vault integration issues
+**Auto-execution**: When prometheus fails health check or on manual request
+
+```bash
+function fix_prometheus_vault_integration() {
+  echo "🔧 Validating and repairing Prometheus Vault integration..."
+  
+  # Ensure Vault is accessible
+  if ! vault status >/dev/null 2>&1; then
+    echo "❌ Vault not accessible, cannot configure Prometheus"
+    return 1
+  fi
+  
+  # Verify Prometheus secrets in Vault
+  if ! vault kv get prometheus-config/metrics >/dev/null 2>&1; then
+    echo "🔧 Creating Prometheus metrics configuration in Vault..."
+    vault kv put prometheus-config/metrics \
+      scrape_interval="15s" \
+      evaluation_interval="15s" \
+      retention_time="200h" \
+      admin_password="$(openssl rand -base64 32)"
+  fi
+  
+  if ! vault kv get prometheus-config/targets >/dev/null 2>&1; then
+    echo "🔧 Creating Prometheus targets configuration in Vault..."
+    vault kv put prometheus-config/targets \
+      vault_endpoint="purebliss-vault:8200" \
+      postgres_endpoint="purebliss-postgres:5432" \
+      redis_endpoint="purebliss-redis:6379" \
+      keycloak_endpoint="purebliss-keycloak:8080" \
+      nginx_endpoint="purebliss-nginx:80" \
+      grafana_endpoint="purebliss-grafana:3001"
+  fi
+  
+  # Fix data directory permissions
+  if [[ -d "/tmp/purebliss-storage/prometheus" ]]; then
+    sudo chown -R 65534:65534 /tmp/purebliss-storage/prometheus 2>/dev/null || true
+    sudo chmod 755 /tmp/purebliss-storage/prometheus 2>/dev/null || true
+  fi
+  
+  # Restart Prometheus if needed
+  if docker ps -q -f name=purebliss-prometheus >/dev/null; then
+    echo "🔧 Restarting Prometheus container..."
+    docker restart purebliss-prometheus
+  else
+    echo "🔧 Starting Prometheus container..."
+    cd /opt/dev-purebliss/services/prometheus
+    docker-compose -f prometheus-docker-compose.yml up -d
+  fi
+  
+  # Validate health
+  sleep 10
+  if curl -s http://localhost:9090/-/healthy | grep -q "Healthy"; then
+    echo "✅ Prometheus health check passed"
+  else
+    echo "⚠️  Prometheus health check failed"
+  fi
+  
+  echo "🔧 Prometheus Vault integration check complete"
+}
+```
+
+**Common Issues:**
+- Permission denied on data directory
+- Vault secrets missing or inaccessible
+- Network connectivity issues between containers
+- Configuration file mounting problems
+
+**Manual Fixes:**
+- Fix permissions: `sudo chown -R 65534:65534 /tmp/purebliss-storage/prometheus`
+- Check Vault: `vault kv get prometheus-config/metrics`
+- Restart service: `cd /opt/dev-purebliss/services/prometheus && docker-compose -f prometheus-docker-compose.yml restart`
+- Check logs: `docker logs purebliss-prometheus --tail 20`
+
+---
+
 ````markdown
 # Vault Break/Fix Automation Report for Pure Bliss Infrastructure
 ## Comprehensive Troubleshooting, Automation, and Integration Guide
@@ -47,13 +128,18 @@ function fix_letsencrypt_vault_integration() {
 Our enhanced `start-all-services.sh` orchestrator now provides **complete automation** without any manual intervention. This break/fix report is **directly integrated** with the startup script and provides automated problem resolution for all services.
 
 ### **Key Automation Achievements:**
-✅ **Container Cleanup & Fresh Startup**: Automatic container cleanup for clean restarts  
-✅ **Vault Auto-Unsealing**: Intelligent unsealing with stored keys  
-✅ **Service Dependencies**: Proper startup order with dependency validation  
-✅ **PostgreSQL Integration**: Fixed to use proper compose files and credentials  
-✅ **Robust Error Handling**: Retry logic and automated problem resolution  
-✅ **Service Onboarding**: Automated Vault integration for Redis, Nginx, Keycloak, Let's Encrypt  
-✅ **Health Validation**: Comprehensive health checks for all services  
+✅ **Container Cleanup & Fresh Startup**: Automatic container cleanup for clean restarts
+✅ **Vault Auto-Unsealing**: Intelligent unsealing with stored keys
+✅ **Service Dependencies**: Proper startup order with dependency management
+✅ **Robust Error Handling**: Retry logic and automated problem resolution
+✅ **Health Validation**: Comprehensive health checks for all services
+✅ **Prometheus Monitoring**: Full metrics collection and service monitoring integration
+✅ **Zero-Restart Operations**: Single service management without environment disruption
+✅ **Service Dependencies**: Proper startup order with dependency validation
+✅ **PostgreSQL Integration**: Fixed to use proper compose files and credentials
+✅ **Robust Error Handling**: Retry logic and automated problem resolution
+✅ **Service Onboarding**: Automated Vault integration for Redis, Nginx, Keycloak, Let's Encrypt
+✅ **Health Validation**: Comprehensive health checks for all services
 
 **RESULT**: Simply run `./start-all-services.sh` and all services start automatically with full break/fix integration!
 
@@ -126,10 +212,10 @@ onboard_redis_to_vault() {
 
 ## 🎯 **EXECUTIVE SUMMARY**
 
-**Service**: Vault + Vault Agent + PostgreSQL + Redis + Keycloak Integration  
-**Status**: ✅ **100% OPERATIONAL** - All Services Healthy and Functional  
-**Automation Level**: Full automation with intelligent break/fix procedures  
-**Integration**: PostgreSQL dynamic secrets + Redis onboarding + Keycloak authentication  
+**Service**: Vault + Vault Agent + PostgreSQL + Redis + Keycloak Integration
+**Status**: ✅ **100% OPERATIONAL** - All Services Healthy and Functional
+**Automation Level**: Full automation with intelligent break/fix procedures
+**Integration**: PostgreSQL dynamic secrets + Redis onboarding + Keycloak authentication
 
 ### **Current Service Status**
 - **Vault Server**: purebliss-vault (✅ healthy, TLS on 8200)
@@ -151,20 +237,20 @@ onboard_redis_to_vault() {
 
 ### **Procedure 1: Network Configuration** - `network`
 
-**Automated by**: `vault-break-fix.sh network`  
-**Triggered when**: Docker network issues, container connectivity problems  
-**Auto-execution**: Pre-startup phase  
+**Automated by**: `vault-break-fix.sh network`
+**Triggered when**: Docker network issues, container connectivity problems
+**Auto-execution**: Pre-startup phase
 
 ```bash
 function fix_network() {
   echo "🔧 Fixing network configuration..."
-  
+
   # Create purebliss-net if missing
   if ! docker network ls --format '{{.Name}}' | grep -q '^purebliss-net$'; then
     echo "Creating Docker network purebliss-net..."
     docker network create --driver bridge purebliss-net
   fi
-  
+
   # Validate network connectivity
   if docker network inspect purebliss-net >/dev/null 2>&1; then
     echo "✅ Network purebliss-net validated"
@@ -172,87 +258,87 @@ function fix_network() {
     echo "❌ Network creation failed - manual intervention required"
     return 1
   fi
-  
+
   echo "🔧 Network configuration fix completed"
 }
 ```
 
 ### **Procedure 2: Permission Issues** - `permissions`
 
-**Automated by**: `vault-break-fix.sh permissions`  
-**Triggered when**: Certificate access denied, vault data directory issues  
-**Auto-execution**: Pre-startup phase, after 10 health check failures  
+**Automated by**: `vault-break-fix.sh permissions`
+**Triggered when**: Certificate access denied, vault data directory issues
+**Auto-execution**: Pre-startup phase, after 10 health check failures
 
 ```bash
 function fix_permissions() {
   echo "🔧 Fixing permission issues..."
-  
+
   # Check if sudo is available
   if sudo -n true 2>/dev/null; then
     echo "🔐 Sudo access available - applying comprehensive fixes"
-    
+
     # Fix Vault data directory
     sudo chown -R 1000:1000 /opt/my-secure-ha-stack/vault/ 2>/dev/null || true
-    
+
     # Fix certificate permissions
     sudo chown -R 1000:1000 /opt/dev-purebliss/services/vault/certs/ 2>/dev/null || true
     chmod 644 /opt/dev-purebliss/services/vault/certs/selfsigned/*.pem 2>/dev/null || true
-    
+
     echo "✅ Full permission fix applied"
   else
     echo "🔧 Sudo requires password prompt - using alternative methods"
-    
+
     # Fix what we can without sudo
     echo "🔧 Fixing Vault data directory permissions inside container..."
     docker exec purebliss-vault chown -R vault:vault /vault/data 2>/dev/null || true
-    
+
     echo "🔧 Cannot fix host vault directory permissions - may need manual intervention"
     echo "⚠️  Manual fix needed: sudo chown -R 1000:1000 /opt/my-secure-ha-stack/vault/"
   fi
-  
+
   echo "🔧 Permissions fixed successfully (automated where possible)"
 }
 ```
 
 ### **Procedure 3: TLS Configuration** - `tls_config`
 
-**Automated by**: `vault-break-fix.sh tls_config`  
-**Triggered when**: Certificate missing/invalid, TLS handshake failures  
-**Auto-execution**: Pre-startup phase  
+**Automated by**: `vault-break-fix.sh tls_config`
+**Triggered when**: Certificate missing/invalid, TLS handshake failures
+**Auto-execution**: Pre-startup phase
 
 ```bash
 function fix_tls_config() {
   echo "🔧 Fixing TLS configuration..."
-  
+
   local cert_dir="/opt/dev-purebliss/services/vault/certs/selfsigned"
-  
+
   # Check if certificates exist and are valid
   if [[ ! -f "$cert_dir/privkey.pem" ]] || [[ ! -f "$cert_dir/fullchain.pem" ]]; then
     echo "🔐 Regenerating self-signed certificates..."
-    
+
     mkdir -p "$cert_dir"
-    
+
     # Generate new self-signed certificate
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 
-      -keyout "$cert_dir/privkey.pem" 
-      -out "$cert_dir/fullchain.pem" 
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048
+      -keyout "$cert_dir/privkey.pem"
+      -out "$cert_dir/fullchain.pem"
       -subj "/CN=dev.purebliss.app" 2>/dev/null || {
       echo "❌ Certificate generation failed"
       return 1
     }
-    
+
     # Set proper permissions
     chown 1000:1000 "$cert_dir"/*.pem 2>/dev/null || true
     chmod 644 "$cert_dir"/*.pem
-    
+
     echo "✅ New certificates generated and configured"
   fi
-  
+
   # Validate vault.hcl configuration
   local config_file="/opt/dev-purebliss/services/vault/vault.hcl"
   if [[ ! -f "$config_file" ]] || ! grep -q "tls_cert_file" "$config_file"; then
     echo "📝 Creating/updating Vault TLS configuration..."
-    
+
     cat > "$config_file" << 'EOF'
 storage "file" {
   path = "/vault/data"
@@ -268,34 +354,34 @@ listener "tcp" {
 api_addr = "https://dev.purebliss.app:8200"
 ui = true
 EOF
-    
+
     echo "✅ TLS configuration updated"
   fi
-  
+
   echo "🔧 TLS configuration fix completed"
 }
 ```
 
 ### **Procedure 4: Agent Configuration** - `agent_config`
 
-**Automated by**: `vault-break-fix.sh agent_config`  
-**Triggered when**: Vault Agent config errors, AppRole authentication issues  
-**Auto-execution**: Pre-startup phase  
+**Automated by**: `vault-break-fix.sh agent_config`
+**Triggered when**: Vault Agent config errors, AppRole authentication issues
+**Auto-execution**: Pre-startup phase
 
 ```bash
 function fix_agent_config() {
   echo "🔧 Fixing Vault Agent configuration..."
-  
+
   local agent_config_dir="/opt/dev-purebliss/services/vault/vault-agent-config"
   local config_file="$agent_config_dir/config.hcl"
-  
+
   # Ensure config directory exists
   mkdir -p "$agent_config_dir"
-  
+
   # Create/validate agent configuration
   if [[ ! -f "$config_file" ]] || ! grep -q "listener" "$config_file"; then
     echo "📝 Creating Vault Agent configuration..."
-    
+
     cat > "$config_file" << 'EOF'
 # Vault Agent configuration for Pure Bliss development
 pid_file = "/tmp/agent.pid"
@@ -318,33 +404,33 @@ api_proxy {
   use_auto_auth_token = false
 }
 EOF
-    
+
     echo "✅ Agent configuration created"
   fi
-  
+
   # Fix ownership
   chown -R 1000:1000 "$agent_config_dir" 2>/dev/null || true
-  
+
   echo "🔧 Vault Agent configuration fix completed"
 }
 ```
 
 ### **Procedure 5: Container Startup** - `container_startup`
 
-**Automated by**: `vault-break-fix.sh container_startup`  
-**Triggered when**: Container won't start, health checks failing  
-**Auto-execution**: Pre-startup phase, during health check failures  
+**Automated by**: `vault-break-fix.sh container_startup`
+**Triggered when**: Container won't start, health checks failing
+**Auto-execution**: Pre-startup phase, during health check failures
 
 ```bash
 function fix_container_startup() {
   echo "🔧 Diagnosing container startup issues..."
-  
+
   # Check container status
   local vault_status=$(docker inspect --format='{{.State.Status}}' purebliss-vault 2>/dev/null || echo "missing")
   local agent_status=$(docker inspect --format='{{.State.Status}}' purebliss-vault-agent 2>/dev/null || echo "missing")
-  
+
   echo "🔧 Vault Status: $vault_status, Agent Status: $agent_status"
-  
+
   # Fix Vault container issues
   if [[ "$vault_status" != "running" ]]; then
     if [[ "$vault_status" == "missing" ]]; then
@@ -359,7 +445,7 @@ function fix_container_startup() {
       docker restart purebliss-vault
     fi
   fi
-  
+
   # Fix Agent container issues
   if [[ "$agent_status" != "running" ]]; then
     if [[ "$agent_status" == "missing" ]]; then
@@ -373,37 +459,37 @@ function fix_container_startup() {
       docker restart purebliss-vault-agent
     fi
   fi
-  
+
   echo "🔧 Container startup fix completed"
 }
 ```
 
 ### **Procedure 6: PostgreSQL Integration** - `postgresql_integration`
 
-**Automated by**: `vault-break-fix.sh postgresql_integration`  
-**Triggered when**: Database secrets engine issues, dynamic credential problems  
-**Auto-execution**: Post-startup validation phase  
+**Automated by**: `vault-break-fix.sh postgresql_integration`
+**Triggered when**: Database secrets engine issues, dynamic credential problems
+**Auto-execution**: Post-startup validation phase
 
 ```bash
 function fix_postgresql_integration() {
   echo "🔧 Validating PostgreSQL-Vault integration..."
-  
+
   # Ensure Vault is unsealed and ready
   if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
     echo "❌ Vault is sealed - cannot validate PostgreSQL integration"
     return 1
   fi
-  
+
   # Test dynamic credential generation
   if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
     export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_SKIP_VERIFY=1
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-    
+
     # Test database connection
     if vault read database/config/postgres >/dev/null 2>&1; then
       echo "✅ Database connection configured"
-      
+
       # Test dynamic credential generation
       if vault read database/creds/postgres-role >/dev/null 2>&1; then
         echo "✅ Dynamic credentials working"
@@ -417,44 +503,44 @@ function fix_postgresql_integration() {
     echo "❌ Vault token not found - cannot test integration"
     return 1
   fi
-  
+
   echo "🔧 PostgreSQL integration validation completed"
 }
 ```
 
 ### **Procedure 7: Redis Integration** - `redis_integration`
 
-**NEW**: Automated Redis onboarding and validation  
-**Automated by**: `vault-break-fix.sh redis_integration`  
-**Triggered when**: Redis-Vault connection issues  
-**Auto-execution**: When Redis starts  
+**NEW**: Automated Redis onboarding and validation
+**Automated by**: `vault-break-fix.sh redis_integration`
+**Triggered when**: Redis-Vault connection issues
+**Auto-execution**: When Redis starts
 
 ```bash
 function fix_redis_integration() {
   echo "🔧 Validating Redis-Vault integration..."
-  
+
   # Check if Redis container is running
   if ! docker ps | grep -q purebliss-redis; then
     echo "❌ Redis container not running - cannot validate integration"
     return 1
   fi
-  
+
   # Ensure Vault is ready
   if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
     echo "❌ Vault is sealed - cannot validate Redis integration"
     return 1
   fi
-  
+
   # Test Redis connection from Vault
   if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
     export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_SKIP_VERIFY=1
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-    
+
     # Test Redis database plugin connection
     if vault read redis/config/redis >/dev/null 2>&1; then
       echo "✅ Redis connection configured in Vault"
-      
+
       # Test network connectivity
       if docker exec purebliss-vault nc -z purebliss-redis 6379 2>/dev/null; then
         echo "✅ Network connectivity to Redis confirmed"
@@ -471,82 +557,82 @@ function fix_redis_integration() {
     echo "❌ Vault token not found - cannot test Redis integration"
     return 1
   fi
-  
+
   echo "🔧 Redis integration validation completed"
 }
 ```
 
 ### **Procedure 8: Keycloak Integration** - `keycloak_integration`
 
-**NEW**: Automated Keycloak-Vault-PostgreSQL integration validation  
-**Automated by**: `vault-break-fix.sh keycloak_integration`  
-**Triggered when**: Keycloak startup issues, authentication failures, health check problems  
-**Auto-execution**: When Keycloak starts  
+**NEW**: Automated Keycloak-Vault-PostgreSQL integration validation
+**Automated by**: `vault-break-fix.sh keycloak_integration`
+**Triggered when**: Keycloak startup issues, authentication failures, health check problems
+**Auto-execution**: When Keycloak starts
 
 ```bash
 function fix_keycloak_integration() {
   echo "🔧 Validating Keycloak-Vault-PostgreSQL integration..."
-  
+
   # Check if Keycloak container is running
   if ! docker ps | grep -q purebliss-keycloak; then
     echo "❌ Keycloak container not running - cannot validate integration"
     return 1
   fi
-  
+
   # Check health status and fix if needed
   local keycloak_health
   keycloak_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-keycloak 2>/dev/null || echo "no_healthcheck")
-  
+
   if [[ "$keycloak_health" == "unhealthy" ]]; then
     echo "🔧 Keycloak health check failing - checking configuration..."
-    
+
     # Check if health check is using unavailable tools
     local healthcheck_test
     healthcheck_test=$(docker inspect --format='{{json .Config.Healthcheck.Test}}' purebliss-keycloak 2>/dev/null)
-    
+
     if echo "$healthcheck_test" | grep -q "curl"; then
       echo "🔧 Health check using curl - updating to TCP-based check..."
       # This requires container restart with updated compose file
       echo "⚠️  Health check needs manual update in docker-compose.yml"
       echo "   Replace curl with: exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3"
     fi
-    
+
     # Try restarting the container
     echo "🔄 Restarting Keycloak container..."
     docker restart purebliss-keycloak
     sleep 30
   fi
-  
+
   # Ensure Vault is ready for secrets
   if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
     echo "❌ Vault is sealed - cannot validate Keycloak integration"
     return 1
   fi
-  
+
   # Ensure PostgreSQL is running
   if ! docker ps | grep -q purebliss-postgres; then
     echo "❌ PostgreSQL container not running - Keycloak requires database"
     return 1
   fi
-  
+
   # Test Keycloak secrets in Vault
   if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
     export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_SKIP_VERIFY=1
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-    
+
     # Check if Keycloak secrets exist in Vault
     if vault kv get secret/keycloak >/dev/null 2>&1; then
       echo "✅ Keycloak secrets configured in Vault"
-      
+
       # Validate PostgreSQL database permissions
       if docker exec purebliss-postgres psql -U postgres -d keycloak -c "SELECT 1" >/dev/null 2>&1; then
         echo "✅ Keycloak database accessible"
-        
+
         # Check keycloak user permissions
         if docker exec purebliss-postgres psql -U postgres -d keycloak -c "\du keycloak" | grep -q keycloak; then
           echo "✅ Keycloak database user configured"
-          
+
           # Test keycloak user can access public schema
           if docker exec purebliss-postgres psql -U keycloak -d keycloak -c "SELECT 1" >/dev/null 2>&1; then
             echo "✅ Keycloak user schema permissions working"
@@ -563,7 +649,7 @@ function fix_keycloak_integration() {
         echo "❌ Cannot access Keycloak database"
         return 1
       fi
-      
+
       # Test Keycloak endpoint accessibility
       if curl -s "http://localhost:8080/" | grep -qE "(Keycloak|Resource not found)"; then
         echo "✅ Keycloak endpoint responding correctly"
@@ -571,12 +657,12 @@ function fix_keycloak_integration() {
         echo "⚠️  Keycloak endpoint not responding properly - checking container health..."
         docker logs purebliss-keycloak --tail 10
       fi
-      
+
     else
       echo "⚠️  Keycloak secrets not configured - creating default secrets..."
       # Enable KV v2 secrets engine if not already enabled
       vault secrets enable -version=2 kv 2>/dev/null || true
-      
+
       # Create default Keycloak secrets if missing
       vault kv put secret/keycloak \
         admin_password="admin123" \
@@ -590,7 +676,7 @@ function fix_keycloak_integration() {
     echo "❌ Vault token not found - cannot test Keycloak integration"
     return 1
   fi
-  
+
   echo "🔧 Keycloak integration validation completed"
 }
 ```
@@ -598,9 +684,9 @@ function fix_keycloak_integration() {
 
 ### **Procedure 10: Nginx PKI Integration** - `nginx_pki_integration`
 
-**Automated by**: `vault-break-fix.sh nginx_pki_integration`  
-**Triggered when**: Nginx is not serving Vault-signed certs, onboarding fails, or endpoint is not HTTPS  
-**Auto-execution**: When nginx fails health check or on manual request  
+**Automated by**: `vault-break-fix.sh nginx_pki_integration`
+**Triggered when**: Nginx is not serving Vault-signed certs, onboarding fails, or endpoint is not HTTPS
+**Auto-execution**: When nginx fails health check or on manual request
 
 ```bash
 function fix_nginx_pki_integration() {
@@ -640,23 +726,23 @@ function fix_nginx_pki_integration() {
 - Check logs: `/opt/my-secure-ha-stack/logs/dev-environment-setup.log`
 
 
-**Automated by**: `vault-break-fix.sh diagnostic`  
-**Triggered when**: General health issues, troubleshooting needed  
-**Auto-execution**: Post-startup validation, manual troubleshooting  
+**Automated by**: `vault-break-fix.sh diagnostic`
+**Triggered when**: General health issues, troubleshooting needed
+**Auto-execution**: Post-startup validation, manual troubleshooting
 
 ```bash
 function run_diagnostic() {
   echo "🔍 Running comprehensive Vault diagnostic..."
-  
+
   echo "📊 Container Status:"
   docker ps --format "table {{.Names}}	{{.Status}}	{{.Image}}" | grep -E "(purebliss-vault|purebliss-redis|purebliss-postgres)"
-  
+
   echo "🔗 Network Connectivity:"
   docker network inspect purebliss-net --format='{{.Name}}: {{len .Containers}} containers' 2>/dev/null || echo "❌ purebliss-net network missing"
-  
+
   echo "🔐 Vault Status:"
   curl -sk https://127.0.0.1:8200/v1/sys/health 2>/dev/null | grep -E '"sealed":|"initialized":' || echo "❌ Vault API not accessible"
-  
+
   echo "🔧 Certificate Status:"
   if [[ -f "/opt/dev-purebliss/services/vault/certs/selfsigned/fullchain.pem" ]]; then
     cert_expiry=$(openssl x509 -in /opt/dev-purebliss/services/vault/certs/selfsigned/fullchain.pem -noout -enddate 2>/dev/null | cut -d= -f2)
@@ -664,10 +750,10 @@ function run_diagnostic() {
   else
     echo "❌ TLS certificate missing"
   fi
-  
+
   echo "📁 File Permissions:"
   ls -la /opt/dev-purebliss/services/vault/certs/selfsigned/ 2>/dev/null || echo "❌ Certificate directory not accessible"
-  
+
   echo "🔍 Diagnostic completed"
 }
 ```
@@ -822,10 +908,10 @@ SERVICE_ORDER=(vault postgres vault-agent redis)
 
 ## 🎯 **STATUS: PRODUCTION READY**
 
-**Achievement**: Complete automation framework with intelligent break/fix procedures  
-**Integration**: Full startup script integration with Redis onboarding  
-**Reliability**: Comprehensive error handling and recovery automation  
-**Security**: Zero manual intervention required for normal operations  
+**Achievement**: Complete automation framework with intelligent break/fix procedures
+**Integration**: Full startup script integration with Redis onboarding
+**Reliability**: Comprehensive error handling and recovery automation
+**Security**: Zero manual intervention required for normal operations
 
 **Next Steps**: Ready for service expansion with monitoring services (prometheus, grafana, loki) and application services (keycloak, nginx, plane) when needed.
 
@@ -836,9 +922,9 @@ SERVICE_ORDER=(vault postgres vault-agent redis)
 ## POSTGRESQL INTEGRATION SUCCESS (NEW)
 
 ### Achievement: Complete PostgreSQL Onboarding with Vault
-**Date Completed**: August 4, 2025, 12:35 PM EDT  
-**Status**: ✅ 100% OPERATIONAL  
-**Integration Type**: Database Secrets Engine + Dynamic Credentials  
+**Date Completed**: August 4, 2025, 12:35 PM EDT
+**Status**: ✅ 100% OPERATIONAL
+**Integration Type**: Database Secrets Engine + Dynamic Credentials
 
 **What We Accomplished**:
 1. **Fresh PostgreSQL Setup**: Clean database with proper superuser configuration
@@ -849,19 +935,19 @@ SERVICE_ORDER=(vault postgres vault-agent redis)
 
 ### PostgreSQL Configuration Details
 
-**Container**: `purebliss-postgres` (PostgreSQL 16)  
-**Bootstrap Credentials**: `postgres:bootstrap_admin_password_12345`  
-**Vault Admin**: `vault_admin:vault_admin_password_123`  
-**Databases Created**: keycloak, plane, vikunja, vault_managed, postgres  
-**Service Users**: keycloak, plane, vikunja (with dedicated database access)  
+**Container**: `purebliss-postgres` (PostgreSQL 16)
+**Bootstrap Credentials**: `postgres:bootstrap_admin_password_12345`
+**Vault Admin**: `vault_admin:vault_admin_password_123`
+**Databases Created**: keycloak, plane, vikunja, vault_managed, postgres
+**Service Users**: keycloak, plane, vikunja (with dedicated database access)
 
 ### Vault Database Secrets Configuration
 
-**Connection String**: `postgresql://{{username}}:{{password}}@purebliss-postgres:5432/postgres?sslmode=disable`  
-**Plugin**: `postgresql-database-plugin`  
-**Role**: `postgres-role` (configured for dynamic user creation)  
-**Lease Duration**: 1 hour (renewable)  
-**Cleanup**: Automatic user removal on lease expiration  
+**Connection String**: `postgresql://{{username}}:{{password}}@purebliss-postgres:5432/postgres?sslmode=disable`
+**Plugin**: `postgresql-database-plugin`
+**Role**: `postgres-role` (configured for dynamic user creation)
+**Lease Duration**: 1 hour (renewable)
+**Cleanup**: Automatic user removal on lease expiration
 
 ### Dynamic Credential Generation Working
 
@@ -884,11 +970,11 @@ docker exec purebliss-postgres psql -U v-root-postgres-NATUxDgKc7ihNh6gcU7i-1754
 
 ### Validation Scripts Created
 
-**Location**: `/opt/dev-purebliss/services/postgres/validate-setup.sh`  
-**Purpose**: Comprehensive validation of PostgreSQL-Vault integration  
+**Location**: `/opt/dev-purebliss/services/postgres/validate-setup.sh`
+**Purpose**: Comprehensive validation of PostgreSQL-Vault integration
 **Features**:
 - Container health verification
-- Database connectivity testing  
+- Database connectivity testing
 - Dynamic credential generation testing
 - Service database enumeration
 - User privilege verification
@@ -1274,7 +1360,7 @@ if [[ ! -f "$cert_dir/privkey.pem" ]] || [[ ! -f "$cert_dir/fullchain.pem" ]]; t
         -keyout "$cert_dir/privkey.pem" \
         -out "$cert_dir/fullchain.pem" \
         -subj "/CN=dev.purebliss.app"
-    
+
     chown 1000:1000 "$cert_dir"/*.pem
     chmod 644 "$cert_dir"/*.pem
     echo "✅ Certificates regenerated"
@@ -1314,7 +1400,7 @@ Use this checklist to verify Vault is operational:
 - [ ] `docker inspect --format='{{.State.Health.Status}}' purebliss-vault` returns "healthy"
 - [ ] `docker inspect --format='{{.State.Status}}' purebliss-vault-agent` returns "running"
 
-### ✅ Network Connectivity  
+### ✅ Network Connectivity
 - [ ] `curl -sk https://127.0.0.1:8200/v1/sys/health` returns JSON response
 - [ ] `curl -s http://127.0.0.1:8100/v1/sys/health` responds or times out gracefully
 - [ ] `docker network ls | grep purebliss-net` shows network exists
@@ -1360,9 +1446,9 @@ To integrate this break/fix report with the startup script, add this function:
 function vault_break_fix() {
     local issue_type="$1"
     local break_fix_report="/opt/dev-purebliss/services/vault/vault-break-fix-report.md"
-    
+
     echo "[$(date)] INFO: Running Vault break/fix procedure for: $issue_type" >> "$LOG_FILE"
-    
+
     case "$issue_type" in
         "container_startup")
             # Run container startup fix

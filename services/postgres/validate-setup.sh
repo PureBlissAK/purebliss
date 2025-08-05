@@ -42,7 +42,7 @@ if [[ $? -eq 0 ]]; then
     VAULT_USER=$(echo "$CREDS" | jq -r '.data.username')
     VAULT_PASS=$(echo "$CREDS" | jq -r '.data.password')
     echo "   ✅ Generated: $VAULT_USER"
-    
+
     # Test connection with generated credentials
     echo "   Testing connection with dynamic credentials..."
     PGPASSWORD="$VAULT_PASS" docker exec purebliss-postgres psql -U "$VAULT_USER" -d postgres -t -c "SELECT 'Vault dynamic credentials working!' as status;" 2>/dev/null || echo "   ❌ Connection with Vault credentials failed"
