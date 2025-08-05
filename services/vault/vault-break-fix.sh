@@ -1025,6 +1025,9 @@ function main() {
             vault_redis_integration_fix
             ;;
         "keycloak_integration"|"keycloak")
+        "nginx_integration"|"nginx")
+            vault_nginx_integration_fix
+            ;;
             vault_keycloak_integration_fix
             ;;
         "nginx_pki_integration"|"nginx_pki"|"nginx")
@@ -1095,3 +1098,37 @@ function main() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
 fi
+
+function vault_nginx_integration_fix() {
+    log_action "Fixing nginx Vault integration..."
+
+    # Check if nginx container is running
+    if ! docker ps | grep -q purebliss-nginx; then
+        log_error "nginx container not running - cannot validate integration"
+        return 1
+    fi
+
+    # Ensure Vault is ready
+    if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
+        log_error "Vault is sealed - cannot validate nginx integration"
+        return 1
+    fi
+
+    # Restart nginx integration
+    if [[ -x "/opt/dev-purebliss/services/nginx/start-nginx-with-vault.sh" ]]; then
+        log_action "Restarting nginx with Vault integration..."
+        /opt/dev-purebliss/services/nginx/start-nginx-with-vault.sh
+    else
+        log_warning "nginx Vault integration script not found"
+    fi
+
+    # Validate integration
+    if [[ -x "/opt/dev-purebliss/services/nginx/validate-nginx-vault-integration.sh" ]]; then
+        log_action "Validating nginx Vault integration..."
+        /opt/dev-purebliss/services/nginx/validate-nginx-vault-integration.sh
+    else
+        log_warning "nginx validation script not found"
+    fi
+
+    log_success "nginx Vault integration validation completed"
+}
