@@ -1,0 +1,87 @@
+[INFO] [2025-08-05 00:30:40.970] === Starting Enhanced Vault & Vault Agent Stress Test ===
+[INFO] [2025-08-05 00:30:40.972] Configuration: Iterations=1, Concurrent Ops=1, Stress Level=low
+[INFO] [2025-08-05 00:30:40.974] Detailed logs: /opt/my-secure-ha-stack/logs/stress-test-20250805-003040.log
+[INFO] [2025-08-05 00:30:40.984] Detected Vault in development mode (HTTP)
+[SUCCESS] [2025-08-05 00:30:41.094] Vault connectivity test passed
+[INFO] [2025-08-05 00:30:41.096] === Testing Vault Token Rotation ===
+[INFO] [2025-08-05 00:30:41.107] Detected Vault in development mode (HTTP)
+[SUCCESS] [2025-08-05 00:30:41.222] Vault connectivity test passed
+[SUCCESS] [2025-08-05 00:30:41.335] Created test token for rotation: hvs.CAES...
+[SUCCESS] [2025-08-05 00:30:41.443] Test token lookup successful
+[INFO] [2025-08-05 00:30:41.446] Waiting for token expiration...
+[SUCCESS] [2025-08-05 00:31:16.578] Token correctly expired after TTL
+[INFO] [2025-08-05 00:31:16.581] Token rotation test complete. Proceeding to main service tests.
+[INFO] [2025-08-05 00:31:16.584] === Stress Test Iteration 1/1 ===
+[INFO] [2025-08-05 00:31:16.587] Testing service: prometheus
+[PERF] [2025-08-05 00:31:16.613] Service check for prometheus took .019891098s
+[SUCCESS] [2025-08-05 00:31:16.647] Service prometheus is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:16.649] Validating dependencies for prometheus: monitoring,vault
+[PERF] [2025-08-05 00:31:16.670] Service check for vault took .016105686s
+[SUCCESS] [2025-08-05 00:31:16.672] Dependency validation passed for prometheus
+[INFO] [2025-08-05 00:31:16.674] Testing prometheus Vault configuration with 1 concurrent ops
+[PERF] [2025-08-05 00:31:16.793] prometheus config operation 1 took .112086316s
+[SUCCESS] [2025-08-05 00:31:16.796] prometheus Vault integration: SUCCESS (0/1 tests passed)
+[INFO] [2025-08-05 00:31:17.801] Testing service: nginx
+[PERF] [2025-08-05 00:31:17.830] Service check for nginx took .021096202s
+[SUCCESS] [2025-08-05 00:31:17.865] Service nginx is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:17.867] Validating dependencies for nginx: proxy,vault,letsencrypt
+[PERF] [2025-08-05 00:31:17.888] Service check for vault took .015780769s
+[SUCCESS] [2025-08-05 00:31:17.891] Dependency validation passed for nginx
+[INFO] [2025-08-05 00:31:17.893] Testing Nginx PKI certificates with 1 concurrent ops
+[ERROR] [2025-08-05 00:31:18.003] Nginx PKI test 1: CA read failed
+[ERROR] [2025-08-05 00:31:18.120] Nginx certificate generation test 1: FAILED
+[PERF] [2025-08-05 00:31:18.126] Nginx PKI operation 1 took .226232168s
+[SUCCESS] [2025-08-05 00:31:18.128] Nginx PKI integration: SUCCESS (0/1 tests passed)
+[INFO] [2025-08-05 00:31:19.134] Testing service: redis
+[PERF] [2025-08-05 00:31:19.162] Service check for redis took .020783365s
+[SUCCESS] [2025-08-05 00:31:19.197] Service redis is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:19.199] Validating dependencies for redis: cache,vault
+[SUCCESS] [2025-08-05 00:31:19.201] Dependency validation passed for redis
+[INFO] [2025-08-05 00:31:19.204] Testing Redis Vault configuration with 1 concurrent ops
+[ERROR] [2025-08-05 00:31:19.317] Redis config test 1: FAILED
+[SUCCESS] [2025-08-05 00:31:19.380] Redis direct connection test 1: SUCCESS
+[PERF] [2025-08-05 00:31:19.385] Redis operation 1 took .174938435s
+[SUCCESS] [2025-08-05 00:31:19.388] Redis Vault integration: SUCCESS (0/1 tests passed)
+[INFO] [2025-08-05 00:31:20.394] Testing service: postgres
+[PERF] [2025-08-05 00:31:20.423] Service check for postgres took .020341320s
+[SUCCESS] [2025-08-05 00:31:20.459] Service postgres is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:20.462] Validating dependencies for postgres: database,vault
+[SUCCESS] [2025-08-05 00:31:20.464] Dependency validation passed for postgres
+[INFO] [2025-08-05 00:31:20.468] Testing PostgreSQL dynamic credentials with 1 concurrent ops
+[ERROR] [2025-08-05 00:31:20.580] Dynamic credential test 1: Vault read failed
+[PERF] [2025-08-05 00:31:20.585] PostgreSQL credential operation 1 took .111663376s
+[SUCCESS] [2025-08-05 00:31:20.588] PostgreSQL dynamic credentials: SUCCESS (0/1 tests passed)
+[INFO] [2025-08-05 00:31:21.593] Testing service: vault-agent
+[PERF] [2025-08-05 00:31:21.620] Service check for vault-agent took .018941989s
+[SUCCESS] [2025-08-05 00:31:21.657] Service vault-agent is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:21.660] Validating dependencies for vault-agent: core,vault
+[PERF] [2025-08-05 00:31:21.686] Service check for vault took .020775774s
+[SUCCESS] [2025-08-05 00:31:21.688] Dependency validation passed for vault-agent
+[INFO] [2025-08-05 00:31:21.690] Testing Vault Agent functionality with 1 checks
+[WARNING] [2025-08-05 00:31:21.709] Vault Agent token renewal test 1: No renewal logs found
+[SUCCESS] [2025-08-05 00:31:21.719] Vault Agent API proxy test 1: SUCCESS
+[PERF] [2025-08-05 00:31:21.724] Vault Agent operation 1 took .028283974s
+[SUCCESS] [2025-08-05 00:31:21.727] Vault Agent functionality: SUCCESS (0/1 tests passed)
+[INFO] [2025-08-05 00:31:22.731] Testing service: letsencrypt
+[PERF] [2025-08-05 00:31:22.755] Service check for letsencrypt took .016363239s
+[SUCCESS] [2025-08-05 00:31:22.792] Service letsencrypt is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:22.795] Validating dependencies for letsencrypt: certs,vault
+[SUCCESS] [2025-08-05 00:31:22.797] Dependency validation passed for letsencrypt
+[INFO] [2025-08-05 00:31:22.799] Testing letsencrypt Vault configuration with 1 concurrent ops
+[PERF] [2025-08-05 00:31:22.915] letsencrypt config operation 1 took .110197548s
+[SUCCESS] [2025-08-05 00:31:22.918] letsencrypt Vault integration: SUCCESS (0/1 tests passed)
+[INFO] [2025-08-05 00:31:23.923] Testing service: loki
+[PERF] [2025-08-05 00:31:23.952] Service check for loki took .020517167s
+[SUCCESS] [2025-08-05 00:31:23.991] Service loki is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:23.993] Validating dependencies for loki: logging,vault
+[PERF] [2025-08-05 00:31:24.015] Service check for vault took .016153144s
+[SUCCESS] [2025-08-05 00:31:24.017] Dependency validation passed for loki
+[INFO] [2025-08-05 00:31:24.019] Testing loki Vault configuration with 1 concurrent ops
+[PERF] [2025-08-05 00:31:24.155] loki config operation 1 took .128917167s
+[SUCCESS] [2025-08-05 00:31:24.158] loki Vault integration: SUCCESS (0/1 tests passed)
+[INFO] [2025-08-05 00:31:25.164] Testing service: vault
+[PERF] [2025-08-05 00:31:25.192] Service check for vault took .020704710s
+[SUCCESS] [2025-08-05 00:31:25.229] Service vault is healthy (attempt 1)
+[INFO] [2025-08-05 00:31:25.231] Validating dependencies for vault: core,self
+[SUCCESS] [2025-08-05 00:31:25.233] Dependency validation passed for vault
+[INFO] [2025-08-05 00:31:25.236] Testing Vault core operations for vault with 1 concurrent ops

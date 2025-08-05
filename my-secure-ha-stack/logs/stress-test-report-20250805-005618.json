@@ -1,0 +1,36 @@
+{
+  "stress_test_report": {
+    "timestamp": "2025-08-05T00:56:18-04:00",
+    "test_duration_seconds": 0,
+    "configuration": {
+      "iterations": 1,
+      "concurrent_operations": 1,
+      "stress_level": "low",
+      "vault_ops_per_iteration": 3
+    },
+    "metrics": {
+      "total_tests": 0,
+      "successful_tests": 0,
+      "failed_tests": 12,
+      "success_rate_percent": 0,
+      "vault_operations": 12,
+      "vault_failures": 0,
+      "vault_success_rate_percent": 100.00
+    },
+    "services_tested": [
+      "prometheus",
+      "grafana",
+      "plane",
+      "nginx",
+      "redis",
+      "postgres",
+      "vault-agent",
+      "letsencrypt",
+      "codeserver",
+      "loki",
+      "vault",
+      "keycloak"
+    ],
+    "recommendations": []
+  }
+}

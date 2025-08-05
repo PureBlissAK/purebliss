@@ -1,0 +1,349 @@
+[Tue Aug  5 12:53:55 AM EDT 2025] INFO: Purging orphaned and stale Docker containers, networks, and images (preserving certificate volumes)...
+open /opt/dev-purebliss/docker-compose.yml: no such file or directory
+Deleted Containers:
+a45fa026e5cb1444dc1ae6dd1034ada2aac83a5de69e5bef3938ee112968fd10
+adbc43b38c40305bbf909e1097bd07d4e70f2d067158c1611944e399801a175f
+c46106499f2d0b27a80f4a880240082618a0ee5fcd1cf934edd8434b61086757
+
+Deleted Images:
+untagged: letsencrypt-letsencrypt:latest
+deleted: sha256:bc22d1adb21eaf50cbb5e8cedb7f5b0f22d7c1c08b18738919b514c8a65f3356
+untagged: purebliss-nginx:latest
+deleted: sha256:08337a0acf277f269964fa36f17dd4cccd11f50849ffcda25751abda378af45e
+untagged: hashicorp/vault:1.17.3
+untagged: hashicorp/vault@sha256:6dbaf64766d3ff02493bfe492fa12cb3c28a0f294a689f1356b6388e3be89bf2
+untagged: vault-vault:latest
+deleted: sha256:c697a95f47b4ba8fd31690464b9dfa86c39eac5e1d84cb29519289a6dea9850e
+untagged: vault-agent-vault-agent:latest
+deleted: sha256:d59245f5dcd41a1a59467a28fd80d6284d434ea7c997f23e6868fd5ee22c1022
+untagged: nginx:latest
+untagged: nginx@sha256:84ec966e61a8c7846f509da7eb081c55c1d56817448728924a87ab32f12a72fb
+deleted: sha256:2cd1d97f893f70cee86a38b7160c30e5750f3ed6ad86c598884ca9c6a563a501
+
+Deleted build cache objects:
+zdn9p082d3ublyz0ehl1oiqdp
+kwzt0z9jdo6nl4uu9uc9x5s5r
+tzj1ejqgjfaq8halkt9eukbni
+swil8bijw4egp47pwprbivknb
+bvt92xugk4uxsxtyjdslpkxy5
+8r83gim267mdoliin1mcwctl1
+zl60pa47mvjuhixocadwygs6u
+go8zvunkx0wob34lsjfpc4a8p
+w65n80lxvoac5v6wz2zjvg1da
+y9wglo8rufy2q42i050gzwjiz
+hyjr21melzgyvceisp9dd5ch3
+mc7z56223zsixrbyesfq5chyy
+xq5t1r32ggeku4ldd47q1itw8
+p0lxah46krwz1yn4vw0d7k56l
+1vxck50z7xs8ju8up6uqbvtzk
+kg9l7fyb1v9tdp4r29cx8i0tf
+wwoueypmpuowqevv0iorb8aj4
+2zkqqhnhej1xdf6g8yipe5muo
+6uxfju0eom8munbdlhbe0pk5y
+n37h11ja0a7qpmy50yr249uxr
+urukyvlvu668io4ysjap9gvw0
+7vyf9w2yknabsrv0fjeb1o8sk
+abob1yw0o5dxmm7r5m5hqhfn9
+msznsfa1q8uqcvz5kk2gb5kcm
+5l5wk7hcvd78v1nuwgkdqwl8z
+hwodrtpoy5qxj55bujnal72g9
+lefr96f6n6tnea3wjv93sgwpl
+r6r6uawhsk8missipeg6e9038
+oufpcethjryww3oc69ei4emyr
+m36ejt0tsp5v70c178z310b3x
+x1l4lw1h4zjtvberxbqbcj2bd
+3p29u45e1bgtzvdsmoslypmdh
+wafuh6yb8baeyhu5vbvjw05bt
+h5a4y63lvn6zprhk4cioe1oh1
+2csjtoi1fca2qiew9qcswpwrx
+366c4or6urcyondyfom80itke
+vr9s5s408h34teok941b2slaa
+s49oq4avy6eh3xc9yvtcbt39j
+sthd4ob7nkjf5v54ddi8m3bi7
+u5iuqdzr6mx0lik0naonjoa1h
+t09fwdbyn93gopphj05utrky0
+txwa8ahqf927449g68tzs1grz
+ta8qslxa9zb5kyv6p907rvpym
+yojr87i00hy65rb7aqmqljk3x
+u4wclwcrib1nawd5bfw08hlrq
+
+Total reclaimed space: 886.7MB
+Total reclaimed space: 0B
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Docker environment purged (certificate volumes preserved).
+70d38cc78b88f481bd7c3000cbb9dbc92bd6de549f1d9fb6713e3833b018c705
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Created Docker bridge network purebliss-net
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Setting services directory ownership...
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Setting up SSL certificates...
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Generating self-signed certificate as fallback...
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Generating self-signed SSL certificate...
+..............+.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*....+...+.........+.+..+......+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.+..+..........+......+.................+...............+.......+.....+...+..........+........+......+.+...+..+.......+...........+.+...+...+.....+.........+...+............+...+......+.+......+.................+......+......+....+..+...+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.....+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*........+....+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.....+........+...+.......+.....+....+........+.+.....+.+.........+..+...+................+......+............+...+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-----
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Self-signed SSL certificate generated successfully.
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Setting up Let's Encrypt certificate...
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Let's Encrypt certificate already exists at /mnt/raid0/nginx/certs/live/dev.purebliss.app-0001.
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Finalizing Nginx SSL configuration...
+[Tue Aug  5 12:53:57 AM EDT 2025] INFO: Configuring Nginx to use Let's Encrypt certificate at /mnt/raid0/nginx/certs/live/dev.purebliss.app-0001...
+[Tue Aug  5 12:54:08 AM EDT 2025] INFO: Starting nginx with final configuration...
+[Tue Aug  5 12:54:09 AM EDT 2025] INFO: Waiting for nginx to become healthy after SSL setup... (1/30)
+[Tue Aug  5 12:54:13 AM EDT 2025] INFO: Waiting for nginx to become healthy after SSL setup... (2/30)
+[Tue Aug  5 12:54:17 AM EDT 2025] INFO: Waiting for nginx to become healthy after SSL setup... (3/30)
+[Tue Aug  5 12:54:21 AM EDT 2025] INFO: Nginx is healthy after SSL setup.
+[Tue Aug  5 12:54:21 AM EDT 2025] INFO: Starting all Pure Bliss core services
+[Tue Aug  5 12:54:21 AM EDT 2025] INFO: nginx is already running, skipping startup.
+[Tue Aug  5 12:54:21 AM EDT 2025] INFO: Building letsencrypt...
+#1 [internal] load local bake definitions
+#1 reading from stdin 412B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from letsencrypt-dockerfile
+#2 transferring dockerfile: 182B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/certbot/certbot:latest
+#3 DONE 0.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 2.87kB done
+#5 DONE 0.0s
+
+#6 [1/3] FROM docker.io/certbot/certbot:latest@sha256:263fe7ee9dde6440bf8baa957c0a8eb0118fc05ef86cf743c4cc84ca84303a21
+#6 resolve docker.io/certbot/certbot:latest@sha256:263fe7ee9dde6440bf8baa957c0a8eb0118fc05ef86cf743c4cc84ca84303a21 0.0s done
+#6 sha256:909abba7453814577a8e1f7b30af304cc99dd112c6f4e6d170515eb1a64e1a2e 2.62kB / 2.62kB done
+#6 sha256:95d0b35bc337d35dbdfed0c7e51498c727d9c1c49755cdbc099ca9b01470400a 8.08kB / 8.08kB done
+#6 sha256:0a9a5dfd008f05ebc27e4790db0709a29e527690c21bcbcd01481eaeb6bb49dc 3.63MB / 3.63MB 0.2s
+#6 sha256:8be8a68a3e49fec0b56794e7483db21dd3d7adf6591594deaa58e270f22f976a 0B / 13.55MB 0.2s
+#6 sha256:263fe7ee9dde6440bf8baa957c0a8eb0118fc05ef86cf743c4cc84ca84303a21 990B / 990B done
+#6 sha256:1799ce2dd17e35796abb5baa5ebd092f2e3acebfafbd180f0e07c2403e9209a7 0B / 459.80kB 0.2s
+#6 sha256:0a9a5dfd008f05ebc27e4790db0709a29e527690c21bcbcd01481eaeb6bb49dc 3.63MB / 3.63MB 0.2s done
+#6 sha256:8be8a68a3e49fec0b56794e7483db21dd3d7adf6591594deaa58e270f22f976a 2.10MB / 13.55MB 0.3s
+#6 sha256:1799ce2dd17e35796abb5baa5ebd092f2e3acebfafbd180f0e07c2403e9209a7 459.80kB / 459.80kB 0.2s done
+#6 extracting sha256:0a9a5dfd008f05ebc27e4790db0709a29e527690c21bcbcd01481eaeb6bb49dc 0.1s
+#6 sha256:1d7a63b094ee269ef952d5db0120848504eae8e5a17c28267080178878fe7efc 0B / 249B 0.3s
+#6 sha256:a2c580eaba127106d1eb12645055643fb390546815e719ad3e2ce558802df061 113B / 113B 0.3s done
+#6 sha256:8be8a68a3e49fec0b56794e7483db21dd3d7adf6591594deaa58e270f22f976a 10.49MB / 13.55MB 0.5s
+#6 extracting sha256:0a9a5dfd008f05ebc27e4790db0709a29e527690c21bcbcd01481eaeb6bb49dc 0.1s done
+#6 sha256:1d7a63b094ee269ef952d5db0120848504eae8e5a17c28267080178878fe7efc 249B / 249B 0.3s done
+#6 sha256:37579339bb657ef9c0bad7fc11497e1e4b8b6c77d39d1a285358e6d93602fd6a 38.18kB / 38.18kB 0.4s done
+#6 sha256:d9e07b9e5b0757402183564f728b4bbd04ed9bd09157c996a03be3df577caaf2 32.00kB / 32.00kB 0.4s done
+#6 sha256:d58808100c8d2e23c0ad3c8f0a97d6828d8684c16618a578986f382ddcae84f4 93.98kB / 93.98kB 0.4s done
+#6 extracting sha256:1799ce2dd17e35796abb5baa5ebd092f2e3acebfafbd180f0e07c2403e9209a7
+#6 sha256:396afed88755954e9e6330028c52fd1221b03a5fc31831a2caefbbd32bdd823b 0B / 5.01MB 0.5s
+#6 sha256:56082c55746e2c8c1d516eb08f2fe0b667e33010bc9a4cc11e3799bcacf3bbf5 0B / 433.42kB 0.5s
+#6 sha256:8be8a68a3e49fec0b56794e7483db21dd3d7adf6591594deaa58e270f22f976a 13.55MB / 13.55MB 0.6s
+#6 extracting sha256:1799ce2dd17e35796abb5baa5ebd092f2e3acebfafbd180f0e07c2403e9209a7 0.1s done
+#6 sha256:396afed88755954e9e6330028c52fd1221b03a5fc31831a2caefbbd32bdd823b 1.05MB / 5.01MB 0.6s
+#6 sha256:56082c55746e2c8c1d516eb08f2fe0b667e33010bc9a4cc11e3799bcacf3bbf5 433.42kB / 433.42kB 0.5s done
+#6 sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 0B / 19.34MB 0.6s
+#6 sha256:8be8a68a3e49fec0b56794e7483db21dd3d7adf6591594deaa58e270f22f976a 13.55MB / 13.55MB 0.6s done
+#6 sha256:396afed88755954e9e6330028c52fd1221b03a5fc31831a2caefbbd32bdd823b 2.10MB / 5.01MB 0.7s
+#6 sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 1.05MB / 19.34MB 0.7s
+#6 extracting sha256:8be8a68a3e49fec0b56794e7483db21dd3d7adf6591594deaa58e270f22f976a 0.1s
+#6 sha256:396afed88755954e9e6330028c52fd1221b03a5fc31831a2caefbbd32bdd823b 4.19MB / 5.01MB 0.8s
+#6 sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 3.15MB / 19.34MB 0.8s
+#6 sha256:396afed88755954e9e6330028c52fd1221b03a5fc31831a2caefbbd32bdd823b 5.01MB / 5.01MB 0.8s done
+#6 sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 6.29MB / 19.34MB 0.9s
+#6 sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 13.60MB / 19.34MB 1.1s
+#6 sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 16.78MB / 19.34MB 1.2s
+#6 sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 19.34MB / 19.34MB 1.3s done
+#6 extracting sha256:8be8a68a3e49fec0b56794e7483db21dd3d7adf6591594deaa58e270f22f976a 0.8s done
+#6 extracting sha256:1d7a63b094ee269ef952d5db0120848504eae8e5a17c28267080178878fe7efc
+#6 extracting sha256:1d7a63b094ee269ef952d5db0120848504eae8e5a17c28267080178878fe7efc done
+#6 extracting sha256:a2c580eaba127106d1eb12645055643fb390546815e719ad3e2ce558802df061 done
+#6 extracting sha256:37579339bb657ef9c0bad7fc11497e1e4b8b6c77d39d1a285358e6d93602fd6a done
+#6 extracting sha256:d9e07b9e5b0757402183564f728b4bbd04ed9bd09157c996a03be3df577caaf2 done
+#6 extracting sha256:d58808100c8d2e23c0ad3c8f0a97d6828d8684c16618a578986f382ddcae84f4
+#6 extracting sha256:d58808100c8d2e23c0ad3c8f0a97d6828d8684c16618a578986f382ddcae84f4 done
+#6 extracting sha256:56082c55746e2c8c1d516eb08f2fe0b667e33010bc9a4cc11e3799bcacf3bbf5 0.1s done
+#6 extracting sha256:396afed88755954e9e6330028c52fd1221b03a5fc31831a2caefbbd32bdd823b 0.1s
+#6 extracting sha256:396afed88755954e9e6330028c52fd1221b03a5fc31831a2caefbbd32bdd823b 0.2s done
+#6 extracting sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5
+#6 extracting sha256:04e4c8d13e2f10e6a0efe7c7d95a630dd5083096c67d41240bb94b54b0e611a5 1.7s done
+#6 DONE 4.1s
+
+#7 [2/3] COPY entrypoint.sh /entrypoint.sh
+#7 DONE 0.7s
+
+#8 [3/3] RUN chmod +x /entrypoint.sh
+#8 DONE 0.4s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 0.2s done
+#9 writing image sha256:6508b1afcb721797cda63cb90e0044710221fb786418989bbbe76ce38c6cc254 done
+#9 naming to docker.io/library/letsencrypt-letsencrypt 0.0s done
+#9 DONE 0.2s
+
+#10 resolving provenance for metadata file
+#10 DONE 0.0s
+ letsencrypt  Built
+[Tue Aug  5 12:54:27 AM EDT 2025] INFO: Starting letsencrypt...
+ Container purebliss-letsencrypt  Creating
+ Container purebliss-letsencrypt  Created
+ Container purebliss-letsencrypt  Starting
+ Container purebliss-letsencrypt  Started
+[Tue Aug  5 12:54:28 AM EDT 2025] INFO: nginx is healthy.
+[Tue Aug  5 12:54:28 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (1/30)
+[Tue Aug  5 12:54:32 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (2/30)
+[Tue Aug  5 12:54:36 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (3/30)
+[Tue Aug  5 12:54:40 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (4/30)
+[Tue Aug  5 12:54:44 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (5/30)
+[Tue Aug  5 12:54:48 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (6/30)
+[Tue Aug  5 12:54:52 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (7/30)
+[Tue Aug  5 12:54:56 AM EDT 2025] INFO: Waiting for letsencrypt to become healthy... (8/30)
+[Tue Aug  5 12:55:00 AM EDT 2025] INFO: letsencrypt is healthy.
+[Tue Aug  5 12:55:00 AM EDT 2025] INFO: Building vault...
+#1 [internal] load local bake definitions
+#1 reading from stdin 374B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from vault-dockerfile.yml
+#2 transferring dockerfile: 75B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/hashicorp/vault:1.17.3
+#3 DONE 0.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/1] FROM docker.io/hashicorp/vault:1.17.3@sha256:6dbaf64766d3ff02493bfe492fa12cb3c28a0f294a689f1356b6388e3be89bf2
+#5 resolve docker.io/hashicorp/vault:1.17.3@sha256:6dbaf64766d3ff02493bfe492fa12cb3c28a0f294a689f1356b6388e3be89bf2 0.0s done
+#5 sha256:c697a95f47b4ba8fd31690464b9dfa86c39eac5e1d84cb29519289a6dea9850e 5.66kB / 5.66kB done
+#5 sha256:7c23b3ce6c2195f4d909979f9ffa39d97636a77d42c0816da048485d6f4edf6e 0B / 2.02kB 0.1s
+#5 sha256:6dbaf64766d3ff02493bfe492fa12cb3c28a0f294a689f1356b6388e3be89bf2 968B / 968B done
+#5 sha256:6e5015e024232cf8074347bf2e0a0de6fd4390d58e0459e6150012acd0507ba6 0B / 3.73MB 0.1s
+#5 sha256:f0dcecadb12356c18389f4dfe9c896dfd0ca2cc6530576033ed891a2286901d6 0B / 985B 0.1s
+#5 sha256:f1c33e7ff9dd5ff7ba66ff09c604f50dc7aab336c22c12dcea4d4f80fb712ba9 1.40kB / 1.40kB done
+#5 sha256:7c23b3ce6c2195f4d909979f9ffa39d97636a77d42c0816da048485d6f4edf6e 2.02kB / 2.02kB 0.1s done
+#5 sha256:6e5015e024232cf8074347bf2e0a0de6fd4390d58e0459e6150012acd0507ba6 1.05MB / 3.73MB 0.2s
+#5 sha256:f0dcecadb12356c18389f4dfe9c896dfd0ca2cc6530576033ed891a2286901d6 985B / 985B 0.1s done
+#5 sha256:e000d590fd7957dc4e2ba56d793121ea1b46ac3558bc9bbf0bf6319f0208dc61 0B / 263.20kB 0.2s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 0B / 155.79MB 0.2s
+#5 extracting sha256:6e5015e024232cf8074347bf2e0a0de6fd4390d58e0459e6150012acd0507ba6
+#5 sha256:6e5015e024232cf8074347bf2e0a0de6fd4390d58e0459e6150012acd0507ba6 3.73MB / 3.73MB 0.2s done
+#5 sha256:e000d590fd7957dc4e2ba56d793121ea1b46ac3558bc9bbf0bf6319f0208dc61 263.20kB / 263.20kB 0.2s done
+#5 sha256:792b9505c15675a96246e2ae90f9bf70883ce5383c85db020872f06b18b555b5 0B / 156B 0.3s
+#5 sha256:d400bff74c5d8f643530a0274c77bca2f28692891b8d4fef08e0d1ef2311f837 0B / 1.90kB 0.3s
+#5 extracting sha256:6e5015e024232cf8074347bf2e0a0de6fd4390d58e0459e6150012acd0507ba6 0.1s done
+#5 sha256:792b9505c15675a96246e2ae90f9bf70883ce5383c85db020872f06b18b555b5 156B / 156B 0.3s done
+#5 sha256:d400bff74c5d8f643530a0274c77bca2f28692891b8d4fef08e0d1ef2311f837 1.90kB / 1.90kB 0.3s done
+#5 extracting sha256:7c23b3ce6c2195f4d909979f9ffa39d97636a77d42c0816da048485d6f4edf6e
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 9.44MB / 155.79MB 0.5s
+#5 extracting sha256:7c23b3ce6c2195f4d909979f9ffa39d97636a77d42c0816da048485d6f4edf6e done
+#5 extracting sha256:f0dcecadb12356c18389f4dfe9c896dfd0ca2cc6530576033ed891a2286901d6 done
+#5 extracting sha256:e000d590fd7957dc4e2ba56d793121ea1b46ac3558bc9bbf0bf6319f0208dc61 0.0s done
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 19.92MB / 155.79MB 0.8s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 28.31MB / 155.79MB 1.0s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 42.99MB / 155.79MB 1.4s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 57.67MB / 155.79MB 1.8s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 72.35MB / 155.79MB 2.2s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 87.03MB / 155.79MB 2.6s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 101.71MB / 155.79MB 3.0s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 113.25MB / 155.79MB 3.3s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 124.78MB / 155.79MB 3.6s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 139.46MB / 155.79MB 4.0s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 149.95MB / 155.79MB 4.3s
+#5 sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 155.79MB / 155.79MB 4.8s done
+#5 extracting sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 0.1s
+#5 extracting sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 5.2s
+#5 extracting sha256:518413071f0b69c632214d0240543584ddcfa18c4b87cea31d4bc52bf491199b 5.7s done
+#5 extracting sha256:792b9505c15675a96246e2ae90f9bf70883ce5383c85db020872f06b18b555b5
+#5 extracting sha256:792b9505c15675a96246e2ae90f9bf70883ce5383c85db020872f06b18b555b5 done
+#5 extracting sha256:d400bff74c5d8f643530a0274c77bca2f28692891b8d4fef08e0d1ef2311f837 done
+#5 DONE 10.7s
+
+#6 exporting to image
+#6 exporting layers done
+#6 writing image sha256:c697a95f47b4ba8fd31690464b9dfa86c39eac5e1d84cb29519289a6dea9850e done
+#6 naming to docker.io/library/vault-vault done
+#6 DONE 0.0s
+
+#7 resolving provenance for metadata file
+#7 DONE 0.0s
+ vault  Built
+[Tue Aug  5 12:55:12 AM EDT 2025] INFO: Starting vault...
+ vault-agent Pulling 
+ vault-agent Pulled 
+ Container purebliss-vault  Creating
+ Container purebliss-vault  Created
+ Container purebliss-vault-agent  Creating
+ Container purebliss-vault-agent  Created
+ Container purebliss-vault  Starting
+ Container purebliss-vault  Started
+ Container purebliss-vault-agent  Starting
+ Container purebliss-vault-agent  Started
+[Tue Aug  5 12:55:14 AM EDT 2025] INFO: Building vault-agent...
+#1 [internal] load local bake definitions
+#1 reading from stdin 412B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from vault-agent-dockerfile
+#2 transferring dockerfile:
+#2 transferring dockerfile: 744B done
+#2 DONE 1.4s
+
+#3 [internal] load metadata for docker.io/hashicorp/vault:1.17.3
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context:
+#4 transferring context: 2B done
+#4 DONE 0.1s
+
+#5 [1/6] FROM docker.io/hashicorp/vault:1.17.3
+#5 CACHED
+
+#6 [2/6] RUN apk add --no-cache curl
+#6 0.604 fetch https://dl-cdn.alpinelinux.org/alpine/v3.20/main/x86_64/APKINDEX.tar.gz
+#6 0.832 fetch https://dl-cdn.alpinelinux.org/alpine/v3.20/community/x86_64/APKINDEX.tar.gz
+#6 1.230 (1/10) Installing ca-certificates (20250619-r0)
+#6 1.350 (2/10) Installing brotli-libs (1.1.0-r2)
+#6 1.392 (3/10) Installing c-ares (1.33.1-r0)
+#6 1.404 (4/10) Installing libunistring (1.2-r0)
+#6 1.434 (5/10) Installing libidn2 (2.3.7-r0)
+#6 1.444 (6/10) Installing nghttp2-libs (1.62.1-r0)
+#6 1.452 (7/10) Installing libpsl (0.21.5-r1)
+#6 1.460 (8/10) Installing zstd-libs (1.5.6-r0)
+#6 1.483 (9/10) Installing libcurl (8.12.1-r0)
+#6 1.498 (10/10) Installing curl (8.12.1-r0)
+#6 1.509 Executing busybox-1.36.1-r29.trigger
+#6 1.662 Executing ca-certificates-20250619-r0.trigger
+#6 1.836 OK: 15 MiB in 32 packages
+#6 DONE 2.3s
+
+#7 [3/6] RUN mkdir -p /vault/agent/output /vault/agent/logs /vault/secrets /vault/templates
+#7 DONE 0.3s
+
+#8 [4/6] RUN cat > /entrypoint.sh << 'SCRIPT'
+#8 DONE 0.2s
+
+#9 [5/6] RUN chmod +x /entrypoint.sh
+#9 DONE 0.5s
+
+#10 [6/6] RUN apk add --no-cache su-exec
+#10 0.206 fetch https://dl-cdn.alpinelinux.org/alpine/v3.20/main/x86_64/APKINDEX.tar.gz
+#10 0.344 fetch https://dl-cdn.alpinelinux.org/alpine/v3.20/community/x86_64/APKINDEX.tar.gz
+#10 0.669 OK: 15 MiB in 32 packages
+#10 DONE 0.8s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 0.2s done
+#11 writing image sha256:7b4e6592211564dbd6593fdb3a61cef1f927338f8ca44750c7311e79da8a9e9e done
+#11 naming to docker.io/library/vault-agent-vault-agent done
+#11 DONE 0.2s
+
+#12 resolving provenance for metadata file
+#12 DONE 0.0s
+ vault-agent  Built
+[Tue Aug  5 12:55:24 AM EDT 2025] INFO: Starting vault-agent...
+ Container purebliss-vault-agent  Creating
+ Container purebliss-vault-agent  Error response from daemon: Conflict. The container name "/purebliss-vault-agent" is already in use by container "e2ac28cf469c5955fdd60d78bb2193ab4713104a58bd8a0f56c91601e9017074". You have to remove (or rename) that container to be able to reuse that name.
+Error response from daemon: Conflict. The container name "/purebliss-vault-agent" is already in use by container "e2ac28cf469c5955fdd60d78bb2193ab4713104a58bd8a0f56c91601e9017074". You have to remove (or rename) that container to be able to reuse that name.
+[Tue Aug  5 12:55:24 AM EDT 2025] ERROR: Failed to start vault-agent

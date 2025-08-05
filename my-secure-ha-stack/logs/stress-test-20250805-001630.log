@@ -1,0 +1,11 @@
+[INFO] [2025-08-05 00:16:30.783] === Starting Enhanced Vault & Vault Agent Stress Test ===
+[INFO] [2025-08-05 00:16:30.786] Configuration: Iterations=10, Concurrent Ops=5, Stress Level=medium
+[INFO] [2025-08-05 00:16:30.790] Detailed logs: /opt/my-secure-ha-stack/logs/stress-test-20250805-001630.log
+[INFO] [2025-08-05 00:16:30.802] Detected Vault in development mode (HTTP)
+[SUCCESS] [2025-08-05 00:16:30.918] Vault connectivity test passed
+[INFO] [2025-08-05 00:16:30.920] === Testing Vault Token Rotation ===
+[INFO] [2025-08-05 00:16:30.930] Detected Vault in development mode (HTTP)
+[SUCCESS] [2025-08-05 00:16:31.060] Vault connectivity test passed
+[SUCCESS] [2025-08-05 00:16:31.175] Created test token for rotation: hvs.CAES...
+[SUCCESS] [2025-08-05 00:16:31.289] Test token lookup successful
+[INFO] [2025-08-05 00:16:31.293] Waiting for token expiration...

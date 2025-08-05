@@ -1,3 +1,485 @@
+# Pure Bliss Development: Comprehensive Troubleshooting & Best Practices
+
+> **MANDATORY:** All troubleshooting steps, actions, and progress must always be logged in **/opt/my-secure-ha-stack/logs/dev-environment-setup.log**. This is a permanent requirement for all work—never skip this step.
+
+## Service Troubleshooting Log System
+
+
+**CRITICAL:** Before starting any troubleshooting, configuration, or code change, you MUST:
+- Reference the troubleshooting log for the relevant service(s) to:
+  - Review previous issues, solutions, and current state
+  - Check the last known healthy state and healthy config location for the service
+  - Confirm the current healthy config is saved and documented
+- Log every troubleshooting step, action, and resolution in the central log file:
+  - **/opt/my-secure-ha-stack/logs/dev-environment-setup.log**
+  - This log is the authoritative record for all troubleshooting and must never be deleted or rotated out of existence.
+  - All team members and scripts must append to this file for every diagnostic, fix, or configuration change.
+
+### Log Structure
+- Each service maintains its own troubleshooting log section
+- Logs include: Issue, Root Cause, Solution, Prevention, Date
+- Each log also tracks:
+  - **Healthy State Description:** What constitutes a healthy/working state for the service
+  - **Healthy Config Location:** Path(s) to the last known good configuration file(s) or backup(s)
+- Reference these logs before making changes to any service
+- Update logs immediately after resolving issues
+- If a fix is applied, update the healthy state and healthy config location in the log to reflect the new working baseline
+
+---
+
+## Service-Specific Troubleshooting Logs
+
+### 1. NGINX Service Log
+
+#### Current Known Issues & Solutions:
+- **SSL Certificate Path Issues (2025-08-03)**
+  - **Issue:** Container serving self-signed certs instead of Let's Encrypt
+  - **Root Cause:** Wrong cert paths in nginx.conf, stale volume mounts
+  - **Solution:** Use `/mnt/raid0/nginx/certs/live/dev.purebliss.app/fullchain.pem` and `privkey.pem`
+  - **Prevention:** Always verify cert paths inside container with `docker exec nginx ls /etc/nginx/certs/`
+
+#### Best Practices:
+1. **Always Reference the Correct Certificate Files**
+   - For production, use `fullchain.pem` and `privkey.pem` from Let's Encrypt.
+   - Remove or backup any self-signed certs from `/etc/nginx/certs/` to avoid accidental use.
+
+2. **Config File Consistency**
+   - Ensure `/opt/pure-bliss-dev/shared/configs/nginx/conf.d/default.conf` is updated and saved before restarting nginx.
+   - If changes don't take effect, verify the config inside the running container (`cat /etc/nginx/conf.d/default.conf`).
+
+3. **Container Volume Mounts**
+   - Certs and config must be mounted into the nginx container as read-only volumes.
+   - If you update certs or config on the host, restart the nginx container to reload them.
+
+4. **Verifying Live Certificate**
+   - Use `openssl s_client -connect dev.purebliss.app:443 -servername dev.purebliss.app | openssl x509 -noout -issuer -subject` to confirm which cert is being served.
+   - If the issuer is not Let's Encrypt, check for old certs or config path errors.
+
+5. **Let's Encrypt Directory Structure**
+   - Host: `/mnt/raid0/nginx/certs/live/dev.purebliss.app/`
+   - Container: `/etc/nginx/certs/`
+   - Mount or copy `fullchain.pem` and `privkey.pem` to the container certs directory.
+
+### 2. KEYCLOAK Service Log
+
+#### Current Known Issues & Solutions:
+- **Database Connection Issues (2025-08-03)**
+  - **Issue:** Keycloak container restarting, authentication failures
+  - **Root Cause:** Incorrect database credentials, keycloak DB user password mismatch
+  - **Solution:** Set keycloak DB user password: `ALTER USER keycloak PASSWORD 'keycloak_password'`
+  - **Environment:** Use KC_DB_USERNAME=keycloak, KC_DB_PASSWORD=keycloak_password, KC_DB_URL_DATABASE=keycloak
+  - **Prevention:** Always verify database exists and credentials match before starting Keycloak
+
+- **Admin User Creation Issues (2025-08-03)**
+  - **Issue:** Cannot authenticate with admin user, 404/invalid credentials
+  - **Root Cause:** Admin user not properly created during container startup
+  - **Solution:** Set KEYCLOAK_ADMIN=admin and KEYCLOAK_ADMIN_PASSWORD=admin123 during container creation
+  - **Prevention:** Always set admin env vars during initial container startup in dev mode
+
+#### Best Practices:
+1. **Database Setup Verification**
+   - Always verify keycloak database and user exist: `docker exec postgres psql -U vikunja -d vikunja -c "\l"`
+   - Ensure keycloak user has correct password before starting container
+   - Use dedicated keycloak database, not shared databases
+
+2. **Admin User Bootstrap**
+   - For fresh installations, set KEYCLOAK_ADMIN and KEYCLOAK_ADMIN_PASSWORD environment variables
+   - Test admin authentication before proceeding with configuration
+   - Use consistent admin credentials across environment files
+
+3. **Container Health Checks**
+   - Health checks may fail due to missing curl/wget - use external endpoint testing as fallback
+   - Wait for full startup (5-10 seconds) before attempting authentication
+   - Check logs for database connection errors before troubleshooting authentication
+
+### 3. POSTGRESQL Service Log
+
+#### Current Known Issues & Solutions:
+- **Multiple Database Configuration (2025-08-03)**
+  - **Issue:** Keycloak database not automatically created, only vikunja database exists
+  - **Root Cause:** PostgreSQL container configured only for vikunja service
+  - **Solution:** Manually create keycloak database and user, or use init scripts
+  - **Current State:** vikunja DB (user: vikunja, pass: vikunjapassword), keycloak DB (user: keycloak, pass: keycloak_password)
+  - **Prevention:** Use proper initialization scripts for multi-service database setup
+
+#### Best Practices:
+1. **Multi-Service Database Setup**
+   - Each service should have its own database and user
+   - Document all database credentials in troubleshooting log
+   - Use initialization scripts for reproducible database setup
+
+2. **Connection Testing**
+   - Always test database connectivity before starting dependent services
+   - Use `docker exec postgres psql -U <user> -d <database> -c "SELECT 1;"` to verify connections
+   - Check both database existence and user permissions
+
+### 4. VAULT Service Log
+
+#### Current Known Issues & Solutions:
+- **Unsealed State Management (2025-08-03)**
+  - **Issue:** Vault frequently sealed, tokens not available
+  - **Root Cause:** Development environment restarts, manual unsealing required
+  - **Solution:** Use unseal keys from `/opt/my-secure-ha-stack/vault-unseal-keys.env`
+  - **Token Location:** `/opt/my-secure-ha-stack/secrets/vault_token`
+  - **Prevention:** Implement automatic unsealing script for development environment
+
+#### Best Practices:
+1. **Token Management**
+   - Always check vault status before attempting operations
+   - Store tokens in consistent location: `/opt/my-secure-ha-stack/secrets/vault_token`
+   - Use graceful fallback when vault is unavailable
+
+2. **Development vs Production**
+   - Development: Use auto-unseal and dev tokens
+   - Production: Implement proper key management and rotation
+
+### 5. SSO/GOOGLE WORKSPACE Integration Log
+
+#### Current Known Issues & Solutions:
+- **Metadata File Validation (2025-08-03)**
+  - **Issue:** Google Workspace SAML metadata not found or invalid
+  - **Root Cause:** Metadata file missing at `/opt/my-secure-ha-stack/GoogleIDPMetadata.xml`
+  - **Solution:** Verify metadata file exists and contains valid Google SSO URLs and Entity IDs
+  - **Prevention:** Always validate metadata extraction before proceeding with IDP configuration
+
+#### Best Practices:
+1. **Metadata Validation**
+   - Always check GoogleIDPMetadata.xml exists before starting SSO configuration
+   - Extract and validate Google SSO URL and Entity ID from metadata
+   - Use production-ready SAML attribute mappers with proper claim URLs
+
+2. **Realm Configuration**
+   - Use consistent realm naming: `purebliss-google-workspace`
+   - Apply security hardening: brute force protection, token timeouts
+   - Configure proper client scopes and redirect URIs
+
+---
+
+## Pre-Task Checklist Protocol
+
+### Before Starting ANY Task:
+1. **Review Service Logs** - Check troubleshooting log for relevant service(s)
+2. **Verify Dependencies** - Ensure all dependent services are healthy
+3. **Check Known Issues** - Look for similar problems in troubleshooting logs
+4. **Validate Environment** - Confirm environment variables and configurations
+5. **Test Connectivity** - Verify service-to-service connectivity
+6. **Document Baseline** - Note current state before making changes
+
+### During Task Execution:
+1. **Log Issues Immediately** - Document problems as they occur
+2. **Record Solutions** - Note exact steps that resolve issues
+3. **Update Logs** - Add entries to relevant service troubleshooting logs
+4. **Test Thoroughly** - Verify fixes work and don't break other services
+
+### After Task Completion:
+1. **Update Troubleshooting Logs** - Add comprehensive entries for any issues encountered
+2. **Document Prevention** - Record how to prevent similar issues
+3. **Verify All Services** - Ensure changes didn't break other services
+4. **Backup Configurations** - Save working configurations to version control
+
+---
+
+## General Debugging Steps
+
+1. **Container Status Check**
+   - `docker ps -a | grep <service>`
+   - Check health status and restart counts
+
+2. **Log Analysis**
+   - `docker logs <container> --tail 20`
+   - Look for ERROR, WARN, FATAL messages
+
+3. **Network Connectivity**
+   - Test inter-service communication
+   - Verify external endpoint accessibility
+
+4. **Configuration Validation**
+   - Check config files inside containers
+   - Verify environment variables
+
+5. **Database Connectivity**
+   - Test database connections
+   - Verify user permissions and database existence
+
+
+### 6. CODE-SERVER Service Log
+
+#### Current Known Issues & Solutions:
+- **No major issues recorded yet (2025-08-03)**
+
+#### Healthy State & Config
+- **Healthy State Description:**
+  - CodeServer container is running and healthy (docker inspect --format='{{.State.Health.Status}}' code-server)
+  - External access via https://dev.purebliss.app/code-server returns HTTP 200
+  - Authentication tokens and certificates are valid
+- **Healthy Config Location:**
+  - /opt/my-secure-ha-stack/.config/code-server/config.yaml (last known good)
+  - /opt/my-secure-ha-stack/backups/code-server/ (config and extension backups)
+
+#### Best Practices:
+1. **Authentication & Access**
+   - Verify external access via https://dev.purebliss.app/code-server
+   - Check authentication tokens and certificates
+   - Monitor resource usage for development workloads
+
+2. **Extensions & Configuration**
+   - Install required extensions via workspace setup
+   - Maintain consistent settings across development environments
+   - Regular backup of user settings and extensions
+
+
+### 7. PLANE Service Log
+
+#### Current Known Issues & Solutions:
+- **No major issues recorded yet (2025-08-03)**
+
+#### Healthy State & Config
+- **Healthy State Description:**
+  - Plane container is running and healthy (docker inspect --format='{{.State.Health.Status}}' plane)
+  - API endpoints respond with HTTP 200
+  - OIDC authentication is functional
+- **Healthy Config Location:**
+  - /opt/my-secure-ha-stack/plane/config.yaml (last known good)
+  - /opt/my-secure-ha-stack/backups/plane/
+
+#### Best Practices:
+1. **Issue Tracking Integration**
+   - Verify API connectivity for batch operations
+   - Monitor authentication with OIDC tokens
+   - Regular backup of project data
+
+2. **Performance Monitoring**
+   - Check response times for API endpoints
+   - Monitor database query performance
+   - Verify external access via https://dev.purebliss.app/plane
+
+
+### 8. REDIS Service Log
+
+#### Current Known Issues & Solutions:
+- **No major issues recorded yet (2025-08-03)**
+
+#### Healthy State & Config
+- **Healthy State Description:**
+  - Redis container is running and healthy (docker inspect --format='{{.State.Health.Status}}' redis)
+  - Memory usage and key expiration are within expected limits
+  - Data persistence (AOF/RDB) is enabled and working
+- **Healthy Config Location:**
+  - /opt/my-secure-ha-stack/redis/redis.conf (last known good)
+  - /opt/my-secure-ha-stack/backups/redis/
+
+#### Best Practices:
+1. **Memory Management**
+   - Monitor memory usage and key expiration
+   - Configure appropriate TTL for cached data
+   - Regular monitoring of connection pools
+
+2. **Data Persistence**
+   - Verify AOF and RDB persistence settings
+   - Regular backup of Redis data
+   - Monitor replication if configured
+
+
+### 9. LOKI Service Log
+
+#### Current Known Issues & Solutions:
+- **No major issues recorded yet (2025-08-03)**
+
+#### Healthy State & Config
+- **Healthy State Description:**
+  - Loki container is running and healthy (docker inspect --format='{{.State.Health.Status}}' loki)
+  - Log ingestion from all services is confirmed
+  - LogQL queries return expected results
+- **Healthy Config Location:**
+  - /opt/my-secure-ha-stack/loki/loki-config.yaml (last known good)
+  - /opt/my-secure-ha-stack/backups/loki/
+
+#### Best Practices:
+1. **Log Aggregation**
+   - Verify log ingestion from all services
+   - Monitor storage usage and retention policies
+   - Test LogQL queries for debugging
+
+2. **Performance Tuning**
+   - Configure appropriate chunk sizes
+   - Monitor query performance
+   - Regular cleanup of old log data
+
+
+### 10. PROMETHEUS Service Log
+
+#### Current Known Issues & Solutions:
+- **No major issues recorded yet (2025-08-03)**
+
+#### Healthy State & Config
+- **Healthy State Description:**
+  - Prometheus container is running and healthy (docker inspect --format='{{.State.Health.Status}}' prometheus)
+  - All targets are up and metrics are being scraped
+  - Alerting rules are active
+- **Healthy Config Location:**
+  - /opt/my-secure-ha-stack/prometheus.yml (last known good)
+  - /opt/my-secure-ha-stack/backups/prometheus/
+
+#### Best Practices:
+1. **Metrics Collection**
+   - Verify all services are exposing metrics
+   - Monitor scrape intervals and targets
+   - Configure alerting rules for critical metrics
+
+2. **Storage Management**
+   - Monitor disk usage for time-series data
+   - Configure retention policies
+   - Regular backup of metrics data
+
+
+### 11. GRAFANA Service Log
+
+#### Current Known Issues & Solutions:
+- **No major issues recorded yet (2025-08-03)**
+
+#### Healthy State & Config
+- **Healthy State Description:**
+  - Grafana container is running and healthy (docker inspect --format='{{.State.Health.Status}}' grafana)
+  - Dashboards load and display data from Prometheus and Loki
+  - Alerting is functional
+- **Healthy Config Location:**
+  - /opt/my-secure-ha-stack/grafana/grafana.ini (last known good)
+  - /opt/my-secure-ha-stack/backups/grafana/
+
+#### Best Practices:
+1. **Dashboard Management**
+   - Maintain service-specific dashboards
+   - Configure alerting for critical thresholds
+   - Regular backup of dashboard configurations
+
+2. **Data Source Integration**
+   - Verify connectivity to Prometheus and Loki
+   - Monitor query performance
+   - Configure appropriate refresh intervals
+
+---
+
+## Task-Specific Troubleshooting Templates
+
+### For New Service Integration:
+1. **Pre-Integration Checklist**
+   - [ ] Review existing service logs for dependencies
+   - [ ] Verify network connectivity (purebliss-net)
+   - [ ] Check available resources (CPU, memory, storage)
+   - [ ] Validate environment variables and secrets
+   - [ ] Confirm database requirements and access
+
+2. **Integration Steps**
+   - [ ] Create service-specific directory structure
+   - [ ] Configure Docker Compose with proper environment
+   - [ ] Set up health checks and monitoring
+   - [ ] Configure logging to Loki
+   - [ ] Add Prometheus metrics endpoint
+   - [ ] Test external access via nginx proxy
+
+3. **Post-Integration Validation**
+   - [ ] Verify service health and connectivity
+   - [ ] Test all endpoints and functionality
+   - [ ] Confirm logs are flowing to Loki
+   - [ ] Validate metrics in Prometheus/Grafana
+   - [ ] Update service documentation in troubleshooting log
+
+### For SSL/TLS Configuration:
+1. **Certificate Validation**
+   - [ ] Verify Let's Encrypt certificates exist
+   - [ ] Check certificate paths in nginx config
+   - [ ] Test external HTTPS access
+   - [ ] Validate certificate chain and trust
+   - [ ] Update nginx configuration if needed
+
+2. **Common SSL Issues**
+   - Self-signed certificates being served
+   - Incorrect certificate paths in nginx
+   - Stale volume mounts or cached configs
+   - Missing intermediate certificates
+   - Browser trust issues
+
+### For Database Configuration:
+1. **Multi-Service Database Setup**
+   - [ ] Create dedicated database for new service
+   - [ ] Create service-specific database user
+   - [ ] Set secure password for database user
+   - [ ] Grant appropriate permissions
+   - [ ] Test connectivity from service container
+   - [ ] Update connection strings and environment variables
+
+2. **Common Database Issues**
+   - Shared database credentials between services
+   - Missing database or user creation
+   - Incorrect password or connection string
+   - Network connectivity between containers
+   - Permission issues for database operations
+
+---
+
+## Incident Response Protocol
+
+### Immediate Response (First 5 minutes):
+1. **Assess Impact**
+   - Identify affected services
+   - Check external service accessibility
+   - Review recent changes or deployments
+
+2. **Stabilize**
+   - Stop any failing services causing cascading issues
+   - Restart services with known good configurations
+   - Implement temporary workarounds if needed
+
+### Investigation Phase (Next 15 minutes):
+1. **Gather Information**
+   - Check service logs for error patterns
+   - Review troubleshooting logs for similar issues
+   - Validate service dependencies and connectivity
+   - Check resource utilization (CPU, memory, disk)
+
+2. **Root Cause Analysis**
+   - Compare current state with last known good state
+   - Identify configuration changes or updates
+   - Check for infrastructure issues (network, storage)
+   - Review recent troubleshooting log entries
+
+### Resolution Phase:
+1. **Apply Fix**
+   - Implement solution based on troubleshooting log history
+   - Test fix in isolated environment if possible
+   - Apply fix with minimal service disruption
+   - Monitor service recovery and stability
+
+2. **Document Resolution**
+   - Update relevant service troubleshooting log
+   - Record root cause and solution steps
+   - Add prevention measures for future occurrences
+   - Update monitoring and alerting if needed
+
+---
+
+## Maintenance Schedule & Best Practices
+
+### Daily Checks:
+- Review service health status and logs
+- Check external endpoint accessibility
+- Monitor resource utilization trends
+- Verify backup completion and integrity
+
+### Weekly Tasks:
+- Update troubleshooting logs with recent issues
+- Review and update service documentation
+- Clean up old logs and temporary files
+- Validate certificate expiration dates
+
+### Monthly Tasks:
+- Review and update security configurations
+- Backup service configurations and data
+- Update container images and dependencies
+- Conduct disaster recovery testing
+
+> **Remember:** This troubleshooting log is a living document. Update it immediately when you encounter and solve issues. The goal is to prevent future problems and accelerate resolution when issues do occur.
+
 GitHub Copilot Instructions for Pure Bliss Development - Microservices First
 This document outlines the guidelines for using Copilot Enterprise within the pure-bliss ecosystem, ensuring consistency, security, and unwavering adherence to our elite standards of modularity and microservices architecture. Copilot is trained on all Pure Bliss repositories and implicitly understands the distinct boundaries and responsibilities of each service.
 

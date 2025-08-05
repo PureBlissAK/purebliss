@@ -1,0 +1,52 @@
+[INFO] [2025-08-05 00:56:18.102] === Starting Enhanced Vault & Vault Agent Stress Test ===
+[INFO] [2025-08-05 00:56:18.106] Configuration: Iterations=1, Concurrent Ops=1, Stress Level=low
+[INFO] [2025-08-05 00:56:18.109] Detailed logs: /opt/my-secure-ha-stack/logs/stress-test-20250805-005618.log
+[INFO] [2025-08-05 00:56:18.112] [DRY RUN] Simulating Vault connectivity test: returning success
+[INFO] [2025-08-05 00:56:18.115] === Testing Vault Token Rotation ===
+[INFO] [2025-08-05 00:56:18.118] [DRY RUN] Simulating Vault connectivity test: returning success
+[ERROR] [2025-08-05 00:56:18.239] Failed to create test token for rotation test
+[WARNING] [2025-08-05 00:56:18.242] Token rotation test failed, continuing with main tests
+[INFO] [2025-08-05 00:56:18.245] Token rotation test complete. Proceeding to main service tests.
+[INFO] [2025-08-05 00:56:18.248] === Stress Test Iteration 1/1 ===
+[INFO] [2025-08-05 00:56:18.250] Testing service: prometheus
+[INFO] [2025-08-05 00:56:18.253] [DRY RUN] Simulating service prometheus as down
+[INFO] [2025-08-05 00:56:18.256] [DRY RUN] Simulating vault_secret_check for prometheus: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.259] Testing service: grafana
+[INFO] [2025-08-05 00:56:18.262] [DRY RUN] Simulating service grafana as down
+[INFO] [2025-08-05 00:56:18.266] [DRY RUN] Simulating vault_secret_check for grafana: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.269] Testing service: plane
+[INFO] [2025-08-05 00:56:18.272] [DRY RUN] Simulating service plane as down
+[INFO] [2025-08-05 00:56:18.275] [DRY RUN] Simulating vault_secret_check for plane: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.278] Testing service: nginx
+[INFO] [2025-08-05 00:56:18.281] [DRY RUN] Simulating service nginx as down
+[INFO] [2025-08-05 00:56:18.284] [DRY RUN] Simulating vault_secret_check for nginx: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.287] Testing service: redis
+[INFO] [2025-08-05 00:56:18.290] [DRY RUN] Simulating service redis as down
+[INFO] [2025-08-05 00:56:18.293] [DRY RUN] Simulating vault_secret_check for redis: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.295] Testing service: postgres
+[INFO] [2025-08-05 00:56:18.298] [DRY RUN] Simulating service postgres as down
+[INFO] [2025-08-05 00:56:18.301] [DRY RUN] Simulating vault_secret_check for postgres: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.304] Testing service: vault-agent
+[INFO] [2025-08-05 00:56:18.306] [DRY RUN] Simulating service vault-agent as down
+[INFO] [2025-08-05 00:56:18.309] [DRY RUN] Simulating vault_secret_check for vault-agent: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.312] Testing service: letsencrypt
+[INFO] [2025-08-05 00:56:18.315] [DRY RUN] Simulating service letsencrypt as down
+[INFO] [2025-08-05 00:56:18.317] [DRY RUN] Simulating vault_secret_check for letsencrypt: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.320] Testing service: codeserver
+[INFO] [2025-08-05 00:56:18.323] [DRY RUN] Simulating service codeserver as down
+[INFO] [2025-08-05 00:56:18.326] [DRY RUN] Simulating vault_secret_check for codeserver: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.328] Testing service: loki
+[INFO] [2025-08-05 00:56:18.331] [DRY RUN] Simulating service loki as down
+[INFO] [2025-08-05 00:56:18.334] [DRY RUN] Simulating vault_secret_check for loki: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.337] Testing service: vault
+[INFO] [2025-08-05 00:56:18.339] [DRY RUN] Simulating service vault as down
+[INFO] [2025-08-05 00:56:18.342] [DRY RUN] Simulating vault_secret_check for vault: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.345] Testing service: keycloak
+[INFO] [2025-08-05 00:56:18.348] [DRY RUN] Simulating service keycloak as down
+[INFO] [2025-08-05 00:56:18.351] [DRY RUN] Simulating vault_secret_check for keycloak: marking as failed (service down)
+[INFO] [2025-08-05 00:56:18.354] === End of Iteration 1/1 ===
+[SUCCESS] [2025-08-05 00:56:18.359] === Enhanced Vault & Vault Agent Stress Test Complete ===
+[INFO] [2025-08-05 00:56:18.363] === Generating Comprehensive Stress Test Report ===
+[SUCCESS] [2025-08-05 00:56:18.381] Stress test report generated: /opt/my-secure-ha-stack/logs/stress-test-report-20250805-005618.json
+[INFO] [2025-08-05 00:56:18.383] Overall Success Rate: 0%
+[INFO] [2025-08-05 00:56:18.386] Vault Success Rate: 100.00%
