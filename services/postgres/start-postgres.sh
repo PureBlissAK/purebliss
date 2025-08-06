@@ -78,13 +78,13 @@ while [[ $attempt -le $max_attempts ]]; do
         log_success "Vault is ready"
         break
     fi
-    
+
     if [[ $attempt -eq $max_attempts ]]; then
         log_error "Vault failed to start within expected time"
         docker-compose logs vault
         exit 1
     fi
-    
+
     log_info "Waiting for Vault... (attempt $attempt/$max_attempts)"
     sleep 3
     ((attempt++))
@@ -94,18 +94,18 @@ done
 log_info "Ensuring Vault has initial PostgreSQL secrets..."
 if ! docker exec purebliss-vault vault kv get secret/postgres >/dev/null 2>&1; then
     log_info "Creating initial PostgreSQL secrets in Vault..."
-    
+
     # Generate secure passwords
     bootstrap_password=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
     vault_admin_password=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
-    
+
     docker exec purebliss-vault vault kv put secret/postgres \
         bootstrap_password="$bootstrap_password" \
         vault_admin_password="$vault_admin_password" \
         description="PostgreSQL bootstrap credentials - auto-generated $(date)" \
         service="purebliss-postgres" \
         environment="development"
-        
+
     log_success "Initial PostgreSQL secrets created in Vault"
 else
     log_info "PostgreSQL secrets already exist in Vault"
@@ -121,14 +121,14 @@ while [[ $attempt -le $max_attempts ]]; do
         log_success "PostgreSQL is ready"
         break
     fi
-    
+
     if [[ $attempt -eq $max_attempts ]]; then
         log_error "PostgreSQL failed to start within expected time"
         log_error "PostgreSQL logs:"
         docker-compose logs postgres
         exit 1
     fi
-    
+
     log_info "Waiting for PostgreSQL... (attempt $attempt/$max_attempts)"
     sleep 3
     ((attempt++))

@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  purebliss-keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: purebliss-keycloak
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    entrypoint: ["/opt/keycloak-redis-simple-entrypoint.sh"]
+    volumes:
+      - ./keycloak-redis-simple-entrypoint.sh:/opt/keycloak-redis-simple-entrypoint.sh:ro
+      - keycloak-data:/opt/keycloak/data
+    environment:
+      # PostgreSQL Configuration
+      POSTGRES_HOST: purebliss-postgres
+      POSTGRES_PORT: 5432
+      KEYCLOAK_DB_NAME: keycloak
+      KEYCLOAK_DB_USER: keycloak
+      KEYCLOAK_DB_PASSWORD: keycloak_secure_password
+
+      # Redis Configuration for Caching and Sessions
+      REDIS_HOST: purebliss-redis
+      REDIS_PORT: 6379
+      REDIS_DATABASE: 1
+      REDIS_PASSWORD: ""
+
+      # Keycloak Admin Configuration
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+
+      # Keycloak Server Configuration
+      KC_HOSTNAME: dev.purebliss.app
+      KC_PROXY: edge
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+
+      # Logging Configuration
+      KC_LOG_LEVEL: INFO
+      KC_LOG_CONSOLE_COLOR: true
+
+      # Performance Configuration with Redis
+      KC_CACHE: ispn
+      KC_CACHE_STACK: tcp
+
+    depends_on: []
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/auth/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    networks:
+      - purebliss-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`dev.purebliss.app`) && PathPrefix(`/auth`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls=true"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      - "com.example.description=PureBliss Keycloak with Redis Caching"
+      - "com.example.service=keycloak"
+      - "com.example.version=24.0.5"
+
+volumes:
+  keycloak-data:
+    driver: local
+
+networks:
+  purebliss-net:
+    external: true

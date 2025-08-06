@@ -5,7 +5,7 @@ services:
     image: postgres:16
     container_name: purebliss-postgres
     restart: unless-stopped
-    
+
     # Environment variables - all secrets sourced from Vault at runtime
     environment:
       POSTGRES_DB: postgres
@@ -13,55 +13,55 @@ services:
       # Password fetched from Vault by entrypoint script
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_bootstrap_password
       PGDATA: /var/lib/postgresql/data/pgdata
-      
+
       # Vault integration environment variables
       VAULT_ADDR: "https://purebliss-vault:8200"
       VAULT_SKIP_VERIFY: "1"
-      
+
       # Database connection settings for optimal performance
       POSTGRES_INITDB_ARGS: "--auth-local=md5 --auth-host=md5 --encoding=UTF8 --locale=en_US.UTF-8"
       POSTGRES_HOST_AUTH_METHOD: "md5"
-      
+
     ports:
       - "5432:5432"
-      
+
     volumes:
       # Data persistence
       - postgres_data:/var/lib/postgresql/data
-      
+
       # Initialization scripts for database setup
       - ./init-scripts:/docker-entrypoint-initdb.d:ro
-      
+
       # Vault integration scripts
       - ./vault-entrypoint.sh:/usr/local/bin/vault-entrypoint.sh:ro
-      
+
       # Secrets mount for Vault-managed credentials
       - postgres_secrets:/run/secrets:rw
-      
+
       # Vault token and configuration
       - /opt/my-secure-ha-stack/secrets:/vault/secrets:ro
-      
+
       # Log directory for comprehensive logging
       - /opt/my-secure-ha-stack/logs:/opt/logs:rw
-      
+
     # Custom entrypoint that fetches secrets from Vault before starting PostgreSQL
     entrypoint: ["/usr/local/bin/vault-entrypoint.sh"]
     command: ["docker-entrypoint.sh", "postgres"]
-    
+
     networks:
       - purebliss-net
-      
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres -h localhost -p 5432"]
       interval: 15s
       timeout: 10s
       retries: 5
       start_period: 60s
-      
+
     depends_on:
       vault:
         condition: service_healthy
-        
+
     # Security settings following Pure Bliss Elite Manifesto
     security_opt:
       - no-new-privileges:true
@@ -70,7 +70,7 @@ services:
       - /tmp:noexec,nosuid,size=100m
       - /var/run/postgresql:noexec,nosuid,size=100m
     user: "999:999"  # postgres user
-      
+
     # Resource limits for optimal container performance
     deploy:
       resources:

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================================
 # Let's Encrypt Vault PKI Certificate Renewal Script
-# 
+#
 # This script manually triggers certificate renewal using Vault PKI
 # and can be used for testing or manual operations.
 # ============================================================================
@@ -44,19 +44,19 @@ detect_vault_mode() {
 generate_certificate() {
   local domain="$1"
   local cert_dir="/mnt/raid0/nginx/certs/live/$domain"
-  
+
   echo "[$(date)] INFO: Generating new certificate for $domain using Vault PKI" | tee -a "$LOG_FILE"
-  
+
   # Create certificate directory if it doesn't exist
   mkdir -p "$cert_dir"
-  
+
   # Generate certificate using Vault PKI
   local cert_response
   cert_response=$(vault write -format=json "$PKI_PATH/issue/$PKI_ROLE" \
     common_name="$domain" \
     alt_names="*.$domain" \
     ttl="24h" 2>/dev/null)
-  
+
   if [[ $? -eq 0 ]] && [[ -n "$cert_response" ]]; then
     # Backup existing certificates
     if [[ -f "$cert_dir/cert.pem" ]]; then
@@ -66,31 +66,31 @@ generate_certificate() {
       cp "$cert_dir"/*.pem "$backup_dir/" 2>/dev/null || true
       echo "[$(date)] SUCCESS: Certificates backed up to $backup_dir" | tee -a "$LOG_FILE"
     fi
-    
+
     # Extract certificate components from JSON response
     echo "[$(date)] INFO: Extracting certificate components..." | tee -a "$LOG_FILE"
     echo "$cert_response" | jq -r '.data.certificate' > "$cert_dir/cert.pem"
     echo "$cert_response" | jq -r '.data.private_key' > "$cert_dir/privkey.pem"
     echo "$cert_response" | jq -r '.data.ca_chain[0]' > "$cert_dir/chain.pem"
     echo "$cert_response" | jq -r '.data.issuing_ca' > "$cert_dir/issuer.pem"
-    
+
     # Create fullchain.pem (cert + chain) compatible with nginx
     cat "$cert_dir/cert.pem" "$cert_dir/chain.pem" > "$cert_dir/fullchain.pem"
-    
+
     # Set proper permissions
     chmod 600 "$cert_dir/privkey.pem"
     chmod 644 "$cert_dir"/*.pem
-    
+
     echo "[$(date)] SUCCESS: Certificate files generated for $domain:" | tee -a "$LOG_FILE"
     echo "  - $cert_dir/cert.pem (server certificate)" | tee -a "$LOG_FILE"
-    echo "  - $cert_dir/privkey.pem (private key)" | tee -a "$LOG_FILE" 
+    echo "  - $cert_dir/privkey.pem (private key)" | tee -a "$LOG_FILE"
     echo "  - $cert_dir/fullchain.pem (cert + chain for nginx)" | tee -a "$LOG_FILE"
     echo "  - $cert_dir/chain.pem (intermediate certificate)" | tee -a "$LOG_FILE"
-    
+
     # Display certificate details
     echo "[$(date)] INFO: Certificate details:" | tee -a "$LOG_FILE"
     openssl x509 -in "$cert_dir/cert.pem" -noout -subject -issuer -dates | tee -a "$LOG_FILE"
-    
+
     return 0
   else
     echo "[$(date)] ERROR: Failed to generate certificate for $domain using Vault PKI" | tee -a "$LOG_FILE"
@@ -101,7 +101,7 @@ generate_certificate() {
 # Reload nginx to pick up new certificates
 reload_nginx() {
   echo "[$(date)] INFO: Reloading nginx to pick up new certificates..." | tee -a "$LOG_FILE"
-  
+
   # Try multiple methods to reload nginx
   if docker ps | grep -q "purebliss-nginx"; then
     # Method 1: Send SIGHUP to nginx inside container
@@ -130,9 +130,9 @@ reload_nginx() {
 validate_certificate() {
   local domain="$1"
   local cert_dir="/mnt/raid0/nginx/certs/live/$domain"
-  
+
   echo "[$(date)] INFO: Validating renewed certificate for $domain..." | tee -a "$LOG_FILE"
-  
+
   # Check if certificate files exist
   local required_files=("cert.pem" "privkey.pem" "fullchain.pem" "chain.pem")
   for file in "${required_files[@]}"; do
@@ -141,19 +141,19 @@ validate_certificate() {
       return 1
     fi
   done
-  
+
   # Validate certificate content
   if openssl x509 -in "$cert_dir/cert.pem" -noout -text >/dev/null 2>&1; then
     echo "[$(date)] SUCCESS: Certificate file is valid" | tee -a "$LOG_FILE"
-    
+
     # Check certificate expiry
     local expiry_date=$(openssl x509 -in "$cert_dir/cert.pem" -noout -enddate | cut -d= -f2)
     echo "[$(date)] INFO: Certificate expires: $expiry_date" | tee -a "$LOG_FILE"
-    
+
     # Check if certificate is for the correct domain
     local cert_subject=$(openssl x509 -in "$cert_dir/cert.pem" -noout -subject | grep -o "CN=[^,]*")
     echo "[$(date)] INFO: Certificate subject: $cert_subject" | tee -a "$LOG_FILE"
-    
+
     return 0
   else
     echo "[$(date)] ERROR: Certificate file is invalid" | tee -a "$LOG_FILE"
@@ -167,7 +167,7 @@ main() {
   echo "[$(date)] INFO: Let's Encrypt Vault PKI Certificate Renewal" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: Domain: $DOMAIN" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: ============================================" | tee -a "$LOG_FILE"
-  
+
   # Step 1: Configure Vault connection
   if detect_vault_mode; then
     echo "[$(date)] SUCCESS: Vault connection configured" | tee -a "$LOG_FILE"
@@ -175,7 +175,7 @@ main() {
     echo "[$(date)] ERROR: Failed to configure Vault connection" | tee -a "$LOG_FILE"
     exit 1
   fi
-  
+
   # Step 2: Generate new certificate
   if generate_certificate "$DOMAIN"; then
     echo "[$(date)] SUCCESS: Certificate generated successfully" | tee -a "$LOG_FILE"
@@ -183,7 +183,7 @@ main() {
     echo "[$(date)] ERROR: Certificate generation failed" | tee -a "$LOG_FILE"
     exit 1
   fi
-  
+
   # Step 3: Validate the certificate
   if validate_certificate "$DOMAIN"; then
     echo "[$(date)] SUCCESS: Certificate validation passed" | tee -a "$LOG_FILE"
@@ -191,19 +191,19 @@ main() {
     echo "[$(date)] ERROR: Certificate validation failed" | tee -a "$LOG_FILE"
     exit 1
   fi
-  
+
   # Step 4: Reload nginx
   if reload_nginx; then
     echo "[$(date)] SUCCESS: Nginx reloaded with new certificate" | tee -a "$LOG_FILE"
   else
     echo "[$(date)] WARNING: Nginx reload failed - certificate generated but may not be active" | tee -a "$LOG_FILE"
   fi
-  
+
   # Summary
   echo "[$(date)] INFO: ============================================" | tee -a "$LOG_FILE"
   echo "[$(date)] SUCCESS: Certificate renewal complete for $DOMAIN" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: ============================================" | tee -a "$LOG_FILE"
-  
+
   echo ""
   echo "🎉 Certificate Renewal Complete!"
   echo ""

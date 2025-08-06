@@ -60,31 +60,31 @@ log_error() {
 
 check_prerequisites() {
     log_info "Checking prerequisites for nginx service..."
-    
+
     # Check if running as correct user
     if [[ $EUID -eq 0 ]]; then
         log_error "This script should not be run as root"
         exit 1
     fi
-    
+
     # Check Docker
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed or not in PATH"
         exit 1
     fi
-    
+
     # Check Docker Compose
     if ! command -v docker-compose &> /dev/null; then
         log_error "Docker Compose is not installed or not in PATH"
         exit 1
     fi
-    
+
     # Check Vault token
     if [[ ! -f "${VAULT_TOKEN_FILE}" ]]; then
         log_error "Vault token file not found: ${VAULT_TOKEN_FILE}"
         exit 1
     fi
-    
+
     log_success "Prerequisites validated"
 }
 
@@ -92,40 +92,40 @@ wait_for_vault() {
     log_info "Waiting for Vault to be available..."
     local max_attempts=30
     local attempt=1
-    
+
     while [[ $attempt -le $max_attempts ]]; do
         if curl -sf "${VAULT_ADDR}/v1/sys/health" >/dev/null 2>&1; then
             log_success "Vault is available"
             return 0
         fi
-        
+
         log_info "Attempt ${attempt}/${max_attempts}: Vault not ready, waiting 2 seconds..."
         sleep 2
         ((attempt++))
     done
-    
+
     log_error "Vault is not available after ${max_attempts} attempts"
     exit 1
 }
 
 setup_vault_authentication() {
     log_info "Setting up Vault authentication..."
-    
+
     export VAULT_ADDR="${VAULT_ADDR}"
     export VAULT_TOKEN="$(cat "${VAULT_TOKEN_FILE}")"
-    
+
     # Verify Vault authentication
     if ! vault token lookup >/dev/null 2>&1; then
         log_error "Failed to authenticate with Vault"
         exit 1
     fi
-    
+
     log_success "Vault authentication successful"
 }
 
 setup_vault_pki() {
     log_info "Setting up Vault PKI secrets engine for nginx..."
-    
+
     # Enable PKI secrets engine if not already enabled
     if ! vault secrets list | grep -q "pki/"; then
         log_info "Enabling PKI secrets engine..."
@@ -135,7 +135,7 @@ setup_vault_pki() {
     else
         log_info "PKI secrets engine already enabled"
     fi
-    
+
     # Configure PKI root CA if not exists
     if ! vault read pki/cert/ca >/dev/null 2>&1; then
         log_info "Configuring PKI root CA..."
@@ -150,12 +150,12 @@ setup_vault_pki() {
     else
         log_info "PKI root CA already exists"
     fi
-    
+
     # Configure PKI URLs
     vault write pki/config/urls \
         issuing_certificates="${VAULT_ADDR}/v1/pki/ca" \
         crl_distribution_points="${VAULT_ADDR}/v1/pki/crl"
-    
+
     # Create role for nginx certificates
     vault write pki/roles/nginx-certs \
         allowed_domains="dev.purebliss.app,purebliss.app,localhost" \
@@ -164,13 +164,13 @@ setup_vault_pki() {
         allow_ip_sans=true \
         max_ttl=720h \
         ttl=720h
-    
+
     log_success "Vault PKI configured for nginx"
 }
 
 setup_nginx_secrets() {
     log_info "Setting up nginx secrets in Vault KV store..."
-    
+
     # Enable KV v2 secrets engine if not already enabled
     if ! vault secrets list | grep -q "secret/"; then
         log_info "Enabling KV v2 secrets engine..."
@@ -179,7 +179,7 @@ setup_nginx_secrets() {
     else
         log_info "KV v2 secrets engine already enabled"
     fi
-    
+
     # Store nginx configuration secrets
     vault kv put secret/nginx/config \
         server_name="dev.purebliss.app" \
@@ -191,7 +191,7 @@ setup_nginx_secrets() {
         ssl_ciphers="ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384" \
         ssl_prefer_server_ciphers="off" \
         hsts_max_age="31536000"
-    
+
     # Store nginx upstream configuration
     vault kv put secret/nginx/upstreams \
         code_server_host="code-server" \
@@ -206,13 +206,13 @@ setup_nginx_secrets() {
         prometheus_port="9090" \
         vault_host="vault" \
         vault_port="8200"
-    
+
     log_success "Nginx secrets stored in Vault"
 }
 
 cleanup_existing_containers() {
     log_info "Cleaning up existing nginx containers..."
-    
+
     # Stop and remove existing containers
     if docker ps -a --format "table {{.Names}}" | grep -q "^nginx$"; then
         log_info "Stopping existing nginx container..."
@@ -220,25 +220,25 @@ cleanup_existing_containers() {
         docker rm nginx >/dev/null 2>&1 || true
         log_success "Existing nginx container removed"
     fi
-    
+
     # Clean up orphaned containers
     docker container prune -f >/dev/null 2>&1 || true
-    
+
     log_success "Container cleanup completed"
 }
 
 start_nginx_service() {
     log_info "Starting nginx service with Vault integration..."
-    
+
     # Change to service directory
     cd "${SCRIPT_DIR}"
-    
+
     # Create necessary directories
     mkdir -p logs certs config
-    
+
     # Start the service using Docker Compose
     docker-compose -f "${COMPOSE_FILE}" up -d
-    
+
     log_success "Nginx service started"
 }
 
@@ -246,24 +246,24 @@ wait_for_service() {
     log_info "Waiting for nginx service to be ready..."
     local max_attempts=30
     local attempt=1
-    
+
     while [[ $attempt -le $max_attempts ]]; do
         if docker ps --format "table {{.Names}}\t{{.Status}}" | grep "nginx" | grep -q "Up"; then
             log_success "Nginx container is running"
             break
         fi
-        
+
         log_info "Attempt ${attempt}/${max_attempts}: Nginx not ready, waiting 2 seconds..."
         sleep 2
         ((attempt++))
-        
+
         if [[ $attempt -gt $max_attempts ]]; then
             log_error "Nginx service failed to start within timeout"
             docker logs nginx 2>&1 | tail -20
             exit 1
         fi
     done
-    
+
     # Wait for HTTP response
     attempt=1
     while [[ $attempt -le $max_attempts ]]; do
@@ -271,16 +271,16 @@ wait_for_service() {
             log_success "Nginx HTTP endpoint is responding"
             break
         fi
-        
+
         log_info "Attempt ${attempt}/${max_attempts}: Nginx HTTP not responding, waiting 2 seconds..."
         sleep 2
         ((attempt++))
-        
+
         if [[ $attempt -gt $max_attempts ]]; then
             log_warning "Nginx HTTP endpoint not responding (may be normal if SSL-only)"
         fi
     done
-    
+
     # Wait for HTTPS response
     attempt=1
     while [[ $attempt -le $max_attempts ]]; do
@@ -288,11 +288,11 @@ wait_for_service() {
             log_success "Nginx HTTPS endpoint is responding"
             break
         fi
-        
+
         log_info "Attempt ${attempt}/${max_attempts}: Nginx HTTPS not responding, waiting 2 seconds..."
         sleep 2
         ((attempt++))
-        
+
         if [[ $attempt -gt $max_attempts ]]; then
             log_warning "Nginx HTTPS endpoint not responding"
         fi
@@ -301,20 +301,20 @@ wait_for_service() {
 
 validate_service() {
     log_info "Validating nginx service..."
-    
+
     # Check container status
     if ! docker ps --format "table {{.Names}}\t{{.Status}}" | grep "nginx" | grep -q "Up"; then
         log_error "Nginx container is not running"
         return 1
     fi
-    
+
     # Check Vault integration
     if docker exec nginx test -f /vault/secrets/cert.pem 2>/dev/null; then
         log_success "Vault-managed certificate found"
     else
         log_warning "Vault-managed certificate not found (may be using existing certs)"
     fi
-    
+
     # Check nginx configuration
     if docker exec nginx nginx -t >/dev/null 2>&1; then
         log_success "Nginx configuration is valid"
@@ -323,45 +323,45 @@ validate_service() {
         docker exec nginx nginx -t
         return 1
     fi
-    
+
     # Check basic connectivity
     local http_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80 2>/dev/null || echo "000")
     local https_status=$(curl -sk -o /dev/null -w "%{http_code}" https://localhost:443 2>/dev/null || echo "000")
-    
+
     if [[ $http_status -eq 200 ]] || [[ $http_status -eq 301 ]] || [[ $http_status -eq 302 ]]; then
         log_success "HTTP endpoint responding (status: ${http_status})"
     else
         log_warning "HTTP endpoint not responding (status: ${http_status})"
     fi
-    
+
     if [[ $https_status -eq 200 ]] || [[ $https_status -eq 301 ]] || [[ $https_status -eq 302 ]]; then
         log_success "HTTPS endpoint responding (status: ${https_status})"
     else
         log_warning "HTTPS endpoint not responding (status: ${https_status})"
     fi
-    
+
     log_success "Nginx service validation completed"
 }
 
 display_service_info() {
     log_info "Nginx service information:"
-    
+
     echo -e "\n${BLUE}🔧 Service Details:${NC}"
     echo "  📁 Service Directory: ${SCRIPT_DIR}"
     echo "  📄 Compose File: ${COMPOSE_FILE}"
     echo "  🔐 Vault Address: ${VAULT_ADDR}"
-    
+
     echo -e "\n${BLUE}🌐 Endpoints:${NC}"
     echo "  🌍 HTTP: http://localhost:80"
     echo "  🔒 HTTPS: https://localhost:443"
     echo "  🔒 External: https://dev.purebliss.app"
-    
+
     echo -e "\n${BLUE}🐋 Container Status:${NC}"
     docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep nginx || echo "  No nginx containers found"
-    
+
     echo -e "\n${BLUE}📊 Resource Usage:${NC}"
     docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}" | grep nginx || echo "  No nginx containers found"
-    
+
     echo -e "\n${BLUE}🔍 Quick Commands:${NC}"
     echo "  📋 View logs: docker logs nginx"
     echo "  🔧 Service status: docker ps | grep nginx"
@@ -406,7 +406,7 @@ main() {
     local skip_cleanup=false
     local skip_vault=false
     local verbose=false
-    
+
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -434,15 +434,15 @@ main() {
                 ;;
         esac
     done
-    
+
     log_info "Starting nginx fresh start process..."
     log_info "Script directory: ${SCRIPT_DIR}"
     log_info "Service: ${SERVICE_NAME}"
     log_info "Compose file: ${COMPOSE_FILE}"
-    
+
     # Execute setup steps
     check_prerequisites
-    
+
     if [[ $skip_vault == false ]]; then
         wait_for_vault
         setup_vault_authentication
@@ -451,21 +451,21 @@ main() {
     else
         log_info "Skipping Vault setup as requested"
     fi
-    
+
     if [[ $skip_cleanup == false ]]; then
         cleanup_existing_containers
     else
         log_info "Skipping container cleanup as requested"
     fi
-    
+
     start_nginx_service
     wait_for_service
     validate_service
     display_service_info
-    
+
     echo -e "\n${GREEN}🎉 SUCCESS: Nginx service fresh start completed!${NC}"
     echo -e "${BLUE}📖 Run validation: ${SCRIPT_DIR}/validate-nginx-vault-integration.sh${NC}"
-    
+
     log_success "Nginx fresh start process completed successfully"
 }
 

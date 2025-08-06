@@ -1,1 +1,39 @@
+# Pure Bliss Redis Container - Independent Startup with Vault Integration
+# Follows Pure Bliss standards for container independence and security
 FROM redis:7
+
+# Install required packages for Vault integration and logging
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    bash \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Vault CLI for dynamic secret retrieval
+RUN wget https://releases.hashicorp.com/vault/1.17.3/vault_1.17.3_linux_amd64.zip && \
+    unzip vault_1.17.3_linux_amd64.zip && \
+    mv vault /usr/local/bin/ && \
+    chmod +x /usr/local/bin/vault && \
+    rm vault_1.17.3_linux_amd64.zip
+
+# Copy the comprehensive entrypoint script with all Vault logic
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Create necessary directories and set permissions
+RUN mkdir -p /data /usr/local/etc/redis /opt/my-secure-ha-stack/logs && \
+    chown -R redis:redis /data /usr/local/etc/redis && \
+    chmod 755 /opt/my-secure-ha-stack/logs
+
+# Health check for standalone operation
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
+  CMD redis-cli ping | grep -q PONG || exit 1
+
+# Expose Redis port
+EXPOSE 6379
+
+# Use the comprehensive entrypoint for Vault integration and independent startup
+ENTRYPOINT ["/entrypoint.sh"]
+CMD []

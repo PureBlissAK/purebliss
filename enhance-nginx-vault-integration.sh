@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Nginx Vault Integration Enhancement Script  
+# Nginx Vault Integration Enhancement Script
 # Configures Nginx with Vault PKI certificates and SSL configuration
 # Priority: Critical - Edge service requiring TLS/SSL management
 # Last Updated: August 5, 2025
@@ -54,7 +54,7 @@ function create_nginx_vault_entrypoint() {
 
     local nginx_dir="/opt/dev-purebliss/services/nginx"
     mkdir -p "$nginx_dir/certs"
-    
+
     local entrypoint_file="$nginx_dir/nginx-vault-entrypoint.sh"
 
     cat > "$entrypoint_file" << 'EOF'
@@ -91,28 +91,28 @@ echo "Fetching SSL certificates from Vault PKI..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Request certificate from Vault PKI
     CERT_RESPONSE=$(vault write -format=json pki/issue/purebliss-role \
         common_name="$DOMAIN" \
         alt_names="*.${DOMAIN},localhost" \
         ttl=8760h 2>/dev/null || echo '{}')
-    
+
     if [[ "$CERT_RESPONSE" != '{}' ]]; then
         # Extract and save certificates
         echo "$CERT_RESPONSE" | jq -r '.data.certificate' > "$CERT_PATH/nginx.crt"
         echo "$CERT_RESPONSE" | jq -r '.data.private_key' > "$CERT_PATH/nginx.key"
         echo "$CERT_RESPONSE" | jq -r '.data.issuing_ca' > "$CERT_PATH/ca.crt"
-        
+
         # Set proper permissions
         chmod 644 "$CERT_PATH/nginx.crt" "$CERT_PATH/ca.crt"
         chmod 600 "$CERT_PATH/nginx.key"
-        
+
         echo "SSL certificates successfully generated and saved"
         echo "Certificate: $CERT_PATH/nginx.crt"
         echo "Private Key: $CERT_PATH/nginx.key"
         echo "CA Certificate: $CERT_PATH/ca.crt"
-        
+
         # Verify certificate
         if openssl x509 -in "$CERT_PATH/nginx.crt" -text -noout >/dev/null 2>&1; then
             echo "Certificate validation successful"
@@ -154,7 +154,7 @@ function generate_fallback_certificate() {
         -out "$CERT_PATH/nginx.crt" \
         -subj "/C=US/ST=State/L=City/O=PureBliss/OU=IT/CN=$DOMAIN" \
         -addext "subjectAltName=DNS:$DOMAIN,DNS:*.$DOMAIN,DNS:localhost"
-    
+
     cp "$CERT_PATH/nginx.crt" "$CERT_PATH/ca.crt"
     chmod 644 "$CERT_PATH/nginx.crt" "$CERT_PATH/ca.crt"
     chmod 600 "$CERT_PATH/nginx.key"
@@ -163,7 +163,7 @@ function generate_fallback_certificate() {
 
 function update_nginx_ssl_config() {
     echo "Updating Nginx SSL configuration..."
-    
+
     # Create SSL configuration snippet
     cat > /etc/nginx/conf.d/ssl.conf << SSLEOF
 # SSL Configuration for Pure Bliss
@@ -416,7 +416,7 @@ function check_certificate_expiry() {
         log_action "Certificate not found, requesting new certificate"
         return 1
     fi
-    
+
     # Check if certificate expires within 30 days
     if openssl x509 -checkend 2592000 -noout -in "$CERT_PATH/nginx.crt" >/dev/null 2>&1; then
         log_action "Certificate is valid for more than 30 days"
@@ -429,33 +429,33 @@ function check_certificate_expiry() {
 
 function renew_certificate() {
     log_action "Renewing SSL certificate via Vault PKI..."
-    
+
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-    
+
     # Request new certificate
     CERT_RESPONSE=$(vault write -format=json pki/issue/purebliss-role \
         common_name="$DOMAIN" \
         alt_names="*.${DOMAIN},localhost" \
         ttl=8760h 2>/dev/null || echo '{}')
-    
+
     if [[ "$CERT_RESPONSE" != '{}' ]]; then
         # Backup existing certificates
         if [[ -f "$CERT_PATH/nginx.crt" ]]; then
             cp "$CERT_PATH/nginx.crt" "$CERT_PATH/nginx.crt.backup.$(date +%Y%m%d_%H%M%S)"
             cp "$CERT_PATH/nginx.key" "$CERT_PATH/nginx.key.backup.$(date +%Y%m%d_%H%M%S)"
         fi
-        
+
         # Save new certificates
         echo "$CERT_RESPONSE" | jq -r '.data.certificate' > "$CERT_PATH/nginx.crt"
         echo "$CERT_RESPONSE" | jq -r '.data.private_key' > "$CERT_PATH/nginx.key"
         echo "$CERT_RESPONSE" | jq -r '.data.issuing_ca' > "$CERT_PATH/ca.crt"
-        
+
         # Set proper permissions
         chmod 644 "$CERT_PATH/nginx.crt" "$CERT_PATH/ca.crt"
         chmod 600 "$CERT_PATH/nginx.key"
-        
+
         log_action "Certificate renewed successfully"
-        
+
         # Test nginx configuration and reload
         if nginx -t; then
             nginx -s reload
@@ -477,7 +477,7 @@ fi
 EOF
 
     chmod +x "$renewal_script"
-    
+
     # Create cron job for automatic renewal
     local cron_file="$nginx_dir/nginx-cert-renewal.cron"
     cat > "$cron_file" << 'EOF'

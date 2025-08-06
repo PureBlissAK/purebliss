@@ -190,7 +190,7 @@ Location: `/opt/dev-purebliss/enhance-container-with-vault.sh`
 # Redis Enhancement
 /opt/dev-purebliss/enhance-redis-vault-integration.sh
 
-# Keycloak Enhancement  
+# Keycloak Enhancement
 /opt/dev-purebliss/enhance-keycloak-vault-integration.sh
 
 # Nginx Enhancement

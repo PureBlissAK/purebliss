@@ -5,7 +5,7 @@ services:
     image: redis:7.2-alpine
     container_name: purebliss-redis
     restart: unless-stopped
-    
+
     # Use custom entrypoint to fetch configuration from Vault
     volumes:
       - redis_data:/data
@@ -13,36 +13,36 @@ services:
       - ./redis.conf.template:/usr/local/etc/redis/redis.conf.template:ro
       - redis_config:/usr/local/etc/redis:rw
       - redis_secrets:/run/secrets:rw
-      
+
     entrypoint: ["/usr/local/bin/vault-entrypoint.sh"]
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    
+
     ports:
       - "6379:6379"
-      
+
     networks:
       - purebliss-net
-      
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
-      
+
     depends_on:
       vault:
         condition: service_healthy
       postgres:
         condition: service_healthy
-        
+
     # Security settings
     security_opt:
       - no-new-privileges:true
     read_only: false
     tmpfs:
       - /tmp
-      
+
     # Resource limits
     deploy:
       resources:

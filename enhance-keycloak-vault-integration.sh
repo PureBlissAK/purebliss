@@ -54,7 +54,7 @@ function create_keycloak_vault_entrypoint() {
 
     local keycloak_dir="/opt/dev-purebliss/services/keycloak"
     mkdir -p "$keycloak_dir"
-    
+
     local entrypoint_file="$keycloak_dir/keycloak-vault-entrypoint.sh"
 
     cat > "$entrypoint_file" << 'EOF'
@@ -86,16 +86,16 @@ echo "Fetching Keycloak secrets from Vault..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Fetch Keycloak secrets
     KEYCLOAK_SECRETS=$(vault kv get -format=json secret/keycloak 2>/dev/null || echo '{}')
-    
+
     if [[ "$KEYCLOAK_SECRETS" != '{}' ]]; then
         # Extract and export secrets
         export KEYCLOAK_ADMIN_PASSWORD=$(echo "$KEYCLOAK_SECRETS" | jq -r '.data.data.admin_password')
         export KC_DB_PASSWORD=$(echo "$KEYCLOAK_SECRETS" | jq -r '.data.data.db_password')
         export KEYCLOAK_MASTER_PASSWORD=$(echo "$KEYCLOAK_SECRETS" | jq -r '.data.data.master_password // .data.data.admin_password')
-        
+
         # Set standard Keycloak environment variables
         export KEYCLOAK_ADMIN=admin
         export KC_DB=postgres
@@ -106,7 +106,7 @@ if [[ -f "/vault-token" ]]; then
         export KC_HOSTNAME_STRICT=false
         export KC_HTTP_ENABLED=true
         export KC_PROXY=edge
-        
+
         echo "Keycloak secrets successfully loaded from Vault"
         echo "Admin user: $KEYCLOAK_ADMIN"
         echo "Database URL: $KC_DB_URL"
@@ -177,7 +177,7 @@ echo "Creating Pure Bliss realms..."
     --user "$KEYCLOAK_ADMIN_USER" \
     --password "$KEYCLOAK_ADMIN_PASSWORD"
 
-# Plane realm  
+# Plane realm
 /opt/keycloak/bin/kcadm.sh create realms \
     -s realm=planerealm \
     -s enabled=true \

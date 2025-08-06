@@ -3,9 +3,9 @@ set -euo pipefail
 
 # Enhanced PostgreSQL Fresh Start with Vault Integration
 # Based on Pure Bliss Container Enhancement Framework
-# 
+#
 # Purpose: Start PostgreSQL with fresh database and complete Vault integration
-# Features: 
+# Features:
 #   - Zero hardcoded secrets using Vault database secrets engine
 #   - Dynamic credential generation with 1-hour TTL
 #   - Comprehensive validation and health checks
@@ -37,31 +37,31 @@ function log_warning() {
 # Prerequisites validation
 function validate_prerequisites() {
     log_action "Validating prerequisites for PostgreSQL fresh start..."
-    
+
     # Check if docker is available
     if ! command -v docker >/dev/null 2>&1; then
         log_error "Docker not found"
         exit 1
     fi
-    
+
     # Check if vault CLI is available
     if ! command -v vault >/dev/null 2>&1; then
         log_error "Vault CLI not found"
         exit 1
     fi
-    
+
     # Check if jq is available for JSON processing
     if ! command -v jq >/dev/null 2>&1; then
         log_error "jq not found (required for JSON processing)"
         exit 1
     fi
-    
+
     # Check if purebliss-net network exists
     if ! docker network ls | grep -q "purebliss-net"; then
         log_warning "purebliss-net network not found, creating..."
         docker network create purebliss-net 2>/dev/null || log_error "Failed to create purebliss-net network"
     fi
-    
+
     log_success "Prerequisites validation completed"
 }
 
@@ -246,18 +246,18 @@ if docker exec purebliss-postgres psql -U "$VAULT_DB_USER" -d postgres -c "SELEC
 else
     echo "[$(date)] POSTGRES_FRESH_START: ❌ ERROR: Failed to connect with Vault-generated credentials" | tee -a "$LOG_FILE"
     echo "[$(date)] POSTGRES_FRESH_START: Attempting credential diagnostics..." | tee -a "$LOG_FILE"
-    
+
     # Enhanced diagnostics
     echo "Generated User: $VAULT_DB_USER" | tee -a "$LOG_FILE"
     docker exec purebliss-postgres psql -U postgres -d postgres -c "\du" | tee -a "$LOG_FILE"
-    
+
     # Check if user exists
     if docker exec purebliss-postgres psql -U postgres -d postgres -c "SELECT 1 FROM pg_user WHERE usename='$VAULT_DB_USER';" | grep -q "1 row"; then
         echo "[$(date)] POSTGRES_FRESH_START: ✅ User exists in database" | tee -a "$LOG_FILE"
     else
         echo "[$(date)] POSTGRES_FRESH_START: ❌ User not found in database" | tee -a "$LOG_FILE"
     fi
-    
+
     exit 1
 fi
 

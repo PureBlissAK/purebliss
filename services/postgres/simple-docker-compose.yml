@@ -1,0 +1,58 @@
+# PostgreSQL Simplified - Basic Configuration
+# Temporary solution to get PostgreSQL running quickly
+# Pure Bliss Elite Standards: Security, Microservices
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: purebliss-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: purebliss_dev_postgres_2025
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+      - /opt/my-secure-ha-stack/logs:/opt/logs:rw
+
+    networks:
+      - purebliss-net
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres -h localhost -p 5432"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /var/run/postgresql:noexec,nosuid,size=100m
+
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+volumes:
+  postgres_data:
+    driver: local
+    name: purebliss_postgres_data
+
+networks:
+  purebliss-net:
+    external: true

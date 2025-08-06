@@ -36,12 +36,12 @@ echo ""
 log_test "Testing PostgreSQL container health and status..."
 if docker ps | grep -q purebliss-postgres; then
     log_success "PostgreSQL container is running"
-    
+
     # Check detailed status
     echo "   Container Details:"
     docker ps --filter name=purebliss-postgres --format "   {{.Names}}: {{.Status}} | {{.Ports}}"
     echo ""
-    
+
     # Check health status
     health_status=$(docker inspect --format='{{.State.Health.Status}}' purebliss-postgres 2>/dev/null || echo "no_healthcheck")
     if [[ "$health_status" == "healthy" ]]; then
@@ -83,22 +83,22 @@ if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
     export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_SKIP_VERIFY=1
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-    
+
     # Test Vault connectivity
     if vault token lookup >/dev/null 2>&1; then
         log_success "Vault authentication working"
-        
+
         # Test PostgreSQL secrets in Vault
         if vault kv get secret/postgres >/dev/null 2>&1; then
             log_success "PostgreSQL secrets stored in Vault"
-            
+
             # Check specific secret fields
             if vault kv get -field=bootstrap_password secret/postgres >/dev/null 2>&1; then
                 log_success "Bootstrap password stored in Vault"
             else
                 log_error "Bootstrap password missing from Vault"
             fi
-            
+
             if vault kv get -field=vault_admin_password secret/postgres >/dev/null 2>&1; then
                 log_success "Vault admin password stored in Vault"
             else
@@ -147,18 +147,18 @@ if [[ -n "${VAULT_TOKEN:-}" ]]; then
     # Check if database secrets engine is enabled
     if vault secrets list | grep -q "database/"; then
         log_success "Database secrets engine enabled"
-        
+
         # Check PostgreSQL connection configuration
         if vault read database/config/postgres-app >/dev/null 2>&1; then
             log_success "PostgreSQL connection configured in Vault"
-            
+
             # Test dynamic credential generation
             log_test "Testing dynamic credential generation..."
             if CREDS=$(vault read -format=json database/creds/postgres-role 2>/dev/null); then
                 VAULT_USER=$(echo "$CREDS" | jq -r '.data.username')
                 VAULT_PASS=$(echo "$CREDS" | jq -r '.data.password')
                 log_success "Generated dynamic credentials: $VAULT_USER"
-                
+
                 # Test connection with generated credentials
                 if PGPASSWORD="$VAULT_PASS" docker exec purebliss-postgres psql -U "$VAULT_USER" -d postgres -t -c "SELECT 'Dynamic credentials working!' as status;" 2>/dev/null | grep -q "Dynamic credentials working"; then
                     log_success "Dynamic credentials connection test successful"
@@ -186,7 +186,7 @@ log_test "Testing service database connectivity..."
 # Test Keycloak database
 if docker exec purebliss-postgres psql -U postgres -d keycloak -t -c "SELECT 'Keycloak DB accessible!' as status;" 2>/dev/null | grep -q "Keycloak DB accessible"; then
     log_success "Keycloak database accessible"
-    
+
     # Test keycloak user access
     if [[ -n "${VAULT_TOKEN:-}" ]]; then
         if keycloak_pass=$(vault kv get -field=db_password secret/keycloak 2>/dev/null); then

@@ -28,7 +28,7 @@ function main() {
 
     # Enhance each monitoring service
     enhance_grafana
-    enhance_prometheus  
+    enhance_prometheus
     enhance_loki
 
     log_success "Monitoring Stack Vault integration enhancement completed!"
@@ -96,7 +96,7 @@ function create_grafana_vault_entrypoint() {
 
     local grafana_dir="/opt/dev-purebliss/services/grafana"
     mkdir -p "$grafana_dir"
-    
+
     local entrypoint_file="$grafana_dir/grafana-vault-entrypoint.sh"
 
     cat > "$entrypoint_file" << 'EOF'
@@ -128,16 +128,16 @@ echo "Fetching Grafana secrets from Vault..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Fetch Grafana secrets
     GRAFANA_SECRETS=$(vault kv get -format=json secret/grafana 2>/dev/null || echo '{}')
-    
+
     if [[ "$GRAFANA_SECRETS" != '{}' ]]; then
         # Extract and export secrets
         export GF_SECURITY_ADMIN_PASSWORD=$(echo "$GRAFANA_SECRETS" | jq -r '.data.data.admin_password')
         export GF_DATABASE_PASSWORD=$(echo "$GRAFANA_SECRETS" | jq -r '.data.data.database_password // "grafana"')
         export GF_SECURITY_SECRET_KEY=$(echo "$GRAFANA_SECRETS" | jq -r '.data.data.secret_key')
-        
+
         # Set standard Grafana environment variables
         export GF_SECURITY_ADMIN_USER=admin
         export GF_INSTALL_PLUGINS="grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel"
@@ -147,7 +147,7 @@ if [[ -f "/vault-token" ]]; then
         export GF_USERS_AUTO_ASSIGN_ORG_ROLE=Viewer
         export GF_SERVER_ROOT_URL=https://dev.purebliss.app/grafana/
         export GF_SERVER_SERVE_FROM_SUB_PATH=true
-        
+
         echo "Grafana secrets successfully loaded from Vault"
         echo "Admin user: $GF_SECURITY_ADMIN_USER"
         echo "Root URL: $GF_SERVER_ROOT_URL"
@@ -170,9 +170,9 @@ exec /run.sh
 
 function create_datasource_config() {
     echo "Creating Grafana datasource configuration..."
-    
+
     mkdir -p /etc/grafana/provisioning/datasources
-    
+
     # Prometheus datasource
     cat > /etc/grafana/provisioning/datasources/prometheus.yml << DSEOF
 apiVersion: 1
@@ -276,7 +276,7 @@ function create_prometheus_vault_entrypoint() {
 
     local prometheus_dir="/opt/dev-purebliss/services/prometheus"
     mkdir -p "$prometheus_dir"
-    
+
     local entrypoint_file="$prometheus_dir/prometheus-vault-entrypoint.sh"
 
     cat > "$entrypoint_file" << 'EOF'
@@ -308,10 +308,10 @@ echo "Fetching Prometheus configuration from Vault..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Fetch Prometheus secrets
     PROMETHEUS_SECRETS=$(vault kv get -format=json secret/prometheus 2>/dev/null || echo '{}')
-    
+
     if [[ "$PROMETHEUS_SECRETS" != '{}' ]]; then
         echo "Prometheus secrets successfully loaded from Vault"
     else
@@ -398,7 +398,7 @@ scrape_configs:
     static_configs:
       - targets: ['purebliss-postgres:5432']
 
-  # Redis monitoring  
+  # Redis monitoring
   - job_name: 'redis'
     static_configs:
       - targets: ['purebliss-redis:6379']
@@ -501,7 +501,7 @@ function create_loki_vault_entrypoint() {
 
     local loki_dir="/opt/dev-purebliss/services/loki"
     mkdir -p "$loki_dir"
-    
+
     local entrypoint_file="$loki_dir/loki-vault-entrypoint.sh"
 
     cat > "$entrypoint_file" << 'EOF'
@@ -533,10 +533,10 @@ echo "Fetching Loki configuration from Vault..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Fetch Loki secrets (if any)
     LOKI_SECRETS=$(vault kv get -format=json secret/loki 2>/dev/null || echo '{}')
-    
+
     if [[ "$LOKI_SECRETS" != '{}' ]]; then
         echo "Loki secrets successfully loaded from Vault"
     else

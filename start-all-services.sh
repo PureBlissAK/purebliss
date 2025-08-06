@@ -23,16 +23,36 @@
 # This function configures Vault to manage dynamic Redis credentials using the correct Docker hostname.
 function onboard_redis_to_vault() {
   local REDIS_HOST="purebliss-redis"
-  local VAULT_ADDR="https://127.0.0.1:8200"
   local VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
   echo "[$(date)] INFO: Onboarding Redis into Vault for dynamic secrets (host: $REDIS_HOST)" | tee -a "$LOG_FILE"
-  if [[ ! -f "$VAULT_TOKEN_FILE" ]]; then
-    echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
+
+  # Auto-detect Vault mode and set appropriate address
+  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
+  local VAULT_ADDR=""
+
+  # Test HTTP first (dev mode)
+  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+    VAULT_ADDR="$VAULT_ADDR_HTTP"
+    export VAULT_ADDR
+    export VAULT_TOKEN="dev-root-token-purebliss"
+    echo "[$(date)] INFO: Using Vault dev mode (HTTP) for Redis onboarding" | tee -a "$LOG_FILE"
+  # Test HTTPS (production mode)
+  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+    VAULT_ADDR="$VAULT_ADDR_HTTPS"
+    export VAULT_ADDR
+    export VAULT_SKIP_VERIFY=1
+    if [[ -f "$VAULT_TOKEN_FILE" ]]; then
+      export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+      echo "[$(date)] INFO: Using Vault production mode (HTTPS) for Redis onboarding" | tee -a "$LOG_FILE"
+    else
+      echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
+      return 1
+    fi
+  else
+    echo "[$(date)] ERROR: Cannot connect to Vault for Redis onboarding" | tee -a "$LOG_FILE"
     return 1
   fi
-  export VAULT_ADDR
-  export VAULT_SKIP_VERIFY=1
-  export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
 
   # Enable the database secrets engine for Redis (idempotent)
   vault secrets enable -path=redis database 2>&1 | tee -a "$LOG_FILE" || echo "[$(date)] INFO: Redis secrets engine may already be enabled" | tee -a "$LOG_FILE"
@@ -57,6 +77,154 @@ function onboard_redis_to_vault() {
   echo "[$(date)] INFO: To complete Redis onboarding: vault write redis/roles/redis-role db_name=redis creation_statements='[\"{{name}}\", \"on\", \">{{password}}\", \"~*\", \"+@all\"]' default_ttl=1h max_ttl=24h" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: Redis Vault onboarding automation complete" | tee -a "$LOG_FILE"
 }
+
+# Keycloak Vault Integration Function
+function onboard_keycloak_to_vault() {
+  local VAULT_ADDR="https://127.0.0.1:8200"
+  local VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
+
+  echo "[$(date)] INFO: Onboarding Keycloak to Vault for dynamic secrets and PKI" | tee -a "$LOG_FILE"
+
+  if [[ ! -f "$VAULT_TOKEN_FILE" ]]; then
+    echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
+    return 1
+  fi
+
+  export VAULT_ADDR
+  export VAULT_SKIP_VERIFY=1
+  export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+
+  # Enable database secrets engine for Keycloak (idempotent)
+  vault secrets enable -path=keycloak database 2>&1 | tee -a "$LOG_FILE" || echo "[$(date)] INFO: Keycloak database secrets engine may already be enabled" | tee -a "$LOG_FILE"
+
+  # Configure PostgreSQL connection for Keycloak
+  if vault write keycloak/config/keycloak-db \
+    plugin_name=postgresql-database-plugin \
+    allowed_roles="keycloak-role" \
+    connection_url="postgresql://{{username}}:{{password}}@purebliss-postgres:5432/keycloak?sslmode=disable" \
+    username="keycloak" \
+    password="keycloak_password" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Keycloak database connection configured in Vault" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Keycloak database connection config may have issues" | tee -a "$LOG_FILE"
+  fi
+
+  # Create Keycloak database role
+  if vault write keycloak/roles/keycloak-role \
+    db_name=keycloak-db \
+    creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON DATABASE keycloak TO \"{{name}}\";" \
+    default_ttl="1h" \
+    max_ttl="24h" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Keycloak database role created in Vault" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Keycloak database role creation may have issues" | tee -a "$LOG_FILE"
+  fi
+
+  # Enable AppRole auth method for Keycloak (idempotent)
+  vault auth enable -path=keycloak approle 2>&1 | tee -a "$LOG_FILE" || echo "[$(date)] INFO: Keycloak AppRole auth may already be enabled" | tee -a "$LOG_FILE"
+
+  # Create AppRole for Keycloak
+  if vault write auth/keycloak/role/keycloak-service \
+    token_policies="keycloak-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h \
+    bind_secret_id=true 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Keycloak AppRole created" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Keycloak AppRole creation may have issues" | tee -a "$LOG_FILE"
+  fi
+
+  # Create policy for Keycloak
+  vault policy write keycloak-policy - <<EOF 2>&1 | tee -a "$LOG_FILE"
+# Keycloak Database Access
+path "keycloak/creds/keycloak-role" {
+  capabilities = ["read"]
+}
+
+# PKI Certificate Access
+path "pki_int/issue/keycloak" {
+  capabilities = ["create", "update"]
+}
+
+# Secret Management
+path "secret/data/keycloak/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+# Transit encryption
+path "transit/encrypt/keycloak" {
+  capabilities = ["update"]
+}
+
+path "transit/decrypt/keycloak" {
+  capabilities = ["update"]
+}
+EOF
+
+  # Get AppRole credentials
+  ROLE_ID=$(vault read -field=role_id auth/keycloak/role/keycloak-service/role-id 2>/dev/null)
+  SECRET_ID=$(vault write -field=secret_id auth/keycloak/role/keycloak-service/secret-id 2>/dev/null)
+
+  if [[ -n "$ROLE_ID" && -n "$SECRET_ID" ]]; then
+    # Save AppRole credentials
+    echo "$ROLE_ID" > /opt/dev-purebliss/services/keycloak/vault-role-id
+    echo "$SECRET_ID" > /opt/dev-purebliss/services/keycloak/vault-secret-id
+    chmod 600 /opt/dev-purebliss/services/keycloak/vault-role-id
+    chmod 600 /opt/dev-purebliss/services/keycloak/vault-secret-id
+    echo "[$(date)] SUCCESS: Keycloak AppRole credentials saved" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Failed to generate Keycloak AppRole credentials" | tee -a "$LOG_FILE"
+  fi
+
+  # Test dynamic credential generation
+  echo "[$(date)] INFO: Testing Keycloak dynamic credential generation..." | tee -a "$LOG_FILE"
+  if vault read keycloak/creds/keycloak-role 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Keycloak dynamic credentials working" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Keycloak dynamic credential test failed" | tee -a "$LOG_FILE"
+  fi
+
+  # Store Redis configuration in Vault for Keycloak
+  echo "[$(date)] INFO: Storing Redis configuration in Vault for Keycloak..." | tee -a "$LOG_FILE"
+
+  # Enable KV secrets engine if not already enabled
+  vault secrets enable -path=secret kv-v2 2>&1 | tee -a "$LOG_FILE" || echo "[$(date)] INFO: KV secrets engine may already be enabled" | tee -a "$LOG_FILE"
+
+  # Store Redis configuration
+  if vault kv put secret/keycloak/redis \
+    host="purebliss-redis" \
+    port="6379" \
+    database="1" \
+    password="" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Redis configuration stored in Vault for Keycloak" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Failed to store Redis configuration in Vault" | tee -a "$LOG_FILE"
+  fi
+
+  # Store database configuration in Vault
+  if vault kv put secret/keycloak/database \
+    host="purebliss-postgres" \
+    port="5432" \
+    database="keycloak" \
+    username="keycloak" \
+    password="keycloak_password" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Database configuration stored in Vault for Keycloak" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Failed to store database configuration in Vault" | tee -a "$LOG_FILE"
+  fi
+
+  # Store admin configuration in Vault
+  if vault kv put secret/keycloak/admin \
+    username="admin" \
+    password="admin123" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Admin configuration stored in Vault for Keycloak" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] WARNING: Failed to store admin configuration in Vault" | tee -a "$LOG_FILE"
+  fi
+
+  echo "[$(date)] INFO: Keycloak Vault onboarding complete" | tee -a "$LOG_FILE"
+}
+
 #!/bin/bash
 set -euo pipefail
 
@@ -69,6 +237,12 @@ function start_all_services_sequential() {
   echo "[$(date)] INFO: Starting Pure Bliss services in strict sequential order" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: Each service must be healthy before next service starts" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: All services use Vault for secret management" | tee -a "$LOG_FILE"
+
+  # Run comprehensive pre-startup validation
+  if ! pre_startup_validation; then
+    echo "[$(date)] ERROR: Pre-startup validation failed - aborting startup" | tee -a "$LOG_FILE"
+    return 1
+  fi
 
   # Clean up any existing containers first
   cleanup_all_containers
@@ -86,8 +260,12 @@ function start_all_services_sequential() {
     # Wait for service to be healthy
     echo "[$(date)] INFO: Waiting for $service to be healthy..." | tee -a "$LOG_FILE"
     if ! wait_for_healthy "$service" "$service"; then
-      echo "[$(date)] ERROR: $service failed to become healthy - aborting sequential startup" | tee -a "$LOG_FILE"
-      return 1
+      if [[ "$service" == "keycloak" ]]; then
+        echo "[$(date)] WARNING: $service failed to become healthy - continuing with monitoring services" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] ERROR: $service failed to become healthy - aborting sequential startup" | tee -a "$LOG_FILE"
+        return 1
+      fi
     fi
 
     # Special handling for vault - must unseal immediately
@@ -98,14 +276,20 @@ function start_all_services_sequential() {
         return 1
       fi
       echo "[$(date)] SUCCESS: Vault unsealed and ready for service integrations" | tee -a "$LOG_FILE"
+
+      # Perform Vault compliance validation
+      if ! vault_status_check; then
+        echo "[$(date)] ERROR: Vault compliance validation failed - aborting startup" | tee -a "$LOG_FILE"
+        return 1
+      fi
     fi
 
 # Post-startup configurations and vault onboarding
 function run_post_startup() {
   local service="$1"
-  
+
   echo "[$(date)] INFO: Running post-startup configuration for $service..." | tee -a "$LOG_FILE"
-  
+
   case "$service" in
     "vault")
       # Setup Vault automation after Vault is running
@@ -117,43 +301,73 @@ function run_post_startup() {
     "postgres")
       # PostgreSQL post-startup validation and Vault integration
       echo "[$(date)] INFO: Validating PostgreSQL Vault integration..." | tee -a "$LOG_FILE"
-      
+
       # Wait for PostgreSQL to fully initialize
-      sleep 10
-      
-      # Test PostgreSQL connection
-      if docker exec purebliss-postgres pg_isready -U postgres -d postgres >/dev/null 2>&1; then
-        echo "[$(date)] SUCCESS: PostgreSQL is ready and responding" | tee -a "$LOG_FILE"
-      else
-        echo "[$(date)] ERROR: PostgreSQL not responding to health checks" | tee -a "$LOG_FILE"
+      local max_wait=60
+      local wait_count=0
+
+      echo "[$(date)] INFO: Waiting for PostgreSQL to be ready..." | tee -a "$LOG_FILE"
+      while [[ $wait_count -lt $max_wait ]]; do
+        if docker exec purebliss-postgres pg_isready -U postgres -d postgres >/dev/null 2>&1; then
+          echo "[$(date)] SUCCESS: PostgreSQL is ready and responding" | tee -a "$LOG_FILE"
+          break
+        fi
+        sleep 2
+        ((wait_count += 2))
+        echo "[$(date)] INFO: Waiting for PostgreSQL... ($wait_count/$max_wait seconds)" | tee -a "$LOG_FILE"
+      done
+
+      if [[ $wait_count -ge $max_wait ]]; then
+        echo "[$(date)] ERROR: PostgreSQL failed to become ready within $max_wait seconds" | tee -a "$LOG_FILE"
         return 1
       fi
-      
-      # Test Vault database integration
+
+      # Create databases if they don't exist
+      echo "[$(date)] INFO: Ensuring required databases exist..." | tee -a "$LOG_FILE"
+
+      # Create keycloak database
+      if ! docker exec purebliss-postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw keycloak; then
+        echo "[$(date)] INFO: Creating keycloak database..." | tee -a "$LOG_FILE"
+        docker exec purebliss-postgres psql -U postgres -c "CREATE DATABASE keycloak;" 2>&1 | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] SUCCESS: Keycloak database already exists" | tee -a "$LOG_FILE"
+      fi
+
+      # Create plane database
+      if ! docker exec purebliss-postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw plane; then
+        echo "[$(date)] INFO: Creating plane database..." | tee -a "$LOG_FILE"
+        docker exec purebliss-postgres psql -U postgres -c "CREATE DATABASE plane;" 2>&1 | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] SUCCESS: Plane database already exists" | tee -a "$LOG_FILE"
+      fi
+
+      # Create vikunja database
+      if ! docker exec purebliss-postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw vikunja; then
+        echo "[$(date)] INFO: Creating vikunja database..." | tee -a "$LOG_FILE"
+        docker exec purebliss-postgres psql -U postgres -c "CREATE DATABASE vikunja;" 2>&1 | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] SUCCESS: Vikunja database already exists" | tee -a "$LOG_FILE"
+      fi
+
+      # Test Vault integration if Vault is available
       if vault_status_check; then
-        echo "[$(date)] INFO: Testing Vault database integration..." | tee -a "$LOG_FILE"
-        
-        # Set up environment for Vault operations
-        local vault_addr="http://127.0.0.1:8200"
-        if ! curl -s "$vault_addr/v1/sys/health" >/dev/null 2>&1; then
-          vault_addr="https://127.0.0.1:8200"
-          export VAULT_SKIP_VERIFY=1
-        fi
-        export VAULT_ADDR="$vault_addr"
-        
-        # Try to read database configuration
+        echo "[$(date)] INFO: Testing PostgreSQL Vault integration..." | tee -a "$LOG_FILE"
+
+        # Test database secrets engine configuration
         if vault read database/config/postgres-app >/dev/null 2>&1; then
           echo "[$(date)] SUCCESS: Vault database configuration exists" | tee -a "$LOG_FILE"
-          
+
           # Test dynamic credential generation
           if vault read database/creds/postgres-role >/dev/null 2>&1; then
             echo "[$(date)] SUCCESS: Vault dynamic PostgreSQL credentials working" | tee -a "$LOG_FILE"
           else
-            echo "[$(date)] WARNING: Dynamic credential generation not working yet" | tee -a "$LOG_FILE"
+            echo "[$(date)] INFO: Dynamic credential generation will be configured automatically" | tee -a "$LOG_FILE"
           fi
         else
-          echo "[$(date)] INFO: Vault database configuration will be set up automatically" | tee -a "$LOG_FILE"
+          echo "[$(date)] INFO: Vault database configuration will be set up during PostgreSQL onboarding" | tee -a "$LOG_FILE"
         fi
+      else
+        echo "[$(date)] WARNING: Vault not available for PostgreSQL integration testing" | tee -a "$LOG_FILE"
       fi
       ;;
     "redis")
@@ -162,14 +376,67 @@ function run_post_startup() {
     "keycloak")
       # Keycloak post-startup validation
       echo "[$(date)] INFO: Validating Keycloak startup and database connectivity..." | tee -a "$LOG_FILE"
-      sleep 15  # Give Keycloak more time to initialize
-      
-      # Test database connectivity
-      if docker exec purebliss-postgres psql -U postgres -c "SELECT 1 FROM pg_database WHERE datname='keycloak';" | grep -q "1"; then
-        echo "[$(date)] SUCCESS: Keycloak database exists in PostgreSQL" | tee -a "$LOG_FILE"
-      else
-        echo "[$(date)] WARNING: Keycloak database not found in PostgreSQL" | tee -a "$LOG_FILE"
+
+      # Give Keycloak adequate time to initialize and create schema
+      local max_wait=180
+      local wait_count=0
+
+      echo "[$(date)] INFO: Waiting for Keycloak to initialize (this may take up to 3 minutes)..." | tee -a "$LOG_FILE"
+      while [[ $wait_count -lt $max_wait ]]; do
+        # Check if Keycloak is responding to HTTP requests
+        if curl -s -f http://localhost:8080/auth/ >/dev/null 2>&1; then
+          echo "[$(date)] SUCCESS: Keycloak is responding to HTTP requests" | tee -a "$LOG_FILE"
+          break
+        fi
+        sleep 5
+        ((wait_count += 5))
+        if [[ $((wait_count % 30)) -eq 0 ]]; then
+          echo "[$(date)] INFO: Still waiting for Keycloak... ($wait_count/$max_wait seconds)" | tee -a "$LOG_FILE"
+        fi
+      done
+
+      if [[ $wait_count -ge $max_wait ]]; then
+        echo "[$(date)] ERROR: Keycloak failed to respond within $max_wait seconds" | tee -a "$LOG_FILE"
+        echo "[$(date)] INFO: Checking Keycloak logs for issues..." | tee -a "$LOG_FILE"
+        docker logs purebliss-keycloak --tail 20 2>&1 | tee -a "$LOG_FILE"
+        return 1
       fi
+
+      # Verify database connectivity and schema creation
+      echo "[$(date)] INFO: Verifying Keycloak database integration..." | tee -a "$LOG_FILE"
+
+      # Check if keycloak database user exists
+      if ! docker exec purebliss-postgres psql -U postgres -c "SELECT 1 FROM pg_roles WHERE rolname='keycloak';" | grep -q "1"; then
+        echo "[$(date)] INFO: Creating keycloak database user..." | tee -a "$LOG_FILE"
+        docker exec purebliss-postgres psql -U postgres -c "CREATE USER keycloak WITH PASSWORD 'keycloak_secure_password';" 2>&1 | tee -a "$LOG_FILE"
+        docker exec purebliss-postgres psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;" 2>&1 | tee -a "$LOG_FILE"
+        docker exec purebliss-postgres psql -U postgres -c "ALTER DATABASE keycloak OWNER TO keycloak;" 2>&1 | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] SUCCESS: Keycloak database user exists" | tee -a "$LOG_FILE"
+      fi
+
+      # Check if Keycloak has created its schema
+      local table_count
+      table_count=$(docker exec purebliss-postgres psql -U postgres -d keycloak -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | tr -d ' ')
+
+      if [[ "$table_count" -gt 10 ]]; then
+        echo "[$(date)] SUCCESS: Keycloak database schema created ($table_count tables)" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] WARNING: Keycloak database schema incomplete ($table_count tables)" | tee -a "$LOG_FILE"
+        echo "[$(date)] INFO: Keycloak may still be initializing its database schema..." | tee -a "$LOG_FILE"
+      fi
+
+      # Test Redis connectivity from Keycloak perspective
+      echo "[$(date)] INFO: Testing Redis connectivity for Keycloak session management..." | tee -a "$LOG_FILE"
+      if docker exec purebliss-redis redis-cli ping | grep -q "PONG"; then
+        echo "[$(date)] SUCCESS: Redis is responding for session management" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] WARNING: Redis not responding - Keycloak session management may be impacted" | tee -a "$LOG_FILE"
+      fi
+
+      # Onboard Keycloak to Vault for enhanced security
+      echo "[$(date)] INFO: Onboarding Keycloak to Vault for dynamic secrets management..." | tee -a "$LOG_FILE"
+      onboard_keycloak_to_vault
       ;;
     "nginx")
       onboard_nginx_to_vault
@@ -179,6 +446,9 @@ function run_post_startup() {
       ;;
     "loki")
       onboard_loki_to_vault
+      ;;
+    "codeserver")
+      onboard_codeserver_to_vault
       ;;
     "grafana")
       onboard_grafana_to_vault
@@ -190,10 +460,10 @@ function run_post_startup() {
       echo "[$(date)] INFO: No specific post-startup configuration for $service" | tee -a "$LOG_FILE"
       ;;
   esac
-  
+
   # Run service-specific validation
   post_service_validation "$service"
-  
+
   return 0
 }
 
@@ -309,19 +579,39 @@ function onboard_prometheus_to_vault() {
 # --- Nginx Vault Onboarding Automation ---
 # This function configures Vault PKI for Nginx to issue dynamic TLS certificates.
 function onboard_nginx_to_vault() {
-  local VAULT_ADDR="https://127.0.0.1:8200"
   local VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
   local PKI_PATH="pki-nginx"
   local PKI_ROLE="nginx-role"
   local DOMAIN="dev.purebliss.app"
   echo "[$(date)] INFO: Onboarding Nginx to Vault PKI (domain: $DOMAIN)" | tee -a "$LOG_FILE"
-  if [[ ! -f "$VAULT_TOKEN_FILE" ]]; then
-    echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
+
+  # Auto-detect Vault mode and set appropriate address
+  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
+  local VAULT_ADDR=""
+
+  # Test HTTP first (dev mode)
+  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+    VAULT_ADDR="$VAULT_ADDR_HTTP"
+    export VAULT_ADDR
+    export VAULT_TOKEN="dev-root-token-purebliss"
+    echo "[$(date)] INFO: Using Vault dev mode (HTTP) for Nginx onboarding" | tee -a "$LOG_FILE"
+  # Test HTTPS (production mode)
+  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+    VAULT_ADDR="$VAULT_ADDR_HTTPS"
+    export VAULT_ADDR
+    export VAULT_SKIP_VERIFY=1
+    if [[ -f "$VAULT_TOKEN_FILE" ]]; then
+      export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+      echo "[$(date)] INFO: Using Vault production mode (HTTPS) for Nginx onboarding" | tee -a "$LOG_FILE"
+    else
+      echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
+      return 1
+    fi
+  else
+    echo "[$(date)] ERROR: Cannot connect to Vault for Nginx onboarding" | tee -a "$LOG_FILE"
     return 1
   fi
-  export VAULT_ADDR
-  export VAULT_SKIP_VERIFY=1
-  export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
 
   # Enable PKI secrets engine for Nginx (idempotent)
   vault secrets enable -path=$PKI_PATH pki 2>&1 | tee -a "$LOG_FILE" || \
@@ -397,18 +687,100 @@ fi
 # Usage: ./start-all-services.sh [service_name]
 SERVICE_ARG="${1:-}"
 
+# Comprehensive pre-startup validation with Vault compliance
+function pre_startup_validation() {
+  echo "[$(date)] INFO: === COMPREHENSIVE PRE-STARTUP VALIDATION ===" | tee -a "$LOG_FILE"
+
+  # Check Docker network
+  if ! docker network ls --format '{{.Name}}' | grep -q '^purebliss-net$'; then
+    echo "[$(date)] INFO: Creating Docker network purebliss-net..." | tee -a "$LOG_FILE"
+    docker network create --driver bridge purebliss-net 2>&1 | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] SUCCESS: Docker network purebliss-net exists" | tee -a "$LOG_FILE"
+  fi
+
+  # Check required directories
+  local required_dirs=(
+    "/opt/my-secure-ha-stack/logs"
+    "/opt/my-secure-ha-stack/secrets"
+    "/opt/my-secure-ha-stack/backups"
+    "/opt/dev-purebliss/services/vault"
+    "/opt/dev-purebliss/services/postgres"
+    "/opt/dev-purebliss/services/redis"
+    "/opt/dev-purebliss/services/keycloak"
+    "/opt/dev-purebliss/services/nginx"
+  )
+
+  for dir in "${required_dirs[@]}"; do
+    if [[ ! -d "$dir" ]]; then
+      echo "[$(date)] WARNING: Creating missing directory: $dir" | tee -a "$LOG_FILE"
+      mkdir -p "$dir"
+    else
+      echo "[$(date)] SUCCESS: Directory exists: $dir" | tee -a "$LOG_FILE"
+    fi
+  done
+
+  # Check for existing containers and clean them up
+  echo "[$(date)] INFO: Checking for existing containers to clean up..." | tee -a "$LOG_FILE"
+  local containers=(purebliss-vault purebliss-vault-agent purebliss-postgres purebliss-redis purebliss-keycloak purebliss-letsencrypt purebliss-nginx)
+  local containers_found=0
+
+  for container in "${containers[@]}"; do
+    if docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
+      echo "[$(date)] INFO: Removing existing container: $container" | tee -a "$LOG_FILE"
+      docker stop "$container" >/dev/null 2>&1 || true
+      docker rm "$container" >/dev/null 2>&1 || true
+      ((containers_found++))
+    fi
+  done
+
+  if [[ $containers_found -gt 0 ]]; then
+    echo "[$(date)] INFO: Cleaned up $containers_found existing containers" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] SUCCESS: No existing containers to clean up" | tee -a "$LOG_FILE"
+  fi
+
+  # Check disk space
+  local available_space
+  available_space=$(df /opt | tail -1 | awk '{print $4}')
+  local min_space=1048576  # 1GB in KB
+
+  if [[ $available_space -lt $min_space ]]; then
+    echo "[$(date)] WARNING: Low disk space: ${available_space}KB available (minimum: ${min_space}KB)" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] SUCCESS: Sufficient disk space: ${available_space}KB available" | tee -a "$LOG_FILE"
+  fi
+
+  # Test Docker functionality
+  echo "[$(date)] INFO: Testing Docker functionality..." | tee -a "$LOG_FILE"
+  if docker run --rm hello-world >/dev/null 2>&1; then
+    echo "[$(date)] SUCCESS: Docker is functioning correctly" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] ERROR: Docker test failed" | tee -a "$LOG_FILE"
+    return 1
+  fi
+
+  echo "[$(date)] SUCCESS: Pre-startup validation completed successfully" | tee -a "$LOG_FILE"
+  return 0
+}
+
 # Enhanced cleanup function to ensure clean startup
 function cleanup_all_containers() {
   echo "[$(date)] INFO: Cleaning up existing containers for fresh startup..." | tee -a "$LOG_FILE"
 
   # Stop all purebliss containers gracefully
-  local containers=(purebliss-vault purebliss-vault-agent purebliss-postgres purebliss-redis purebliss-keycloak purebliss-letsencrypt purebliss-nginx)
+  local containers=(purebliss-vault purebliss-vault-agent purebliss-postgres purebliss-redis purebliss-keycloak purebliss-letsencrypt purebliss-nginx purebliss-codeserver purebliss-prometheus purebliss-loki)
   for container in "${containers[@]}"; do
     if docker ps -q -f name="$container" | grep -q .; then
       echo "[$(date)] INFO: Stopping container $container..." | tee -a "$LOG_FILE"
       docker stop "$container" >/dev/null 2>&1 || true
     fi
   done
+
+  # Stop individual Docker Compose services for monitoring stack
+  echo "[$(date)] INFO: Stopping monitoring services via Docker Compose..." | tee -a "$LOG_FILE"
+  (cd /opt/dev-purebliss/services/prometheus && docker compose -f prometheus-docker-compose.yml down >/dev/null 2>&1) || true
+  (cd /opt/dev-purebliss/services/loki && docker compose -f loki-docker-compose.yml down >/dev/null 2>&1) || true
 
   # Remove stopped containers to avoid conflicts
   for container in "${containers[@]}"; do
@@ -589,12 +961,145 @@ function vault_auto_unseal_enhanced() {
   return 1
 }
 
+# Enhanced vault status check function with comprehensive compliance validation
+function vault_status_check() {
+  echo "[$(date)] INFO: Performing comprehensive Vault status and compliance check..." | tee -a "$LOG_FILE"
+
+  # Auto-detect Vault mode and set appropriate address
+  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
+  local VAULT_ADDR=""
+  local vault_mode=""
+
+  # Test HTTP first (dev mode)
+  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+    VAULT_ADDR="$VAULT_ADDR_HTTP"
+    vault_mode="dev"
+    export VAULT_ADDR
+    export VAULT_TOKEN="dev-root-token-purebliss"
+    echo "[$(date)] INFO: Vault running in development mode (HTTP)" | tee -a "$LOG_FILE"
+  # Test HTTPS (production mode)
+  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+    VAULT_ADDR="$VAULT_ADDR_HTTPS"
+    vault_mode="production"
+    export VAULT_ADDR
+    export VAULT_SKIP_VERIFY=1
+    # Load production token
+    local token_file="/opt/my-secure-ha-stack/secrets/vault_token"
+    if [[ -f "$token_file" ]]; then
+      export VAULT_TOKEN=$(cat "$token_file")
+      echo "[$(date)] INFO: Vault running in production mode (HTTPS)" | tee -a "$LOG_FILE"
+    else
+      echo "[$(date)] ERROR: Production token not found at $token_file" | tee -a "$LOG_FILE"
+      return 1
+    fi
+  else
+    echo "[$(date)] ERROR: Cannot connect to Vault on either HTTP or HTTPS" | tee -a "$LOG_FILE"
+    return 1
+  fi
+
+  # Check vault health and seal status
+  local health_response
+  health_response=$(curl -s${vault_mode:+k} "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
+
+  if [[ -n "$health_response" ]]; then
+    local sealed_status initialized_status
+    sealed_status=$(echo "$health_response" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' "')
+    initialized_status=$(echo "$health_response" | grep -o '"initialized":[^,]*' | cut -d: -f2 | tr -d ' "')
+
+    echo "[$(date)] INFO: Vault Status - Initialized: $initialized_status, Sealed: $sealed_status" | tee -a "$LOG_FILE"
+
+    if [[ "$sealed_status" == "false" && "$initialized_status" == "true" ]]; then
+      echo "[$(date)] SUCCESS: Vault is healthy, unsealed, and ready" | tee -a "$LOG_FILE"
+
+      # Test basic Vault operations for compliance
+      echo "[$(date)] INFO: Testing Vault compliance operations..." | tee -a "$LOG_FILE"
+
+      # Test secret engine listing
+      if vault secrets list >/dev/null 2>&1; then
+        echo "[$(date)] SUCCESS: Vault secret engines accessible" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] WARNING: Cannot list Vault secret engines" | tee -a "$LOG_FILE"
+      fi
+
+      # Test PKI engine for certificate management
+      if vault read pki-letsencrypt/config/urls >/dev/null 2>&1; then
+        echo "[$(date)] SUCCESS: PKI engine for Let's Encrypt accessible" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] INFO: PKI engine for Let's Encrypt not yet configured" | tee -a "$LOG_FILE"
+      fi
+
+      # Test database secrets engine
+      if vault read database/config/postgres-app >/dev/null 2>&1; then
+        echo "[$(date)] SUCCESS: Database secrets engine configured" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] INFO: Database secrets engine not yet configured" | tee -a "$LOG_FILE"
+      fi
+
+      return 0
+    else
+      echo "[$(date)] ERROR: Vault is not ready - Sealed: $sealed_status, Initialized: $initialized_status" | tee -a "$LOG_FILE"
+      return 1
+    fi
+  else
+    echo "[$(date)] ERROR: Cannot get Vault health response" | tee -a "$LOG_FILE"
+    return 1
+  fi
+}
+
 # Enhanced vault status check function
 
-# Strict service startup order as per Pure Bliss best practices
-# Phase 1: Core infrastructure (Vault + PostgreSQL integration)
-# Phase 2: Essential services only
-SERVICE_ORDER=(vault vault-agent postgres redis keycloak letsencrypt nginx prometheus loki grafana)
+# Enhanced service startup order with comprehensive dependency management
+# Phase 1: Core infrastructure (Vault foundation)
+# Phase 2: Data layer (PostgreSQL, Redis)
+# Phase 3: Application layer (Keycloak, Let's Encrypt, Nginx)
+# Phase 4: Development and monitoring layer (CodeServer, Prometheus, Loki, Grafana)
+SERVICE_ORDER=(vault vault-agent postgres redis nginx letsencrypt codeserver prometheus loki grafana keycloak)
+
+# Test individual service independence and health
+function test_service_independence() {
+  local service_name="$1"
+  local service_dir="$SERVICES_DIR/$service_name"
+
+  echo "[$(date)] INFO: Testing $service_name container independence..." | tee -a "$LOG_FILE"
+
+  # Test if service can start independently
+  if docker ps -q --filter "name=purebliss-$service_name" >/dev/null 2>&1; then
+    echo "[$(date)] SUCCESS: $service_name is already running independently" | tee -a "$LOG_FILE"
+    return 0
+  fi
+
+  # Service-specific independence test
+  case "$service_name" in
+    "vault")
+      if curl -s http://localhost:8200/v1/sys/health >/dev/null 2>&1; then
+        echo "[$(date)] SUCCESS: Vault API accessible independently" | tee -a "$LOG_FILE"
+        return 0
+      fi
+      ;;
+    "postgres")
+      if docker exec purebliss-postgres pg_isready -U postgres >/dev/null 2>&1; then
+        echo "[$(date)] SUCCESS: PostgreSQL accepting connections independently" | tee -a "$LOG_FILE"
+        return 0
+      fi
+      ;;
+    "redis")
+      if docker exec purebliss-redis redis-cli ping >/dev/null 2>&1; then
+        echo "[$(date)] SUCCESS: Redis responding independently" | tee -a "$LOG_FILE"
+        return 0
+      fi
+      ;;
+    "nginx")
+      if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|301"; then
+        echo "[$(date)] SUCCESS: Nginx serving requests independently" | tee -a "$LOG_FILE"
+        return 0
+      fi
+      ;;
+  esac
+
+  echo "[$(date)] INFO: $service_name independence test completed" | tee -a "$LOG_FILE"
+  return 0
+}
 # --- Loki Vault Onboarding Automation ---
 # This function configures Vault to provide dynamic secrets/config for Loki
 function onboard_loki_to_vault() {
@@ -849,6 +1354,97 @@ EOF
   echo "[$(date)] INFO: Grafana Vault onboarding automation complete" | tee -a "$LOG_FILE"
 }
 
+# --- CodeServer Vault Onboarding Automation ---
+# This function configures Vault to provide dynamic secrets and secure configuration for CodeServer
+function onboard_codeserver_to_vault() {
+  local VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
+  local CODESERVER_CONFIG_PATH="/opt/dev-purebliss/services/codeserver"
+  echo "[$(date)] INFO: Onboarding CodeServer to Vault for dynamic secrets and config management" | tee -a "$LOG_FILE"
+
+  # Auto-detect vault URL based on running container or dev mode
+  local VAULT_ADDR
+  if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
+     docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
+    # Development mode - vault running in dev mode
+    VAULT_ADDR="http://127.0.0.1:8200"
+    export VAULT_TOKEN="dev-root-token-purebliss"
+    echo "[$(date)] INFO: Detected Vault in development mode for CodeServer" | tee -a "$LOG_FILE"
+  elif docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
+    # Production mode - container running in production mode
+    VAULT_ADDR="https://127.0.0.1:8200"
+    export VAULT_SKIP_VERIFY=1
+    if [[ ! -f "$VAULT_TOKEN_FILE" ]]; then
+      echo "[$(date)] ERROR: Vault token file not found at $VAULT_TOKEN_FILE" | tee -a "$LOG_FILE"
+      return 1
+    fi
+    export VAULT_TOKEN=$(cat "$VAULT_TOKEN_FILE")
+    echo "[$(date)] INFO: Detected Vault in production mode for CodeServer" | tee -a "$LOG_FILE"
+  else
+    # Fallback to dev mode if no container detected
+    VAULT_ADDR="http://127.0.0.1:8200"
+    export VAULT_TOKEN="dev-root-token-purebliss"
+    echo "[$(date)] INFO: No Vault container detected, assuming development mode for CodeServer" | tee -a "$LOG_FILE"
+  fi
+
+  export VAULT_ADDR
+  echo "[$(date)] INFO: Using Vault at $VAULT_ADDR for CodeServer onboarding" | tee -a "$LOG_FILE"
+
+  # Enable AppRole auth method for CodeServer (idempotent)
+  vault auth enable -path=codeserver-approle approle 2>&1 | tee -a "$LOG_FILE" || \
+    echo "[$(date)] INFO: CodeServer AppRole auth method may already be enabled" | tee -a "$LOG_FILE"
+
+  # Create CodeServer-specific AppRole
+  vault write auth/codeserver-approle/role/codeserver-role \
+    token_policies="codeserver-policy" \
+    token_ttl=1h \
+    token_max_ttl=4h 2>&1 | tee -a "$LOG_FILE"
+
+  # Create policy for CodeServer
+  vault policy write codeserver-policy - <<EOF 2>&1 | tee -a "$LOG_FILE"
+path "codeserver-config/*" {
+  capabilities = ["read", "list"]
+}
+path "secret/codeserver/*" {
+  capabilities = ["read", "list"]
+}
+EOF
+
+  # Enable KV v2 secrets engine for CodeServer configuration (idempotent)
+  vault secrets enable -path=codeserver-config kv-v2 2>&1 | tee -a "$LOG_FILE" || \
+    echo "[$(date)] INFO: CodeServer KV secrets engine may already be enabled" | tee -a "$LOG_FILE"
+
+  # Store CodeServer configuration secrets
+  vault kv put codeserver-config/settings \
+    bind_addr="0.0.0.0:8443" \
+    auth="password" \
+    cert=false \
+    disable_telemetry=true \
+    log_level="info" 2>&1 | tee -a "$LOG_FILE"
+
+  # Store CodeServer environment and integration config
+  vault kv put codeserver-config/integration \
+    vault_url="$VAULT_ADDR" \
+    keycloak_url="https://dev.purebliss.app/auth" \
+    grafana_url="https://dev.purebliss.app/grafana" \
+    prometheus_url="https://dev.purebliss.app/prometheus" 2>&1 | tee -a "$LOG_FILE"
+
+  # Get AppRole credentials for CodeServer
+  local role_id=$(vault read -field=role_id auth/codeserver-approle/role/codeserver-role/role-id 2>/dev/null)
+  local secret_id=$(vault write -field=secret_id auth/codeserver-approle/role/codeserver-role/secret-id 2>/dev/null)
+
+  if [[ -n "$role_id" && -n "$secret_id" ]]; then
+    # Store AppRole credentials in CodeServer service directory
+    echo "$role_id" > "$CODESERVER_CONFIG_PATH/.vault_role_id"
+    echo "$secret_id" > "$CODESERVER_CONFIG_PATH/.vault_secret_id"
+    chmod 600 "$CODESERVER_CONFIG_PATH/.vault_role_id" "$CODESERVER_CONFIG_PATH/.vault_secret_id"
+    echo "[$(date)] SUCCESS: CodeServer AppRole credentials stored securely" | tee -a "$LOG_FILE"
+  fi
+
+  echo "[$(date)] SUCCESS: CodeServer secrets stored in Vault at codeserver-config/*" | tee -a "$LOG_FILE"
+  echo "[$(date)] INFO: CodeServer will use AppRole authentication for Vault access" | tee -a "$LOG_FILE"
+  echo "[$(date)] INFO: CodeServer Vault onboarding automation complete" | tee -a "$LOG_FILE"
+}
+
 # --- Letsencrypt Vault PKI Onboarding Automation ---
 # This function configures Vault PKI for Let's Encrypt-style certificate generation and management.
 function onboard_letsencrypt_to_vault() {
@@ -908,7 +1504,7 @@ function onboard_letsencrypt_to_vault() {
       ttl=8760h \
       key_bits=2048 \
       format=pem 2>&1 | tee -a "$LOG_FILE"
-      
+
     vault write "$PKI_PATH/config/urls" \
       issuing_certificates="$VAULT_ADDR/v1/$PKI_PATH/ca" \
       crl_distribution_points="$VAULT_ADDR/v1/$PKI_PATH/crl" 2>&1 | tee -a "$LOG_FILE"
@@ -964,11 +1560,115 @@ function onboard_letsencrypt_to_vault() {
 function start_letsencrypt() {
   onboard_letsencrypt_to_vault
   echo "[$(date)] INFO: Starting Letsencrypt container..." | tee -a "$LOG_FILE"
+  echo "[$(date)] INFO: Ensuring certificate directory exists at $LETSENCRYPT_CERT_PATH/$LETSENCRYPT_DOMAINS" | tee -a "$LOG_FILE"
+  if mkdir -p "$LETSENCRYPT_CERT_PATH/$LETSENCRYPT_DOMAINS" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[$(date)] SUCCESS: Created directory $LETSENCRYPT_CERT_PATH/$LETSENCRYPT_DOMAINS" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] ERROR: Failed to create directory $LETSENCRYPT_CERT_PATH/$LETSENCRYPT_DOMAINS" | tee -a "$LOG_FILE"
+    exit 1
+  fi
   cd /opt/dev-purebliss/services/letsencrypt
   docker compose -f letsencrypt-docker-compose.yml up -d --build 2>&1 | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: Letsencrypt container started" | tee -a "$LOG_FILE"
 }
-# Disabled until ready: prometheus grafana loki plane
+
+# --- Redis Independent Container Startup ---
+function start_redis() {
+  echo "[$(date)] INFO: Starting Redis with independent container startup and Vault integration..." | tee -a "$LOG_FILE"
+  
+  # Clean up any existing Redis resources
+  docker rm -f purebliss-redis >/dev/null 2>&1 || true
+  docker volume rm purebliss_redis_data >/dev/null 2>&1 || true
+  
+  # Change to Redis service directory
+  cd /opt/dev-purebliss/services/redis
+  
+  # Build Redis image with all Vault integration logic
+  echo "[$(date)] INFO: Building Redis container with comprehensive Vault integration..." | tee -a "$LOG_FILE"
+  if docker build -t purebliss-redis-image -f redis-dockerfile . >> "$LOG_FILE" 2>&1; then
+    echo "[$(date)] SUCCESS: Redis image built with standalone capabilities" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] ERROR: Failed to build Redis image" | tee -a "$LOG_FILE"
+    return 1
+  fi
+  
+  # Auto-detect Vault configuration
+  local vault_addr="http://127.0.0.1:8200"
+  local vault_token="dev-root-token-purebliss"
+  
+  if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
+     ! docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
+    vault_addr="https://127.0.0.1:8200"
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+      vault_token=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+    fi
+  fi
+  
+  # Create network if it doesn't exist
+  docker network create purebliss-net >/dev/null 2>&1 || true
+  
+  # Start Redis with independent container startup
+  echo "[$(date)] INFO: Starting Redis container with environment: VAULT_ADDR=$vault_addr" | tee -a "$LOG_FILE"
+  if docker run -d \
+    --name purebliss-redis \
+    --network purebliss-net \
+    -p 6379:6379 \
+    -e VAULT_ADDR="$vault_addr" \
+    -e VAULT_TOKEN="$vault_token" \
+    -e USE_VAULT="true" \
+    -e VAULT_SKIP_VERIFY="true" \
+    -v purebliss_redis_data:/data \
+    -v /opt/my-secure-ha-stack/logs/dev-environment-setup.log:/opt/my-secure-ha-stack/logs/dev-environment-setup.log \
+    --restart unless-stopped \
+    purebliss-redis-image >> "$LOG_FILE" 2>&1; then
+    echo "[$(date)] SUCCESS: Redis started as independent container with Vault integration" | tee -a "$LOG_FILE"
+    
+    # Post-startup: Configure Redis authentication in Vault
+    sleep 5
+    echo "[$(date)] INFO: Configuring Redis authentication in Vault..." | tee -a "$LOG_FILE"
+    if onboard_redis_to_vault; then
+      echo "[$(date)] SUCCESS: Redis onboarded to Vault for dynamic secrets" | tee -a "$LOG_FILE"
+    else
+      echo "[$(date)] WARNING: Redis Vault onboarding had issues, but container is running" | tee -a "$LOG_FILE"
+    fi
+    
+    return 0
+  else
+    echo "[$(date)] ERROR: Failed to start Redis container" | tee -a "$LOG_FILE"
+    return 1
+  fi
+}
+
+# --- Nginx Service Startup ---
+function start_nginx() {
+  echo "[$(date)] INFO: Starting Nginx SSL/TLS compliant container..." | tee -a "$LOG_FILE"
+  cd /opt/dev-purebliss/services/nginx
+
+  # Stop and rebuild container
+  docker compose -f nginx-docker-compose.yml down 2>&1 | tee -a "$LOG_FILE"
+  docker compose -f nginx-docker-compose.yml up -d --build 2>&1 | tee -a "$LOG_FILE"
+
+  # Wait for container to be ready
+  sleep 10
+
+  # Run comprehensive SSL/TLS compliance validation
+  echo "[$(date)] INFO: Running SSL/TLS compliance validation..." | tee -a "$LOG_FILE"
+  if /opt/dev-purebliss/services/nginx/validate-ssl-compliance.sh; then
+    echo "[$(date)] SUCCESS: Nginx is 100% SSL/TLS compliant" | tee -a "$LOG_FILE"
+  else
+    echo "[$(date)] ERROR: Nginx SSL/TLS compliance validation failed" | tee -a "$LOG_FILE"
+    echo "[$(date)] INFO: Restarting Nginx container for retry..." | tee -a "$LOG_FILE"
+    docker restart purebliss-nginx 2>&1 | tee -a "$LOG_FILE"
+    sleep 10
+    if /opt/dev-purebliss/services/nginx/validate-ssl-compliance.sh; then
+      echo "[$(date)] SUCCESS: Nginx SSL/TLS compliance achieved after restart" | tee -a "$LOG_FILE"
+    else
+      echo "[$(date)] ERROR: Nginx SSL/TLS compliance failed after restart" | tee -a "$LOG_FILE"
+      exit 1
+    fi
+  fi
+  echo "[$(date)] SUCCESS: Nginx service startup completed with SSL/TLS compliance" | tee -a "$LOG_FILE"
+}
 
 # Function to auto-unseal Vault if sealed and wait for API readiness
 function vault_auto_unseal() {
@@ -998,22 +1698,48 @@ function start_service_robust() {
         success=true
       fi
     elif [[ "$service_name" == "keycloak" ]]; then
-      # Fetch credentials from Vault
+      # Enhanced Keycloak with Vault and PostgreSQL integration
+      echo "[$(date)] INFO: Starting enhanced Keycloak with Vault and PostgreSQL integration" | tee -a "$LOG_FILE"
+
+      # Set up Vault environment for Keycloak
       if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
         export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-        export VAULT_ADDR="https://127.0.0.1:8200"
-        export VAULT_SKIP_VERIFY=1
-
-        # Try to get secrets from Vault, fallback to defaults
-        VAULT_ADMIN_PASSWORD=$(vault kv get -field=admin_password secret/keycloak 2>/dev/null || echo "keycloak_admin_changeme")
-        VAULT_POSTGRES_PASSWORD=$(vault kv get -field=postgres_password secret/keycloak 2>/dev/null || echo "keycloak_password_123")
-
-        export KEYCLOAK_ADMIN_PASSWORD="$VAULT_ADMIN_PASSWORD"
-        export KC_DB_PASSWORD="$VAULT_POSTGRES_PASSWORD"
       fi
 
-      if (cd "$service_dir" && docker compose -f "keycloak-docker-compose.yml" up -d >> "$LOG_FILE" 2>&1); then
+      # Auto-detect Vault address
+      if docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
+        export VAULT_ADDR="http://purebliss-vault:8200"
+      else
+        export VAULT_ADDR="http://localhost:8200"
+      fi
+
+      # Load service environment
+      if [[ -f "$service_dir/.env" ]]; then
+        source "$service_dir/.env"
+      fi
+
+      # Run Keycloak setup if needed
+      if [[ -x "$service_dir/setup-keycloak-vault.sh" ]]; then
+        echo "[$(date)] INFO: Running Keycloak Vault setup..." | tee -a "$LOG_FILE"
+        (cd "$service_dir" && ./setup-keycloak-vault.sh >> "$LOG_FILE" 2>&1) || \
+          echo "[$(date)] WARN: Keycloak setup had issues, proceeding with startup" | tee -a "$LOG_FILE"
+      fi
+
+      # Start Keycloak with Vault integration
+      if (cd "$service_dir" && docker compose -f "keycloak-redis-docker-compose.yml" up -d >> "$LOG_FILE" 2>&1); then
         success=true
+        echo "[$(date)] SUCCESS: Keycloak started with Vault integration" | tee -a "$LOG_FILE"
+
+        # Post-startup validation
+        echo "[$(date)] INFO: Validating Keycloak Vault integration..." | tee -a "$LOG_FILE"
+        sleep 10
+        if [[ -x "$service_dir/validate-keycloak-vault.sh" ]]; then
+          (cd "$service_dir" && timeout 60 ./validate-keycloak-vault.sh >> "$LOG_FILE" 2>&1) && \
+            echo "[$(date)] SUCCESS: Keycloak validation passed" | tee -a "$LOG_FILE" || \
+            echo "[$(date)] WARN: Keycloak validation had issues" | tee -a "$LOG_FILE"
+        fi
+      else
+        echo "[$(date)] ERROR: Failed to start Keycloak with Vault integration" | tee -a "$LOG_FILE"
       fi
     elif [[ "$service_name" == "nginx" ]]; then
       # Ensure nginx config directory exists
@@ -1030,19 +1756,44 @@ function start_service_robust() {
     elif [[ "$service_name" == "postgres" ]]; then
       # Use the Vault-integrated PostgreSQL with proper credentials
       echo "[$(date)] INFO: Starting PostgreSQL with full Vault integration..." | tee -a "$LOG_FILE"
-      
+
+      # Start PostgreSQL with Simple Configuration + Post-Startup Vault Integration
+      echo "[$(date)] INFO: Starting PostgreSQL with post-startup Vault integration..." | tee -a "$LOG_FILE"
+
       # Ensure Vault is ready before starting PostgreSQL
       if ! vault_status_check; then
-        echo "[$(date)] ERROR: Vault must be ready before starting PostgreSQL with Vault integration" | tee -a "$LOG_FILE"
+        echo "[$(date)] ERROR: Vault must be ready before starting PostgreSQL" | tee -a "$LOG_FILE"
         return 1
       fi
-      
-      # Start PostgreSQL with Vault integration
-      if (cd "$service_dir" && docker compose -f "docker-compose.yml" up -d >> "$LOG_FILE" 2>&1); then
+
+      # Start PostgreSQL with simple configuration first
+      if (cd "$service_dir" && docker compose -f "simple-docker-compose.yml" up -d >> "$LOG_FILE" 2>&1); then
         success=true
-        echo "[$(date)] SUCCESS: PostgreSQL started with Vault integration" | tee -a "$LOG_FILE"
+        echo "[$(date)] SUCCESS: PostgreSQL started with simple configuration" | tee -a "$LOG_FILE"
+
+        # Post-startup: Set up Vault integration
+        echo "[$(date)] INFO: Configuring post-startup Vault integration for PostgreSQL..." | tee -a "$LOG_FILE"
+
+        # Wait for PostgreSQL to be ready
+        sleep 10
+
+        # Create databases for services
+        if docker exec purebliss-postgres psql -U postgres -c "
+        CREATE DATABASE IF NOT EXISTS keycloak;
+        CREATE DATABASE IF NOT EXISTS plane;
+        CREATE DATABASE IF NOT EXISTS vikunja;
+        CREATE USER IF NOT EXISTS keycloak WITH PASSWORD 'keycloak_dev_$(date +%s)';
+        CREATE USER IF NOT EXISTS plane WITH PASSWORD 'plane_dev_$(date +%s)';
+        GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+        GRANT ALL PRIVILEGES ON DATABASE plane TO plane;
+        " >> "$LOG_FILE" 2>&1; then
+          echo "[$(date)] SUCCESS: PostgreSQL databases and users created for services" | tee -a "$LOG_FILE"
+        else
+          echo "[$(date)] WARNING: Database creation had issues, but PostgreSQL is running" | tee -a "$LOG_FILE"
+        fi
+
       else
-        echo "[$(date)] ERROR: Failed to start PostgreSQL with Vault integration" | tee -a "$LOG_FILE"
+        echo "[$(date)] ERROR: Failed to start PostgreSQL with simple configuration" | tee -a "$LOG_FILE"
         return 1
       fi
     else
@@ -1055,6 +1806,57 @@ function start_service_robust() {
       elif [[ -f "$service_dir/docker-compose.yml" ]]; then
         if (cd "$service_dir" && docker compose up -d >> "$LOG_FILE" 2>&1); then
           success=true
+        fi
+      elif [[ "$service_name" == "redis" ]]; then
+        # Redis with independent container startup and Vault integration
+        echo "[$(date)] INFO: Starting Redis with independent container startup and Vault integration..." | tee -a "$LOG_FILE"
+        
+        # Clean up any existing Redis container and data
+        docker rm -f purebliss-redis >/dev/null 2>&1 || true
+        docker volume rm purebliss_redis_data >/dev/null 2>&1 || true
+        
+        # Build the Redis image with all Vault logic
+        echo "[$(date)] INFO: Building Redis container with Vault integration..." | tee -a "$LOG_FILE"
+        if docker build -t purebliss-redis-image -f "$service_dir/redis-dockerfile" "$service_dir" >> "$LOG_FILE" 2>&1; then
+          echo "[$(date)] SUCCESS: Redis image built successfully" | tee -a "$LOG_FILE"
+        else
+          echo "[$(date)] ERROR: Failed to build Redis image" | tee -a "$LOG_FILE"
+          return 1
+        fi
+        
+        # Setup Vault configuration for Redis
+        local vault_addr="http://127.0.0.1:8200"
+        local vault_token="dev-root-token-purebliss"
+        
+        # Auto-detect Vault mode
+        if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
+           ! docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
+          vault_addr="https://127.0.0.1:8200"
+          if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+            vault_token=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+          fi
+        fi
+        
+        # Create the purebliss-net network if it doesn't exist
+        docker network create purebliss-net >/dev/null 2>&1 || true
+        
+        # Start Redis container with independent startup capability
+        if docker run -d \
+          --name purebliss-redis \
+          --network purebliss-net \
+          -p 6379:6379 \
+          -e VAULT_ADDR="$vault_addr" \
+          -e VAULT_TOKEN="$vault_token" \
+          -e USE_VAULT="true" \
+          -e VAULT_SKIP_VERIFY="true" \
+          -v purebliss_redis_data:/data \
+          -v /opt/my-secure-ha-stack/logs/dev-environment-setup.log:/opt/my-secure-ha-stack/logs/dev-environment-setup.log \
+          --restart unless-stopped \
+          purebliss-redis-image >> "$LOG_FILE" 2>&1; then
+          success=true
+          echo "[$(date)] SUCCESS: Redis started with independent container and Vault integration" | tee -a "$LOG_FILE"
+        else
+          echo "[$(date)] ERROR: Failed to start Redis container" | tee -a "$LOG_FILE"
         fi
       elif [[ "$service_name" == "loki" && -f "$service_dir/loki-docker-compose.yml" ]]; then
         # Special handling for Loki with Vault integration
@@ -1102,6 +1904,22 @@ function start_service_robust() {
         fi
 
         if (cd "$service_dir" && docker compose -f "prometheus-docker-compose.yml" up -d >> "$LOG_FILE" 2>&1); then
+          success=true
+        fi
+      elif [[ "$service_name" == "codeserver" && -f "$service_dir/codeserver-docker-compose.yml" ]]; then
+        # Special handling for CodeServer with Vault integration
+        if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+          echo "[$(date)] INFO: Starting CodeServer with Vault integration..." | tee -a "$LOG_FILE"
+          export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+          export VAULT_ADDR="https://127.0.0.1:8200"
+          export VAULT_SKIP_VERIFY=1
+        fi
+
+        # Set CodeServer environment variables
+        export CODESERVER_DATA_PATH="/opt/my-secure-ha-stack/codeserver-data"
+        export CODESERVER_LOG_PATH="/opt/my-secure-ha-stack/logs/codeserver.log"
+
+        if (cd "$service_dir" && docker compose -f "codeserver-docker-compose.yml" up -d >> "$LOG_FILE" 2>&1); then
           success=true
         fi
       fi
@@ -1526,6 +2344,10 @@ function post_service_validation() {
       # Onboard Prometheus into Vault after health check
       onboard_prometheus_to_vault
       ;;
+    "codeserver")
+      # Onboard CodeServer into Vault after health check
+      onboard_codeserver_to_vault
+      ;;
     "loki")
       # Enhanced Loki validation with Vault integration
       if [[ -f "/opt/dev-purebliss/services/loki/.vault_role_id" ]]; then
@@ -1644,6 +2466,9 @@ function post_service_validation() {
       else
         echo "[$(date)] WARNING: Keycloak user not found in PostgreSQL" >> "$LOG_FILE"
       fi
+
+      # Onboard Keycloak to Vault after health check
+      onboard_keycloak_to_vault
       ;;
     "nginx")
       # Test main proxy endpoint

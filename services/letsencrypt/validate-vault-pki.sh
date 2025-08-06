@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================================
 # Let's Encrypt Vault PKI Integration Validation Script
-# 
+#
 # This script validates the Vault PKI setup for Let's Encrypt certificate generation
 # and tests certificate generation functionality.
 # ============================================================================
@@ -43,7 +43,7 @@ detect_vault_mode() {
 # Test 1: Vault connectivity
 test_vault_connectivity() {
   echo "[$(date)] INFO: Testing Vault connectivity..." | tee -a "$LOG_FILE"
-  
+
   if vault status >/dev/null 2>&1; then
     echo "[$(date)] SUCCESS: Vault is accessible and responding" | tee -a "$LOG_FILE"
     return 0
@@ -56,14 +56,14 @@ test_vault_connectivity() {
 # Test 2: PKI secrets engine validation
 test_pki_engine() {
   echo "[$(date)] INFO: Testing PKI secrets engine..." | tee -a "$LOG_FILE"
-  
+
   if vault secrets list | grep -q "$PKI_PATH"; then
     echo "[$(date)] SUCCESS: PKI engine $PKI_PATH is enabled" | tee -a "$LOG_FILE"
   else
     echo "[$(date)] ERROR: PKI engine $PKI_PATH is not enabled" | tee -a "$LOG_FILE"
     return 1
   fi
-  
+
   # Check if root CA exists
   if vault read "$PKI_PATH/cert/ca" >/dev/null 2>&1; then
     echo "[$(date)] SUCCESS: Root CA is configured for $PKI_PATH" | tee -a "$LOG_FILE"
@@ -71,17 +71,17 @@ test_pki_engine() {
     echo "[$(date)] ERROR: Root CA is not configured for $PKI_PATH" | tee -a "$LOG_FILE"
     return 1
   fi
-  
+
   return 0
 }
 
 # Test 3: PKI role validation
 test_pki_role() {
   echo "[$(date)] INFO: Testing PKI role configuration..." | tee -a "$LOG_FILE"
-  
+
   if vault read "$PKI_PATH/roles/$PKI_ROLE" >/dev/null 2>&1; then
     echo "[$(date)] SUCCESS: PKI role $PKI_ROLE is configured" | tee -a "$LOG_FILE"
-    
+
     # Display role configuration
     echo "[$(date)] INFO: PKI role configuration:" | tee -a "$LOG_FILE"
     vault read "$PKI_PATH/roles/$PKI_ROLE" | tee -a "$LOG_FILE"
@@ -89,35 +89,35 @@ test_pki_role() {
     echo "[$(date)] ERROR: PKI role $PKI_ROLE is not configured" | tee -a "$LOG_FILE"
     return 1
   fi
-  
+
   return 0
 }
 
 # Test 4: Certificate generation test
 test_certificate_generation() {
   echo "[$(date)] INFO: Testing certificate generation..." | tee -a "$LOG_FILE"
-  
+
   local test_response
   test_response=$(vault write -format=json "$PKI_PATH/issue/$PKI_ROLE" \
     common_name="$DOMAIN" \
     alt_names="*.$DOMAIN" \
     ttl="1h" 2>/dev/null)
-  
+
   if [[ $? -eq 0 ]] && [[ -n "$test_response" ]]; then
     echo "[$(date)] SUCCESS: Certificate generation test passed" | tee -a "$LOG_FILE"
-    
+
     # Extract and validate certificate components
     local cert_data=$(echo "$test_response" | jq -r '.data.certificate')
     local private_key=$(echo "$test_response" | jq -r '.data.private_key')
     local ca_chain=$(echo "$test_response" | jq -r '.data.ca_chain[0]')
-    
+
     if [[ -n "$cert_data" ]] && [[ "$cert_data" != "null" ]]; then
       echo "[$(date)] SUCCESS: Certificate data extracted successfully" | tee -a "$LOG_FILE"
-      
+
       # Validate certificate using openssl
       if echo "$cert_data" | openssl x509 -noout -text >/dev/null 2>&1; then
         echo "[$(date)] SUCCESS: Generated certificate is valid" | tee -a "$LOG_FILE"
-        
+
         # Display certificate details
         echo "[$(date)] INFO: Certificate details:" | tee -a "$LOG_FILE"
         echo "$cert_data" | openssl x509 -noout -subject -issuer -dates | tee -a "$LOG_FILE"
@@ -129,73 +129,73 @@ test_certificate_generation() {
       echo "[$(date)] ERROR: Certificate data extraction failed" | tee -a "$LOG_FILE"
       return 1
     fi
-    
+
     if [[ -n "$private_key" ]] && [[ "$private_key" != "null" ]]; then
       echo "[$(date)] SUCCESS: Private key extracted successfully" | tee -a "$LOG_FILE"
     else
       echo "[$(date)] ERROR: Private key extraction failed" | tee -a "$LOG_FILE"
       return 1
     fi
-    
+
     if [[ -n "$ca_chain" ]] && [[ "$ca_chain" != "null" ]]; then
       echo "[$(date)] SUCCESS: CA chain extracted successfully" | tee -a "$LOG_FILE"
     else
       echo "[$(date)] ERROR: CA chain extraction failed" | tee -a "$LOG_FILE"
       return 1
     fi
-    
+
   else
     echo "[$(date)] ERROR: Certificate generation test failed" | tee -a "$LOG_FILE"
     return 1
   fi
-  
+
   return 0
 }
 
 # Test 5: Let's Encrypt container validation
 test_letsencrypt_container() {
   echo "[$(date)] INFO: Testing Let's Encrypt container..." | tee -a "$LOG_FILE"
-  
+
   if docker ps | grep -q "purebliss-letsencrypt"; then
     echo "[$(date)] SUCCESS: Let's Encrypt container is running" | tee -a "$LOG_FILE"
-    
+
     # Check container health
     local health_status=$(docker inspect --format='{{.State.Health.Status}}' purebliss-letsencrypt 2>/dev/null || echo "no_healthcheck")
     echo "[$(date)] INFO: Container health status: $health_status" | tee -a "$LOG_FILE"
-    
+
     # Check container logs for Vault PKI activity
     if docker logs purebliss-letsencrypt --tail 20 | grep -q "Vault PKI"; then
       echo "[$(date)] SUCCESS: Container is using Vault PKI for certificate generation" | tee -a "$LOG_FILE"
     else
       echo "[$(date)] WARNING: Container may not be using Vault PKI (check logs)" | tee -a "$LOG_FILE"
     fi
-    
+
   else
     echo "[$(date)] WARNING: Let's Encrypt container is not running" | tee -a "$LOG_FILE"
     return 1
   fi
-  
+
   return 0
 }
 
 # Test 6: Certificate file validation
 test_certificate_files() {
   echo "[$(date)] INFO: Testing generated certificate files..." | tee -a "$LOG_FILE"
-  
+
   local cert_dir="/mnt/raid0/nginx/certs/live/$DOMAIN"
-  
+
   # Check if certificate directory exists
   if [[ -d "$cert_dir" ]]; then
     echo "[$(date)] SUCCESS: Certificate directory exists: $cert_dir" | tee -a "$LOG_FILE"
-    
+
     # Check for required certificate files
     local required_files=("cert.pem" "privkey.pem" "fullchain.pem" "chain.pem")
     local all_files_present=true
-    
+
     for file in "${required_files[@]}"; do
       if [[ -f "$cert_dir/$file" ]]; then
         echo "[$(date)] SUCCESS: Certificate file exists: $file" | tee -a "$LOG_FILE"
-        
+
         # Validate certificate file content
         if [[ "$file" == "cert.pem" ]] || [[ "$file" == "fullchain.pem" ]]; then
           if openssl x509 -in "$cert_dir/$file" -noout -text >/dev/null 2>&1; then
@@ -210,7 +210,7 @@ test_certificate_files() {
         all_files_present=false
       fi
     done
-    
+
     if [[ "$all_files_present" == "true" ]]; then
       echo "[$(date)] SUCCESS: All required certificate files are present and valid" | tee -a "$LOG_FILE"
       return 0
@@ -218,7 +218,7 @@ test_certificate_files() {
       echo "[$(date)] ERROR: Some certificate files are missing or invalid" | tee -a "$LOG_FILE"
       return 1
     fi
-    
+
   else
     echo "[$(date)] WARNING: Certificate directory does not exist: $cert_dir" | tee -a "$LOG_FILE"
     return 1
@@ -230,10 +230,10 @@ main() {
   echo "[$(date)] INFO: ============================================" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: Let's Encrypt Vault PKI Validation Report" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: ============================================" | tee -a "$LOG_FILE"
-  
+
   local tests_passed=0
   local tests_total=6
-  
+
   # Initialize Vault connection
   if detect_vault_mode; then
     echo "[$(date)] SUCCESS: Vault mode detected and configured" | tee -a "$LOG_FILE"
@@ -241,7 +241,7 @@ main() {
     echo "[$(date)] ERROR: Failed to detect or configure Vault mode" | tee -a "$LOG_FILE"
     exit 1
   fi
-  
+
   # Run validation tests
   if test_vault_connectivity; then ((tests_passed++)) || true; fi
   if test_pki_engine; then ((tests_passed++)) || true; fi
@@ -249,12 +249,12 @@ main() {
   if test_certificate_generation; then ((tests_passed++)) || true; fi
   if test_letsencrypt_container; then ((tests_passed++)) || true; fi
   if test_certificate_files; then ((tests_passed++)) || true; fi
-  
+
   # Summary
   echo "[$(date)] INFO: ============================================" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: Validation Summary: $tests_passed/$tests_total tests passed" | tee -a "$LOG_FILE"
   echo "[$(date)] INFO: ============================================" | tee -a "$LOG_FILE"
-  
+
   if [[ $tests_passed -eq $tests_total ]]; then
     echo "[$(date)] SUCCESS: All validation tests passed! Let's Encrypt Vault PKI integration is working correctly." | tee -a "$LOG_FILE"
     echo ""

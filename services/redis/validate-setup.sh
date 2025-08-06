@@ -38,7 +38,7 @@ exec > >(tee /tmp/redis_validation_output)
 log_action "Validating Redis container health"
 if docker ps | grep -q purebliss-redis; then
     log_success "Redis container is running"
-    
+
     # Check health status
     health_status=$(docker inspect --format='{{.State.Health.Status}}' purebliss-redis 2>/dev/null || echo "no_healthcheck")
     if [[ "$health_status" == "healthy" ]]; then
@@ -73,18 +73,18 @@ fi
 log_action "Validating Redis secrets in Vault"
 if vault kv get secret/redis >/dev/null 2>&1; then
     log_success "Redis secrets found in Vault"
-    
+
     # Validate secret fields
     REDIS_SECRETS=$(vault kv get -format=json secret/redis)
     AUTH_PASSWORD=$(echo "$REDIS_SECRETS" | jq -r '.data.data.auth_password')
     MASTER_AUTH=$(echo "$REDIS_SECRETS" | jq -r '.data.data.master_auth')
-    
+
     if [[ "$AUTH_PASSWORD" != "null" && -n "$AUTH_PASSWORD" ]]; then
         log_success "Auth password secret is valid"
     else
         log_error "Auth password secret is missing or invalid"
     fi
-    
+
     if [[ "$MASTER_AUTH" != "null" && -n "$MASTER_AUTH" ]]; then
         log_success "Master auth secret is valid"
     else
@@ -111,7 +111,7 @@ log_action "Testing Redis operations"
 if [[ -n "${AUTH_PASSWORD:-}" ]] && [[ "$AUTH_PASSWORD" != "null" ]]; then
     TEST_KEY="validation_test_$(date +%s)"
     TEST_VALUE="vault_integration_validation"
-    
+
     if docker exec purebliss-redis redis-cli -a "$AUTH_PASSWORD" set "$TEST_KEY" "$TEST_VALUE" >/dev/null 2>&1; then
         if docker exec purebliss-redis redis-cli -a "$AUTH_PASSWORD" get "$TEST_KEY" | grep -q "$TEST_VALUE"; then
             log_success "Redis SET/GET operations working"
@@ -136,7 +136,7 @@ if [[ -n "${AUTH_PASSWORD:-}" ]] && [[ "$AUTH_PASSWORD" != "null" ]]; then
     else
         log_warning "Redis maxmemory not configured"
     fi
-    
+
     # Check maxmemory-policy
     POLICY=$(docker exec purebliss-redis redis-cli -a "$AUTH_PASSWORD" config get maxmemory-policy 2>/dev/null | tail -n1)
     if [[ "$POLICY" == "allkeys-lru" ]]; then

@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  purebliss-keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: purebliss-keycloak
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    entrypoint: ["/opt/keycloak-vault-entrypoint.sh"]
+    volumes:
+      - ./keycloak-vault-entrypoint.sh:/opt/keycloak-vault-entrypoint.sh:ro
+      - /opt/my-secure-ha-stack/logs:/opt/my-secure-ha-stack/logs
+      - keycloak-data:/opt/keycloak/data
+    environment:
+      # Vault Configuration
+      VAULT_ADDR: ${VAULT_ADDR:-http://purebliss-vault:8200}
+      VAULT_TOKEN: ${VAULT_TOKEN}
+
+      # PostgreSQL Configuration (fallbacks if Vault unavailable)
+      KC_DB: postgres
+      KC_DB_HOST: ${POSTGRES_HOST:-purebliss-postgres}
+      KC_DB_PORT: ${POSTGRES_PORT:-5432}
+      KC_DB_NAME: ${KEYCLOAK_DB_NAME:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak_secure_password}
+
+      # PostgreSQL root credentials for database setup
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+      # Keycloak Admin Configuration (fallbacks if Vault unavailable)
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin123}
+
+      # Keycloak Server Configuration
+      KC_HOSTNAME: ${KC_HOSTNAME:-dev.purebliss.app}
+      KC_PROXY: ${KC_PROXY:-edge}
+      KC_HTTP_RELATIVE_PATH: ${KC_HTTP_RELATIVE_PATH:-/auth}
+      KC_HTTP_ENABLED: ${KC_HTTP_ENABLED:-true}
+      KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT:-false}
+      KC_HOSTNAME_STRICT_HTTPS: ${KC_HOSTNAME_STRICT_HTTPS:-false}
+      KC_START_MODE: ${KC_START_MODE:-start-dev}
+
+      # Logging Configuration
+      KC_LOG_LEVEL: ${KC_LOG_LEVEL:-INFO}
+      KC_LOG_CONSOLE_COLOR: ${KC_LOG_CONSOLE_COLOR:-true}
+
+      # Performance Configuration
+      KC_CACHE: ${KC_CACHE:-ispn}
+      KC_CACHE_STACK: ${KC_CACHE_STACK:-tcp}
+
+      # Redis Configuration for Caching and Sessions
+      REDIS_HOST: ${REDIS_HOST:-purebliss-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DATABASE: ${REDIS_DATABASE:-1}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+      # Security Configuration
+      KC_FIPS_MODE: ${KC_FIPS_MODE:-disabled}
+
+    depends_on: []
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/auth/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    networks:
+      - purebliss-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`dev.purebliss.app`) && PathPrefix(`/auth`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls=true"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      - "com.example.description=PureBliss Keycloak Identity Provider with Vault Integration"
+      - "com.example.service=keycloak"
+      - "com.example.version=24.0.5"
+
+volumes:
+  keycloak-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${KEYCLOAK_DATA_PATH:-/mnt/raid0/keycloak/data}
+
+networks:
+  purebliss-net:
+    external: true

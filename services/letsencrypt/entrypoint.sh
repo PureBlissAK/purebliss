@@ -71,7 +71,7 @@ setup_vault_pki() {
       common_name="Let's Encrypt Alternative Root CA" \
       ttl=8760h \
       format=pem 2>&1 | tee -a "$LOG_FILE"
-      
+
     vault write "$VAULT_PKI_PATH/config/urls" \
       issuing_certificates="$VAULT_ADDR/v1/$VAULT_PKI_PATH/ca" \
       crl_distribution_points="$VAULT_ADDR/v1/$VAULT_PKI_PATH/crl" 2>&1 | tee -a "$LOG_FILE"
@@ -105,42 +105,42 @@ setup_vault_pki() {
 generate_vault_certificate() {
   local domain="$1"
   local cert_dir="/etc/letsencrypt/live/$domain"
-  
+
   echo "[$(date)] INFO: Generating certificate for $domain using Vault PKI" | tee -a "$LOG_FILE"
-  
+
   # Create certificate directory structure compatible with Let's Encrypt
   mkdir -p "$cert_dir"
-  
+
   # Generate certificate using Vault PKI
   local cert_response
   cert_response=$(vault write -format=json "$VAULT_PKI_PATH/issue/$VAULT_PKI_ROLE" \
     common_name="$domain" \
     alt_names="*.$domain" \
     ttl="24h" 2>/dev/null)
-  
+
   if [ $? -eq 0 ] && [ -n "$cert_response" ]; then
     # Extract certificate components from JSON response
     echo "$cert_response" | jq -r '.data.certificate' > "$cert_dir/cert.pem"
     echo "$cert_response" | jq -r '.data.private_key' > "$cert_dir/privkey.pem"
     echo "$cert_response" | jq -r '.data.ca_chain[0]' > "$cert_dir/chain.pem"
     echo "$cert_response" | jq -r '.data.issuing_ca' > "$cert_dir/issuer.pem"
-    
+
     # Create fullchain.pem (cert + chain) compatible with nginx
     cat "$cert_dir/cert.pem" "$cert_dir/chain.pem" > "$cert_dir/fullchain.pem"
-    
+
     # Set proper permissions
     chmod 600 "$cert_dir/privkey.pem"
     chmod 644 "$cert_dir"/*.pem
-    
+
     echo "[$(date)] SUCCESS: Certificate generated for $domain using Vault PKI" | tee -a "$LOG_FILE"
-    
+
     # Log certificate details
     echo "[$(date)] INFO: Certificate files created:" | tee -a "$LOG_FILE"
     echo "  - $cert_dir/cert.pem (server certificate)" | tee -a "$LOG_FILE"
-    echo "  - $cert_dir/privkey.pem (private key)" | tee -a "$LOG_FILE" 
+    echo "  - $cert_dir/privkey.pem (private key)" | tee -a "$LOG_FILE"
     echo "  - $cert_dir/fullchain.pem (cert + chain for nginx)" | tee -a "$LOG_FILE"
     echo "  - $cert_dir/chain.pem (intermediate certificate)" | tee -a "$LOG_FILE"
-    
+
     return 0
   else
     echo "[$(date)] ERROR: Failed to generate certificate for $domain using Vault PKI" | tee -a "$LOG_FILE"
@@ -192,7 +192,7 @@ FIRST_DOMAIN=""
 for domain in $LETSENCRYPT_DOMAINS; do
   domain=$(echo "$domain" | xargs)  # trim whitespace
   [ -z "$FIRST_DOMAIN" ] && FIRST_DOMAIN="$domain"
-  
+
   # Generate certificate using Vault PKI
   if [ -n "$VAULT_ADDR" ] && [ -n "$VAULT_TOKEN" ]; then
     echo "[$(date)] INFO: Generating Vault PKI certificate for domain: $domain" | tee -a "$LOG_FILE"
@@ -214,9 +214,9 @@ unset IFS
 traditional_letsencrypt_fallback() {
   local domain="$1"
   local cert_dir="/etc/letsencrypt/live/$domain"
-  
+
   echo "[$(date)] INFO: Using traditional Let's Encrypt for $domain" | tee -a "$LOG_FILE"
-  
+
   # Ensure webroot exists
   if [ ! -d "$LETSENCRYPT_WEBROOT_PATH" ]; then
     echo "[$(date)] ERROR: Webroot $LETSENCRYPT_WEBROOT_PATH does not exist" | tee -a "$LOG_FILE"
@@ -243,20 +243,20 @@ echo "[$(date)] INFO: Starting certificate renewal loop with $RENEW_INTERVAL int
 # Main renewal loop - handle both Vault PKI and traditional Let's Encrypt certs
 while true; do
   echo "[$(date)] INFO: Starting certificate renewal cycle" | tee -a "$LOG_FILE"
-  
+
   # Parse domains for renewal
   IFS=','
   for domain in $LETSENCRYPT_DOMAINS; do
     domain=$(echo "$domain" | xargs)  # trim whitespace
     cert_dir="/etc/letsencrypt/live/$domain"
-    
+
     if [ -d "$cert_dir" ]; then
       # Check if this is a Vault PKI certificate (check for vault-generated marker)
       if [ -f "$cert_dir/cert.pem" ] && [ -n "$VAULT_ADDR" ] && [ -n "$VAULT_TOKEN" ]; then
         echo "[$(date)] INFO: Renewing Vault PKI certificate for $domain" | tee -a "$LOG_FILE"
         if generate_vault_certificate "$domain"; then
           echo "[$(date)] SUCCESS: Vault PKI certificate renewed for $domain" | tee -a "$LOG_FILE"
-          
+
           # Send SIGHUP to nginx to reload certificates
           if [ -f "/var/run/nginx.pid" ]; then
             kill -HUP $(cat /var/run/nginx.pid) 2>/dev/null || true
@@ -274,7 +274,7 @@ while true; do
     fi
   done
   unset IFS
-  
+
   echo "[$(date)] INFO: Certificate renewal cycle complete, sleeping for $RENEW_INTERVAL" | tee -a "$LOG_FILE"
   sleep "$RENEW_INTERVAL"
 done

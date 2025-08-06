@@ -51,7 +51,7 @@ function validate_prerequisites() {
     if curl -sk http://127.0.0.1:8200/v1/sys/health >/dev/null 2>&1; then
         log_success "Vault is accessible via HTTP"
     elif curl -sk https://127.0.0.1:8200/v1/sys/health >/dev/null 2>&1; then
-        log_success "Vault is accessible via HTTPS"  
+        log_success "Vault is accessible via HTTPS"
     else
         log_error "Vault is not accessible. Please ensure Vault is running and unsealed."
         return 1
@@ -74,7 +74,7 @@ function create_service_directory() {
     log_action "Creating service directory structure for $service..."
 
     mkdir -p "$service_dir"/{templates,scripts,configs}
-    
+
     # Create backup directory for existing files
     mkdir -p "$service_dir/backup/$(date +%Y%m%d_%H%M%S)"
 
@@ -372,10 +372,10 @@ echo "Fetching secrets from Vault KV store..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Fetch service-specific secrets
     SECRETS_JSON=$(vault kv get -format=json "secret/$SERVICE_NAME" || echo '{}')
-    
+
     # Export secrets as environment variables
     if [[ "$SECRETS_JSON" != '{}' ]]; then
         eval "$(echo "$SECRETS_JSON" | jq -r '.data.data | to_entries[] | "export \(.key | ascii_upcase)=\"\(.value)\""')"
@@ -432,20 +432,20 @@ echo "Generating dynamic database credentials..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Generate dynamic credentials
     DB_CREDS=$(vault read -format=json "database/creds/$DB_ROLE")
-    
+
     if [[ "$DB_CREDS" != "null" ]]; then
         # Extract credentials
         DB_USERNAME=$(echo "$DB_CREDS" | jq -r '.data.username')
         DB_PASSWORD=$(echo "$DB_CREDS" | jq -r '.data.password')
-        
+
         # Export database environment variables
         export DATABASE_USER="$DB_USERNAME"
         export DATABASE_PASSWORD="$DB_PASSWORD"
         export DATABASE_URL="postgresql://$DB_USERNAME:$DB_PASSWORD@${DATABASE_HOST:-purebliss-postgres}:${DATABASE_PORT:-5432}/${DATABASE_NAME:-$SERVICE_NAME}"
-        
+
         echo "Dynamic database credentials generated successfully"
         echo "Database user: $DB_USERNAME"
     else
@@ -502,23 +502,23 @@ echo "Generating PKI certificate from Vault..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Create certificate directory
     mkdir -p "/certs/$CERT_DOMAIN"
-    
+
     # Generate certificate
     CERT_DATA=$(vault write -format=json "pki-$SERVICE_NAME/issue/$PKI_ROLE" common_name="$CERT_DOMAIN" ttl="24h")
-    
+
     if [[ "$CERT_DATA" != "null" ]]; then
         # Extract certificate components
         echo "$CERT_DATA" | jq -r '.data.certificate' > "/certs/$CERT_DOMAIN/fullchain.pem"
         echo "$CERT_DATA" | jq -r '.data.private_key' > "/certs/$CERT_DOMAIN/privkey.pem"
         echo "$CERT_DATA" | jq -r '.data.ca_chain[]' >> "/certs/$CERT_DOMAIN/fullchain.pem"
-        
+
         # Set proper permissions
         chmod 644 "/certs/$CERT_DOMAIN/fullchain.pem"
         chmod 600 "/certs/$CERT_DOMAIN/privkey.pem"
-        
+
         echo "PKI certificate generated successfully"
         echo "Certificate path: /certs/$CERT_DOMAIN/"
     else
@@ -573,18 +573,18 @@ echo "Generating configuration from Vault templates..."
 if [[ -f "/vault-token" ]]; then
     VAULT_TOKEN=$(cat /vault-token)
     export VAULT_TOKEN
-    
+
     # Fetch configuration data from Vault
     CONFIG_DATA=$(vault kv get -format=json "$SERVICE_NAME-config/main" || echo '{}')
-    
+
     if [[ "$CONFIG_DATA" != '{}' ]]; then
         # Generate service configuration file
         mkdir -p /config
         echo "$CONFIG_DATA" | jq -r '.data.data' > "/config/$SERVICE_NAME.json"
-        
+
         # Export configuration as environment variables
         eval "$(echo "$CONFIG_DATA" | jq -r '.data.data | to_entries[] | "export \(.key | ascii_upcase)=\"\(.value)\""')"
-        
+
         echo "Configuration generated successfully from Vault"
     else
         echo "WARNING: No configuration found for service $SERVICE_NAME"
@@ -767,7 +767,7 @@ function validate_integration() {
         ./validate-\${SERVICE_NAME}-vault-integration.sh
     else
         log_action "No validation script found, running basic checks..."
-        
+
         # Basic health check
         if docker ps | grep -q purebliss-\$SERVICE_NAME; then
             log_success "\$SERVICE_NAME container is running"
@@ -841,7 +841,7 @@ function validate_container_health() {
     if docker ps | grep -q purebliss-\$SERVICE_NAME; then
         local health_status
         health_status=\$(docker inspect --format='{{.State.Health.Status}}' purebliss-\$SERVICE_NAME 2>/dev/null || echo "no_healthcheck")
-        
+
         case "\$health_status" in
             "healthy")
                 log_success "\$SERVICE_NAME container is healthy"
@@ -876,10 +876,10 @@ function validate_vault_integration() {
 
     export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_SKIP_VERIFY=1
-    
+
     if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
         export VAULT_TOKEN=\$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-        
+
         case "\$INTEGRATION_TYPE" in
             "kv_secrets")
                 validate_kv_secrets_integration
@@ -905,7 +905,7 @@ function validate_kv_secrets_integration() {
 
     if vault kv get secret/\$SERVICE_NAME >/dev/null 2>&1; then
         log_success "KV secrets accessible for \$SERVICE_NAME"
-        
+
         # Test secret retrieval
         local admin_password
         admin_password=\$(vault kv get -field=admin_password secret/\$SERVICE_NAME 2>/dev/null || echo "")
@@ -927,7 +927,7 @@ function validate_database_integration() {
     # Test database role
     if vault read database/roles/\$SERVICE_NAME-role >/dev/null 2>&1; then
         log_success "Database role configured for \$SERVICE_NAME"
-        
+
         # Test credential generation
         if vault read database/creds/\$SERVICE_NAME-role >/dev/null 2>&1; then
             log_success "Dynamic credentials can be generated for \$SERVICE_NAME"
@@ -947,7 +947,7 @@ function validate_pki_integration() {
     # Test PKI engine
     if vault read pki-\$SERVICE_NAME/cert/ca >/dev/null 2>&1; then
         log_success "PKI CA certificate available for \$SERVICE_NAME"
-        
+
         # Test certificate generation
         if vault write pki-\$SERVICE_NAME/issue/\$SERVICE_NAME-role common_name="test.dev.purebliss.app" ttl="1h" >/dev/null 2>&1; then
             log_success "PKI certificate can be generated for \$SERVICE_NAME"
@@ -966,7 +966,7 @@ function validate_monitoring_integration() {
 
     if vault kv get \$SERVICE_NAME-config/main >/dev/null 2>&1; then
         log_success "Monitoring configuration accessible for \$SERVICE_NAME"
-        
+
         # Test configuration retrieval
         local scrape_interval
         scrape_interval=\$(vault kv get -field=scrape_interval \$SERVICE_NAME-config/main 2>/dev/null || echo "")
@@ -1083,11 +1083,11 @@ function update_break_fix_integration() {
     log_action "Updating break/fix integration for $service..."
 
     local break_fix_script="/opt/dev-purebliss/services/vault/vault-break-fix.sh"
-    
+
     # Add service-specific break/fix function if not exists
     if ! grep -q "vault_${service}_integration_fix" "$break_fix_script"; then
         log_action "Adding break/fix function for $service..."
-        
+
         # Create break/fix function
         cat >> "$break_fix_script" << EOF
 
@@ -1149,11 +1149,11 @@ function update_health_check_integration() {
     log_action "Updating health check integration for $service..."
 
     local health_check_script="/opt/dev-purebliss/comprehensive-health-check.sh"
-    
+
     # Add service-specific health check function if not exists
     if ! grep -q "test_${service}_vault_integration" "$health_check_script"; then
         log_action "Adding health check function for $service..."
-        
+
         # Add health check function before main function
         sed -i "/# Main execution/i\\
 function test_${service}_vault_integration() {\

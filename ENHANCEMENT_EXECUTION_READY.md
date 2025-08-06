@@ -52,7 +52,7 @@ cd /opt/dev-purebliss
 # 1. Redis (Database credentials)
 ./enhance-redis-vault-integration.sh
 
-# 2. Keycloak (Authentication service)  
+# 2. Keycloak (Authentication service)
 ./enhance-keycloak-vault-integration.sh
 
 # 3. Nginx (Edge proxy with PKI)
@@ -69,7 +69,7 @@ cd /opt/dev-purebliss
 
 # Integration types available:
 # - kv_secrets: Application secrets via KV v2
-# - database_dynamic: Dynamic database credentials  
+# - database_dynamic: Dynamic database credentials
 # - pki_certificates: SSL/TLS certificate automation
 # - monitoring_config: Monitoring and metrics configuration
 ```
@@ -116,7 +116,7 @@ cd /opt/dev-purebliss
 - [ ] Vault-managed PKI for all TLS communication
 - [ ] Comprehensive audit logging enabled
 
-### **Operational Excellence**  
+### **Operational Excellence**
 - [ ] Automated health checks for all enhanced services
 - [ ] Break/fix automation integrated
 - [ ] Service dependency validation
@@ -134,7 +134,7 @@ cd /opt/dev-purebliss
 
 1. **Execute Redis Enhancement**: Run `enhance-redis-vault-integration.sh`
 2. **Validate Redis Integration**: Verify dynamic credentials and connection
-3. **Execute Keycloak Enhancement**: Run `enhance-keycloak-vault-integration.sh`  
+3. **Execute Keycloak Enhancement**: Run `enhance-keycloak-vault-integration.sh`
 4. **Validate Authentication Flow**: Test SSO and realm configuration
 5. **Execute Nginx Enhancement**: Run `enhance-nginx-vault-integration.sh`
 6. **Validate SSL/TLS**: Test certificate automation and renewal

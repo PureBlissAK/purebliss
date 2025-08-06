@@ -3,9 +3,9 @@ set -euo pipefail
 
 # Enhanced Redis Fresh Start with Vault Integration
 # Based on Pure Bliss Container Enhancement Framework (PostgreSQL Template)
-# 
+#
 # Purpose: Start Redis with fresh configuration and complete Vault integration
-# Features: 
+# Features:
 #   - Zero hardcoded secrets using Vault KV v2 secrets engine
 #   - Dynamic configuration generation
 #   - Comprehensive validation and health checks
@@ -37,31 +37,31 @@ function log_warning() {
 # Prerequisites validation
 function validate_prerequisites() {
     log_action "Validating prerequisites for Redis fresh start"
-    
+
     # Check if docker is available
     if ! command -v docker >/dev/null 2>&1; then
         log_error "Docker not found"
         exit 1
     fi
-    
+
     # Check if vault CLI is available
     if ! command -v vault >/dev/null 2>&1; then
         log_error "Vault CLI not found"
         exit 1
     fi
-    
+
     # Check if jq is available for JSON processing
     if ! command -v jq >/dev/null 2>&1; then
         log_error "jq not found (required for JSON processing)"
         exit 1
     fi
-    
+
     # Check if purebliss-net network exists
     if ! docker network ls | grep -q "purebliss-net"; then
         log_warning "purebliss-net network not found, creating"
         docker network create purebliss-net 2>/dev/null || log_error "Failed to create purebliss-net network"
     fi
-    
+
     log_success "Prerequisites validation completed"
 }
 
