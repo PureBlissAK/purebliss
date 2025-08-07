@@ -587,6 +587,34 @@ Before starting any service work, **MANDATORY** inventory check of existing file
 3. **Test Current State**: Validate existing setup before enhancement
 4. **Document Changes**: Log what was changed and why
 5. **Preserve Working Features**: Never break existing functionality
+6. **Commit Progress**: Git commit and push after each successful enhancement step
+
+#### Git Commit Standards for Project Plan
+**MANDATORY: Git commit and push after every successful step, phase, or milestone completion**
+
+**Conventional Commit Format:**
+```
+<type>(<scope>): <description>
+
+[optional body explaining what was done and why]
+
+[optional footer with breaking changes, references, etc.]
+```
+
+**Commit Types by Project Phase:**
+- `feat(<service>):` - New service functionality or major enhancements
+- `fix(<service>):` - Bug fixes, permission issues, configuration problems
+- `docs(<service>):` - Documentation updates, guides, break-fix reports
+- `test(<service>):` - Health validation, testing, verification steps
+- `refactor(<service>):` - Code restructuring, optimization without functionality changes
+- `build(<service>):` - Container builds, scaffolding, Dockerfile changes
+- `ci(<service>):` - Integration workflows, automation improvements
+- `perf(<service>):` - Performance optimizations and resource tuning
+
+**Service-Specific Commit Scopes:**
+- vault, vault-agent, postgres, redis, nginx, keycloak, letsencrypt
+- prometheus, grafana, loki, plane, codeserver
+- orchestrator, health-validation, autonomous-scripts
 
 #### Pre-Task Checklist (MANDATORY)
 Before working on any service:
@@ -596,6 +624,40 @@ Before working on any service:
 - [ ] Identify specific gaps or enhancements needed
 - [ ] Document current state before making changes
 - [ ] Only create new files if none exist for the specific need
+- [ ] **Git Status Check**: Verify clean working directory or commit pending changes
+
+#### Post-Step Git Workflow (MANDATORY)
+After every successful step completion:
+```bash
+# 1. Log completion to development log
+echo "$(date '+%Y-%m-%d %H:%M:%S') - STEP_COMPLETE: <service> <step_description> completed successfully" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+
+# 2. Stage all changes
+git add .
+
+# 3. Commit with descriptive message
+git commit -m "<type>(<service>): <step_description>
+
+- ✅ <specific_accomplishment_1>
+- ✅ <specific_accomplishment_2>
+- ✅ <validation_results>
+- ✅ <health_check_status>
+
+<detailed_description_of_changes>
+<root_cause_if_fixing_issue>
+<prevention_measures_implemented>
+
+Files modified: <list_of_modified_files>
+Validation: <health_validation_command_and_result>
+
+Co-authored-by: GitHub Copilot <copilot@github.com>"
+
+# 4. Push to feature branch
+git push origin feature/container-independence
+
+# 5. Log git completion
+echo "$(date '+%Y-%m-%d %H:%M:%S') - GIT_COMMIT: <service> <step> committed successfully ($(git rev-parse --short HEAD))" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+```
 
 ---
 
@@ -643,6 +705,12 @@ Before working on any service:
 
 **Status:** ✅ Vault service is running successfully in development mode with comprehensive health, API, secrets, PKI, AppRole, audit, backup, and integration tests completed. All automation, documentation, and health checks are complete and logged.
 
+**Git Commit Record:**
+- Initial Setup: `feat(vault): initialize vault service with development mode and PKI engine`
+- Health Validation: `test(vault): complete comprehensive health validation with exit code 0`
+- Documentation: `docs(vault): create automation guide and break-fix reports`
+- Final Integration: `feat(vault): complete vault service independence with all validations`
+
 
 #### **Secrets Agent (`vault-agent`)** ✅ COMPLETED
     **Vault-Specific Tasks:**
@@ -665,6 +733,12 @@ Before working on any service:
 - [x] **Final Health Check:** Confirm that the agent is healthy and functioning correctly
 
 **Status:** ✅ Vault Agent service is running successfully with API proxy functionality. Template infrastructure is ready for future authentication integration.
+
+**Git Commit Record:**
+- Initial Setup: `feat(vault-agent): create vault agent with API proxy functionality`
+- Configuration: `refactor(vault-agent): enhance docker-compose and entrypoint configuration`
+- Health Validation: `test(vault-agent): validate vault agent connectivity and health checks`
+- Documentation: `docs(vault-agent): create comprehensive automation and break-fix guides`
 
 
 #### **Database Service (`postgres`)** ✅ COMPLETED
@@ -692,6 +766,12 @@ Before working on any service:
 
 **Status:** ✅ PostgreSQL service is running successfully with all application databases (keycloak, plane, vikunja) and users configured. Vault dynamic secrets, AppRole, audit, backup, and integration checks completed and logged. Fully independent operation confirmed.
 
+**Git Commit Record:**
+- Database Setup: `feat(postgres): create application databases and users with vault integration`
+- Vault Integration: `feat(postgres): implement dynamic secrets and AppRole authentication`
+- Health Validation: `test(postgres): complete comprehensive database connectivity and performance tests`
+- Documentation: `docs(postgres): create automation guide and break-fix procedures`
+
 
 
 #### **Caching Service (`redis`)** ✅ COMPLETED
@@ -718,6 +798,13 @@ Before working on any service:
         - [x] **Final Confirmation:** Log all test results and confirmations to `/opt/my-secure-ha-stack/logs/dev-environment-setup.log` and update this project plan before moving to the next service.
 
 **Status:** ✅ Redis service is running successfully with AOF persistence, Vault dynamic secrets, AppRole, audit, backup, and integration checks completed and logged. Independent container operation and all automation, documentation, and health checks are complete. (Completed: 2025-08-06T00:00:00Z)
+
+**Git Commit Record:**
+- Initial Setup: `feat(redis): implement redis caching service with AOF persistence`
+- Vault Integration: `feat(redis): add vault AppRole authentication and dynamic secrets`
+- Performance Optimization: `perf(redis): configure AOF persistence and memory optimization`
+- Health Validation: `test(redis): complete comprehensive caching and connectivity validation`
+- Documentation: `docs(redis): create automation guide and troubleshooting procedures`
 
 
 #### **Gateway Service (`nginx`)** ✅ BASIC FUNCTIONALITY COMPLETED
@@ -1116,6 +1203,14 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - Phase 6 elite features ready for implementation
 - SSL/TLS integration confirmed working with enhanced container
 
+**Git Commit Record:**
+- Phase 1 Deployment: `feat(nginx): deploy basic nginx gateway with health checks and network integration`
+- Phase 3 Enhancement: `feat(nginx): add smart upstream logic and dynamic upstream detection`
+- Phase 5 Permission Fix: `fix(nginx): resolve /var/cache/nginx/client_temp permission errors with entrypoint enhancement`
+- Container Optimization: `refactor(nginx): remove user directives from configs for container compatibility`
+- Health Validation: `test(nginx): validate all phases (1-5) with comprehensive health checks passing`
+- Documentation: `docs(nginx): update project plan with phase 5+ completion status and enhancement logs`
+
 ---
 
 ### Phase 2: Authentication & Gateway (Keycloak, Let's Encrypt, Nginx)
@@ -1184,6 +1279,13 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - Implement monitoring/alerting for certificate expiration
 - Document integration and break-fix procedures after next phase
 
+**Git Commit Record:**
+- Phase 6 Build: `feat(letsencrypt): complete phase6 container with health endpoint and automated certificate management`
+- Permission Fixes: `fix(letsencrypt): resolve Dockerfile absolute paths and netcat compatibility issues`
+- Nginx Integration: `feat(letsencrypt): integrate dynamic cert loading and graceful nginx reloads`
+- Health Validation: `test(letsencrypt): validate phase6 container health and certificate monitoring`
+- Documentation: `docs(letsencrypt): create comprehensive break-fix and integration procedures`
+
 
 
 
@@ -1230,6 +1332,14 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 
 **Status:** ✅ Keycloak service is running successfully with comprehensive Vault integration, PostgreSQL backend, Redis caching, upstream notification workflow, and complete documentation. All automation, validation, and health checks complete and logged. Service independence achieved with nginx integration ready.
 
+**Git Commit Record:**
+- Initial Enhancement: `feat(keycloak): enhance existing keycloak container with vault integration and upstream notification`
+- Dependency Validation: `test(keycloak): implement strict sequential dependency testing for PostgreSQL and Redis`
+- Health Validation: `test(keycloak): validate keycloak /realms/master endpoint for Keycloak 24+ compatibility`
+- Nginx Integration: `feat(keycloak): add upstream notification workflow for service discovery`
+- Documentation: `docs(keycloak): create comprehensive automation guide and break-fix procedures`
+- Final Validation: `test(keycloak): complete all health validation tests with exit code 0`
+
 
 #### **Metrics Service (`prometheus`)** 📋 LEVERAGE EXISTING
     **Vault-Specific Tasks:**
@@ -1265,6 +1375,121 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - [x] **Monitoring Targets:** prometheus.yml supports all core services; dynamic reload validated
 - [x] **Security Compliance:** HTTPS enforced using existing configuration; self-signed fallback and Vault PKI ready
 - [x] **Documentation:** `AUTOMATION_GUIDE.md` and `BREAK_FIX_REPORT.md` created/updated with all troubleshooting, validation, and enhancement steps
+
+**Git Commit Record:**
+- Initial Analysis: `feat(prometheus): analyze existing prometheus container and entrypoint configuration`
+- HTTPS Enhancement: `feat(prometheus): implement HTTPS enforcement and config reload capabilities`
+- Vault Integration: `feat(prometheus): add AppRole authentication logic and dynamic secrets support`
+- Health Validation: `test(prometheus): complete health validation with exit code 0`
+- Documentation: `docs(prometheus): create automation guide and break-fix procedures`
+
+---
+
+### Phase 3: Monitoring & Visualization (Prometheus, Grafana, Loki)
+
+#### **Visualization Service (`grafana`)** ✅ VAULT INTEGRATION COMPLETE (2025-08-07)
+
+**Git Commit Record:**
+- Vault Integration Fix: `fix(grafana): resolve GF_DATABASE_* environment variables for vault dynamic credentials`
+- Database Connectivity: `feat(grafana): establish healthy postgres connectivity with vault-generated users`
+- Health Validation: `test(grafana): validate all 671 migrations successful and container health passing`
+- Documentation: `docs(grafana): update automation guide with vault integration procedures`
+
+---
+
+### Phase 4: Application Services (Plane, CodeServer)
+
+#### **Issue Tracking Service (`plane`)** 📋 PENDING
+**Planned Git Commit Workflow:**
+- Initial Analysis: `feat(plane): analyze existing plane container and database requirements`
+- Database Setup: `feat(plane): create plane database and vault integration`
+- Container Enhancement: `build(plane): implement multi-phase container with health validation`
+- Vault Integration: `feat(plane): add dynamic secrets and AppRole authentication`
+- Health Validation: `test(plane): complete comprehensive API and database validation`
+- Documentation: `docs(plane): create automation guide and break-fix procedures`
+
+#### **Development Environment (`codeserver`)** 📋 PENDING
+**Planned Git Commit Workflow:**
+- Initial Analysis: `feat(codeserver): analyze existing codeserver container and workspace requirements`
+- Workspace Automation: `feat(codeserver): implement automated workspace setup and configuration`
+- Vault Integration: `feat(codeserver): add vault secrets integration for development environment`
+- Health Validation: `test(codeserver): validate IDE functionality and workspace automation`
+- Documentation: `docs(codeserver): create development environment guide and procedures`
+
+---
+
+### Phase 5: Logging & Observability (Loki)
+
+#### **Logging Service (`loki`)** 🔄 IN PROGRESS
+**Current Git Commit Status:**
+- Container Build: `build(loki): create enhanced loki container with ENTRYPOINT override`
+- **Next Planned Commits:**
+  - Health Validation: `test(loki): complete health validation and logging functionality`
+  - Vault Integration: `feat(loki): add vault integration for secure log storage`
+  - Documentation: `docs(loki): create comprehensive logging automation guide`
+
+---
+
+### Git Workflow Templates for Future Services
+
+#### Standard Service Enhancement Workflow
+```bash
+# Phase 1: Analysis and Planning
+git commit -m "feat(<service>): analyze existing <service> infrastructure and plan enhancements"
+
+# Phase 2: Container Enhancement
+git commit -m "build(<service>): implement multi-phase container with health validation and vault integration"
+
+# Phase 3: Health Validation
+git commit -m "test(<service>): complete comprehensive health validation with exit code 0"
+
+# Phase 4: Documentation
+git commit -m "docs(<service>): create automation guide and break-fix procedures"
+
+# Phase 5: Integration Testing
+git commit -m "test(<service>): validate integration with vault, nginx, and dependent services"
+```
+
+#### Bug Fix and Enhancement Workflow
+```bash
+# Root Cause Resolution
+git commit -m "fix(<service>): resolve <specific_issue> with <solution_description>
+
+- ✅ Root Cause: <detailed_root_cause>
+- ✅ Solution: <specific_solution_implemented>
+- ✅ Prevention: <prevention_measures_added>
+- ✅ Validation: <health_validation_results>
+
+Files modified: <list_of_files>
+Validation: <validation_command_and_result>"
+
+# Autonomous Enhancement
+git commit -m "refactor(<service>): implement autonomous enhancement to prevent <issue_type> recurrence
+
+- ✅ Enhanced <script/component> with <enhancement_description>
+- ✅ Added monitoring for <specific_issue_type>
+- ✅ Implemented fallback logic for <failure_scenario>
+- ✅ Updated health validation with <new_checks>
+
+Prevention measures: <detailed_prevention_strategy>"
+```
+
+#### Final Integration Workflow
+```bash
+# Service Independence Achievement
+git commit -m "feat(<service>): achieve complete service independence with comprehensive validation
+
+- ✅ Container Health: All health validation tests passing
+- ✅ Vault Integration: Dynamic secrets and AppRole authentication
+- ✅ Dependency Validation: All required services connectivity confirmed
+- ✅ Nginx Integration: Upstream notification workflow implemented
+- ✅ Documentation: Comprehensive guides and procedures created
+- ✅ Autonomous Enhancement: Prevention measures for known issues
+
+Status: <service> fully operational and independent"
+```
+
+**MANDATORY: All git commits must be followed by push to feature branch and logging to development log**
 
 **Status:** ✅ Prometheus container is healthy, health endpoint validated, and endpoint validation logic enhanced for wget compatibility. Autonomous script enhancement implemented to prevent recurrence of curl/wget mismatch. All actions logged to /opt/my-secure-ha-stack/logs/dev-environment-setup.log. Ready to proceed to configuration management and Vault/AppRole integration.
 
