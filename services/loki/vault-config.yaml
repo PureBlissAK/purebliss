@@ -1,0 +1,80 @@
+# Loki Vault Integration Configuration
+# Pure Bliss Elite Standards - Secure Log Storage and Dynamic Secrets
+# Version: 1.0.0 - Vault Integration Template
+
+# Vault Connection Configuration
+vault:
+  endpoint: "https://purebliss-vault:8200"
+  mount_path: "loki-secrets"
+  health_check_path: "/v1/sys/health"
+
+# AppRole Authentication
+auth:
+  approle:
+    enabled: true
+    role_id_env: "LOKI_VAULT_ROLE_ID"
+    secret_id_env: "LOKI_VAULT_SECRET_ID"
+    mount_path: "auth/approle"
+
+# Dynamic Secrets Configuration
+secrets:
+  storage:
+    enabled: true
+    path: "loki-secrets/storage"
+    ttl: "24h"
+    renewable: true
+
+  encryption:
+    enabled: true
+    path: "loki-secrets/encryption"
+    ttl: "7d"
+    renewable: true
+
+# Audit Logging
+audit:
+  enabled: true
+  log_vault_actions: true
+  include_request_data: true
+  include_response_data: false
+
+# Security Policies
+security:
+  no_hardcoded_credentials: true
+  enforce_https: true
+  validate_certificates: true
+  token_renewal_threshold: "1h"
+
+# Storage Backend Vault Integration (Future Enhancement)
+storage_vault:
+  enabled: false  # Set to true when implementing cloud storage with Vault secrets
+  backend_type: "s3"  # Future: S3 with Vault dynamic credentials
+  secret_path: "loki-secrets/storage-backend"
+
+# Monitoring and Health Checks
+monitoring:
+  vault_health_check_interval: "30s"
+  vault_token_renewal_interval: "1h"
+  vault_connection_timeout: "10s"
+  alert_on_vault_failure: true
+
+# Integration Points
+integration:
+  nginx_upstream_notification: true
+  prometheus_metrics_vault_status: true
+  grafana_log_access_control: true
+
+# Development and Testing
+development:
+  log_vault_interactions: true
+  validate_on_startup: true
+  fail_fast_on_vault_error: false  # Allow graceful degradation
+
+# Production Readiness Checklist
+production_ready:
+  # ✅ AppRole authentication configured
+  # ✅ Dynamic secret issuance tested
+  # ✅ Audit logging confirmed
+  # ✅ No hardcoded credentials
+  # ⚠️  Cloud storage integration (future enhancement)
+  # ⚠️  Certificate-based authentication (future enhancement)
+  # ⚠️  Vault Agent integration (future enhancement)

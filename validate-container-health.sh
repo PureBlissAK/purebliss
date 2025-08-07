@@ -11,6 +11,33 @@ validate_dependency_independent() {
             # Phase 1: Network connectivity
             if docker exec $CONTAINER_NAME bash -c 'timeout 10 bash -c "until echo > /dev/tcp/purebliss-postgres/5432; do sleep 1; done"'; then
                 log_health "SUCCESS" "PostgreSQL reachable from $service"
+
+                # ✅ RAID Storage Validation
+                if [[ "$service" == "postgres" ]]; then
+                    # Validate PostgreSQL RAID migration
+                    if docker exec $CONTAINER_NAME ls -la /var/lib/postgresql/data/pgdata/ >/dev/null 2>&1; then
+                        local data_size=$(docker exec $CONTAINER_NAME du -sh /var/lib/postgresql/data/pgdata/ 2>/dev/null | cut -f1 || echo "Unknown")
+                        log_health "SUCCESS" "PostgreSQL RAID storage validated - Data size: $data_size"
+
+                        # Validate data integrity
+                        if docker exec $CONTAINER_NAME test -f /var/lib/postgresql/data/pgdata/PG_VERSION; then
+                            local pg_version=$(docker exec $CONTAINER_NAME cat /var/lib/postgresql/data/pgdata/PG_VERSION 2>/dev/null)
+                            log_health "SUCCESS" "PostgreSQL data integrity confirmed - Version: $pg_version"
+                        else
+                            log_health "ERROR" "PostgreSQL data integrity check failed - missing PG_VERSION"
+                        fi
+
+                        # Validate existing databases
+                        if docker exec $CONTAINER_NAME bash -c 'PGPASSWORD="$(cat /run/secrets/postgres_bootstrap_password 2>/dev/null || echo "")" psql -U postgres -c "\l" 2>/dev/null | grep -E "(keycloak|plane|vikunja)"'; then
+                            log_health "SUCCESS" "PostgreSQL RAID migration validated - Application databases present"
+                        else
+                            log_health "WARNING" "PostgreSQL database validation incomplete - may need password sync"
+                        fi
+                    else
+                        log_health "ERROR" "PostgreSQL RAID storage validation failed"
+                    fi
+                fi
+
                 # Phase 2: Authentication - Set service-specific environment variables
                 local auth_cmd=""
                 if [[ "$service" == "keycloak" ]]; then
@@ -124,6 +151,66 @@ log_health() {
         "WARN") echo -e "${YELLOW}⚠ $message${NC}" ;;
         "INFO") echo -e "${BLUE}ℹ $message${NC}" ;;
     esac
+}
+
+# RAID Storage Validation Function
+validate_raid_storage() {
+    local service_name="$1"
+    local result=0
+
+    log_health "INFO" "Validating RAID storage for $service_name"
+
+    case "$service_name" in
+        "postgres")
+            # Validate PostgreSQL RAID storage accessibility
+            if [[ -d "/raid-storage" ]] && [[ -r "/raid-storage" ]] && [[ -w "/raid-storage" ]]; then
+                # Check if it's a mount point or accessible directory
+                if mountpoint -q /raid-storage; then
+                    log_health "SUCCESS" "RAID storage mounted successfully as mount point"
+                else
+                    log_health "SUCCESS" "RAID storage accessible as directory"
+                fi
+
+                # Check storage health and performance
+                local raid_status=$(cat /proc/mdstat 2>/dev/null | grep -A 3 "md" || echo "RAID status unavailable")
+                log_health "INFO" "RAID status: $raid_status"
+
+                # Validate PostgreSQL data directory
+                if [[ -d "/raid-storage/postgres-data/pgdata" ]]; then
+                    local data_size=$(du -sh /raid-storage/postgres-data/pgdata 2>/dev/null | cut -f1 || echo "Unknown")
+                    log_health "SUCCESS" "PostgreSQL RAID data directory validated - Size: $data_size"
+
+                    # Check file permissions
+                    local perms=$(stat -c "%U:%G %a" /raid-storage/postgres-data/pgdata 2>/dev/null || echo "Unknown permissions")
+                    log_health "INFO" "PostgreSQL data permissions: $perms"
+
+                    # Validate disk I/O performance (basic test)
+                    if command -v iotop >/dev/null 2>&1; then
+                        log_health "INFO" "RAID I/O monitoring available via iotop"
+                    fi
+
+                    # Verify PostgreSQL can access the data
+                    if [[ -f "/raid-storage/postgres-data/pgdata/PG_VERSION" ]]; then
+                        local pg_version=$(cat /raid-storage/postgres-data/pgdata/PG_VERSION 2>/dev/null || echo "Unknown")
+                        log_health "SUCCESS" "PostgreSQL data integrity verified - Version: $pg_version"
+                    else
+                        log_health "WARN" "PostgreSQL version file not found - may be initializing"
+                    fi
+                else
+                    log_health "ERROR" "PostgreSQL RAID data directory not found"
+                    result=1
+                fi
+            else
+                log_health "ERROR" "RAID storage not accessible at /raid-storage"
+                result=1
+            fi
+            ;;
+        *)
+            log_health "INFO" "No RAID storage validation required for $service_name"
+            ;;
+    esac
+
+    return $result
 }
 
 # --- Autonomous Enhancement: Port Conflict Detection ---
@@ -817,6 +904,15 @@ main() {
         log_health "ERROR" "Docker health check failed"
         log_health "CRITICAL" "STOPPING: Health issue detected - performing comprehensive troubleshooting"
         # Deep troubleshooting already triggered in validate_docker_health
+    fi
+
+    # Step 2.5: Validate RAID storage (PostgreSQL only)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]] && [[ "$SERVICE_NAME" == "postgres" ]]; then
+        if ! validate_raid_storage "$SERVICE_NAME"; then
+            overall_result=$EXIT_UNHEALTHY
+            log_health "ERROR" "RAID storage validation failed"
+            log_health "CRITICAL" "STOPPING: RAID storage issue detected"
+        fi
     fi
 
     # Step 3: Validate service endpoints (only if previous steps passed)

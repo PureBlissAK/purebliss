@@ -1,0 +1,2 @@
+# Ignore RAID storage data for Loki
+/raid-storage/

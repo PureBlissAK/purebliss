@@ -1,0 +1,97 @@
+# Loki Service - Docker Compose Integration with Vault
+# Pure Bliss Elite Standards - Secure Log Storage with Dynamic Secrets
+# Version: 1.0.0 - Vault Integration Ready
+
+# Add this configuration to the services section of your docker-compose.yml
+
+services:
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: purebliss-loki
+    restart: unless-stopped
+    networks:
+      - purebliss-net
+    ports:
+      - "3100:3100"
+    volumes:
+      # Configuration files
+      - "/opt/dev-purebliss/services/loki/local-config.yaml:/etc/loki/local-config.yaml:ro"
+      - "/opt/dev-purebliss/services/loki/vault-config.yaml:/etc/loki/vault-config.yaml:ro"
+
+      # Enhanced entrypoint with Vault integration
+      - "/opt/dev-purebliss/services/loki/entrypoint.sh:/entrypoint.sh:ro"
+
+      # Log storage (persistent volume)
+      - "loki_data:/loki"
+
+      # Shared log directory for cross-service access
+      - "/opt/my-secure-ha-stack/logs:/shared-logs:ro"
+
+    environment:
+      # Vault Connection
+      - VAULT_ADDR=https://purebliss-vault:8200
+      - VAULT_SKIP_VERIFY=false
+
+      # AppRole Credentials (load from credentials file)
+      - LOKI_VAULT_ROLE_ID=${LOKI_VAULT_ROLE_ID}
+      - LOKI_VAULT_SECRET_ID=${LOKI_VAULT_SECRET_ID}
+
+      # Loki Configuration
+      - LOKI_CONFIG_FILE=/etc/loki/local-config.yaml
+      - LOKI_VAULT_CONFIG_FILE=/etc/loki/vault-config.yaml
+
+      # Security Settings
+      - LOKI_LOG_LEVEL=info
+      - LOKI_ENABLE_METRICS=true
+      - LOKI_ENABLE_TRACING=false
+
+      # Performance Tuning
+      - GOGC=100
+      - GOMEMLIMIT=512MiB
+
+    entrypoint: ["/entrypoint.sh"]
+
+    depends_on:
+      vault:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3100/ready || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.loki.rule=Host(`dev.purebliss.app`) && PathPrefix(`/loki`)"
+      - "traefik.http.routers.loki.tls=true"
+      - "traefik.http.services.loki.loadbalancer.server.port=3100"
+      - "com.purebliss.service=loki"
+      - "com.purebliss.vault.integrated=true"
+      - "com.purebliss.environment=development"
+
+# Add this to the volumes section of your docker-compose.yml
+volumes:
+  loki_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/my-secure-ha-stack/loki/data
+
+# Network configuration (already exists in main docker-compose.yml)
+networks:
+  purebliss-net:
+    external: true

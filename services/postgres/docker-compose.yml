@@ -29,13 +29,13 @@ services:
 
     volumes:
       # Data persistence
-      - postgres_data:/var/lib/postgresql/data
+      - /raid-storage/postgres-data/pgdata:/var/lib/postgresql/data
 
       # Initialization scripts for database setup
       - ./init-scripts:/docker-entrypoint-initdb.d:ro
 
-      # Vault integration scripts
-      - ./vault-entrypoint.sh:/usr/local/bin/vault-entrypoint.sh:ro
+      # Vault integration scripts - CENTRALIZED PATH
+      - /opt/dev-purebliss/dev_scripts/services/postgres/entrypoints/vault-entrypoint.sh:/usr/local/bin/vault-entrypoint.sh:ro
 
       # Secrets mount for Vault-managed credentials
       - postgres_secrets:/run/secrets:rw
@@ -80,9 +80,6 @@ services:
           cpus: '1.0'
 
 volumes:
-  postgres_data:
-    driver: local
-    name: purebliss_postgres_data
   postgres_secrets:
     driver: local
     name: purebliss_postgres_secrets
