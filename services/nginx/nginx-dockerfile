@@ -28,14 +28,16 @@ RUN mkdir -p /etc/nginx/certs \
              /var/log/nginx \
              /usr/share/nginx/html \
              /opt/my-secure-ha-stack/logs \
+             /var/cache/nginx/client_temp \
     && touch /var/log/nginx/access.log /var/log/nginx/error.log \
     && chown -R nginx:nginx /etc/nginx/certs \
                             /var/log/nginx \
                             /usr/share/nginx/html \
-    && chmod 755 /etc/nginx/certs
+                            /var/cache/nginx \
+    && chmod 755 /etc/nginx/certs /var/cache/nginx /var/cache/nginx/client_temp
 
-# Copy enhanced entrypoint script with smart upstream logic
-COPY entrypoint-enhanced.sh /entrypoint.sh
+# Copy enhanced entrypoint script with Vault PKI/SSL logic
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Create basic index page
@@ -58,5 +60,6 @@ ENV VAULT_ADDR=https://127.0.0.1:8200 \
 EXPOSE 80 443
 
 # Use custom entrypoint
+USER root
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

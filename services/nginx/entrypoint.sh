@@ -7,7 +7,15 @@ log_error() { echo "[$(date)] ERROR: $1" | tee -a /opt/my-secure-ha-stack/logs/d
 log_success() { echo "[$(date)] SUCCESS: $1" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log; }
 log_warn() { echo "[$(date)] WARN: $1" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log; }
 
+
 log_info "Nginx entrypoint.sh started"
+
+# Ensure nginx temp/cache directories exist and are writable
+for d in /var/cache/nginx /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp; do
+    mkdir -p "$d"
+    chmod 777 "$d"
+    log_info "Ensured directory $d exists and is writable (chmod 777)"
+done
 
 # Source environment variables
 if [[ -f /opt/my-secure-ha-stack/config.env ]]; then
@@ -109,11 +117,60 @@ function start_nginx() {
     exec nginx -g 'daemon off;'
 }
 
-# Fallback mode - using self-signed certificates
-log_warn "[FALLBACK] Using fallback certificate logic and Nginx startup."
-log_info "[FALLBACK] Generating fallback self-signed certificates for $DOMAIN."
-generate_fallback_certificates
-log_info "[FALLBACK] Configuring Nginx for fallback mode."
+
+# Try to fetch/generate SSL certs from Vault PKI, fallback to self-signed if needed
+SSL_DIR="/etc/nginx/ssl"
+mkdir -p "$SSL_DIR"
+
+# Try Vault PKI first
+VAULT_CERT_OK=0
+if command -v vault >/dev/null 2>&1 && [[ -n "${VAULT_TOKEN:-}" ]]; then
+    log_info "Attempting to fetch SSL cert from Vault PKI for $DOMAIN..."
+    if vault write -format=json pki-nginx/issue/nginx-role common_name="$DOMAIN" ttl="24h" > "$SSL_DIR/vault_cert.json" 2>/dev/null; then
+        cat "$SSL_DIR/vault_cert.json" | jq -r .data.certificate > "$SSL_DIR/nginx.crt"
+        cat "$SSL_DIR/vault_cert.json" | jq -r .data.issuing_ca >> "$SSL_DIR/nginx.crt"
+        cat "$SSL_DIR/vault_cert.json" | jq -r .data.private_key > "$SSL_DIR/nginx.key"
+        chmod 600 "$SSL_DIR/nginx.key"
+        chmod 644 "$SSL_DIR/nginx.crt"
+        VAULT_CERT_OK=1
+        log_success "Fetched SSL cert from Vault PKI."
+    else
+        log_warn "Vault PKI cert fetch failed, will use fallback."
+    fi
+else
+    log_warn "Vault CLI or token not available, skipping Vault PKI."
+fi
+
+if [[ $VAULT_CERT_OK -ne 1 ]]; then
+    generate_fallback_certificates
+fi
+
 configure_nginx
-log_info "[FALLBACK] Starting Nginx with fallback certificates."
-start_nginx
+
+# Ensure both HTTP and HTTPS server blocks are present
+cat > /etc/nginx/conf.d/https.conf <<EOF
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
+    ssl_certificate $SSL_DIR/nginx.crt;
+    ssl_certificate_key $SSL_DIR/nginx.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+    location / {
+        return 200 "Pure Bliss Development Environment - HTTPS Active";
+        add_header Content-Type text/plain;
+    }
+}
+EOF
+
+log_info "Reloading Nginx to activate HTTPS..."
+nginx -s reload || start_nginx

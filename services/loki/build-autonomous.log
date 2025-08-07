@@ -1,0 +1,40 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from loki-autonomous-dockerfile
+#1 transferring dockerfile: 647B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/grafana/loki:2.9.0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/6] FROM docker.io/grafana/loki:2.9.0
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 39B done
+#5 DONE 0.0s
+
+#6 [3/6] RUN mkdir -p /etc/loki /loki/data /loki/chunks
+#6 CACHED
+
+#7 [4/6] COPY local-config.yaml /etc/loki/local-config.yaml
+#7 CACHED
+
+#8 [2/6] RUN apk add --no-cache curl bash netcat-openbsd
+#8 CACHED
+
+#9 [5/6] RUN chown -R loki:loki /loki /etc/loki
+#9 CACHED
+
+#10 [6/6] WORKDIR /loki
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 writing image sha256:f0b09545859c2fd506977ecb706791e9f88503478421e58f2e568b672e375cef done
+#11 naming to docker.io/library/purebliss-loki:autonomous done
+#11 DONE 0.0s

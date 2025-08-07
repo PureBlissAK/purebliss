@@ -54,11 +54,11 @@ EOF
 # Function to detect containers with naming pattern recognition
 detect_containers() {
     log_endpoint "Detecting containers with multiple naming patterns..."
-    
+
     # Multi-pattern container discovery
     local patterns=("purebliss-" "phase1_manual" "_enhanced" "loki" "vault" "nginx" "keycloak" "postgres" "redis" "grafana" "prometheus")
     local found_containers=()
-    
+
     for pattern in "${patterns[@]}"; do
         while IFS= read -r container; do
             if [[ -n "$container" ]]; then
@@ -67,7 +67,7 @@ detect_containers() {
             fi
         done < <(docker ps --format "{{.Names}}" | grep "$pattern" || true)
     done
-    
+
     if [[ ${#found_containers[@]} -gt 0 ]]; then
         log_success "Detected ${#found_containers[@]} containers total"
         printf '%s\n' "${found_containers[@]}"
@@ -81,9 +81,9 @@ detect_containers() {
 test_endpoint() {
     local endpoint="$1"
     local timeout="${2:-10}"
-    
+
     log_endpoint "Testing endpoint: $endpoint (timeout: ${timeout}s)"
-    
+
     if curl -s -k --max-time "$timeout" "$endpoint" >/dev/null 2>&1; then
         log_success "Endpoint responding: $endpoint"
         return 0
@@ -98,19 +98,19 @@ generate_nginx_proxy() {
     local service="$1"
     local container_ip="${2:-}"
     local container_port="${3:-3100}"
-    
+
     log_endpoint "Generating nginx proxy configuration for: $service"
-    
+
     if [[ -z "$container_ip" ]]; then
         # Try to detect container IP
         container_ip=$(docker inspect "$service" --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "")
-        
+
         if [[ -z "$container_ip" ]]; then
             log_error "Cannot determine container IP for: $service"
             return 1
         fi
     fi
-    
+
     local proxy_config="
 # Auto-generated proxy configuration for $service
 # Generated: $(date)
@@ -122,7 +122,7 @@ location /$service/ {
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto \$scheme;
-    
+
     # Health check bypass
     proxy_connect_timeout 5s;
     proxy_send_timeout 60s;
@@ -135,7 +135,7 @@ location /$service/ready {
     access_log off;
 }
 "
-    
+
     # Write to nginx config directory if it exists
     local nginx_config_dir="/opt/my-secure-ha-stack/nginx/conf.d"
     if [[ -d "$nginx_config_dir" ]]; then
@@ -145,17 +145,17 @@ location /$service/ready {
         log_endpoint "Nginx config directory not found, displaying configuration:"
         echo "$proxy_config"
     fi
-    
+
     return 0
 }
 
 # Function to perform autonomous remediation
 autonomous_remediation() {
     local service="${1:-}"
-    
+
     if [[ -z "$service" ]]; then
         log_endpoint "Starting autonomous remediation for all detected services"
-        
+
         # Detect all containers and attempt remediation
         local containers
         if containers=$(detect_containers); then
@@ -167,30 +167,30 @@ autonomous_remediation() {
         fi
         return 0
     fi
-    
+
     log_endpoint "Starting autonomous remediation for: $service"
-    
+
     # Check if container is running
     if ! docker ps --format "{{.Names}}" | grep -q "^${service}$"; then
         log_error "Container not running: $service"
         return 1
     fi
-    
+
     # Get container details
     local container_ip
     container_ip=$(docker inspect "$service" --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "")
-    
+
     if [[ -z "$container_ip" ]]; then
         log_error "Cannot determine IP for container: $service"
         return 1
     fi
-    
+
     log_success "Container $service running at IP: $container_ip"
-    
+
     # Test common service ports
     local common_ports=(3100 8080 9090 3000 5432 6379 8200)
     local working_port=""
-    
+
     for port in "${common_ports[@]}"; do
         if curl -s -k --max-time 3 "http://$container_ip:$port" >/dev/null 2>&1; then
             working_port="$port"
@@ -198,11 +198,11 @@ autonomous_remediation() {
             break
         fi
     done
-    
+
     if [[ -n "$working_port" ]]; then
         # Generate nginx proxy configuration
         generate_nginx_proxy "$service" "$container_ip" "$working_port"
-        
+
         # Test the proxy endpoint
         local proxy_endpoint="https://dev.purebliss.app/$service/"
         if test_endpoint "$proxy_endpoint"; then
@@ -221,7 +221,7 @@ autonomous_remediation() {
 # Main execution logic
 main() {
     local command="${1:-detect}"
-    
+
     case "$command" in
         "detect")
             log_endpoint "=== AUTONOMOUS ENDPOINT DETECTION ==="

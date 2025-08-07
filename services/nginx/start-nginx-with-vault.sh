@@ -28,9 +28,24 @@ function log_error() {
 function configure_vault_integration() {
     log_action "Configuring Vault $INTEGRATION_TYPE integration for $SERVICE_NAME..."
 
-    export VAULT_ADDR="https://127.0.0.1:8200"
+
+    # Auto-detect Vault protocol (HTTP/HTTPS) and validate endpoint
+    VAULT_ADDR_CANDIDATES=("https://127.0.0.1:8200" "http://127.0.0.1:8200")
     export VAULT_SKIP_VERIFY=1
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+    for addr in "${VAULT_ADDR_CANDIDATES[@]}"; do
+        export VAULT_ADDR="$addr"
+        if vault status >/dev/null 2>&1; then
+            log_action "Detected working Vault endpoint: $VAULT_ADDR"
+            break
+        else
+            log_action "Vault endpoint $VAULT_ADDR not responding, trying next..."
+        fi
+    done
+    if ! vault status >/dev/null 2>&1; then
+        log_error "No working Vault endpoint detected (HTTP/HTTPS). Aborting."
+        exit 1
+    fi
 
     case "$INTEGRATION_TYPE" in
         "kv_secrets")
@@ -153,7 +168,7 @@ function validate_integration() {
         ./validate-${SERVICE_NAME}-vault-integration.sh
     else
         log_action "No validation script found, running basic checks..."
-        
+
         # Basic health check
         if docker ps | grep -q purebliss-$SERVICE_NAME; then
             log_success "$SERVICE_NAME container is running"

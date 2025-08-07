@@ -1,0 +1,58 @@
+# Enhanced Loki Dockerfile - Pure Bliss Elite Standards
+# Phase 3: Service Integration & Dependency Management
+# Addresses previous issues: ENTRYPOINT override, config file usage, health endpoint
+
+FROM grafana/loki:2.9.0
+
+# Pure Bliss Elite Standards
+LABEL maintainer="Pure Bliss Elite Development"
+LABEL service="loki"
+LABEL version="2.9.0-enhanced"
+LABEL enhancement-phase="3"
+
+# Install dependencies for health checks and networking
+USER root
+RUN apk add --no-cache \
+    curl \
+    netcat-openbsd \
+    ca-certificates \
+    tzdata \
+    bash
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /etc/loki /loki/data /loki/chunks \
+    && chown -R loki:loki /loki /etc/loki
+
+# Copy configuration file
+COPY local-config.yaml /etc/loki/local-config.yaml
+RUN chown loki:loki /etc/loki/local-config.yaml
+
+# Copy environment file if it exists
+COPY .env /etc/loki/.env
+RUN chown loki:loki /etc/loki/.env
+
+# Switch back to loki user for security
+USER loki
+
+# Create health check script
+USER root
+RUN echo '#!/bin/bash' > /usr/local/bin/loki-health-check.sh \
+    && echo 'timeout 10 curl -f http://localhost:3100/ready || exit 1' >> /usr/local/bin/loki-health-check.sh \
+    && chmod +x /usr/local/bin/loki-health-check.sh
+
+# Set proper working directory
+WORKDIR /loki
+
+# Expose Loki port
+EXPOSE 3100
+
+# Health check with reasonable timing
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD /usr/local/bin/loki-health-check.sh
+
+# Switch back to loki user
+USER loki
+
+# CRITICAL: Override ENTRYPOINT to ensure config file usage
+# This addresses the root cause from previous issues
+ENTRYPOINT ["/usr/bin/loki", "-config.file=/etc/loki/local-config.yaml"]

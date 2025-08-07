@@ -84,7 +84,7 @@ LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
 # DEEP HEALTH TROUBLESHOOTING DIRECTIVE
 # If ANY health check fails, warnings appear, or performance degrades:
 # 1. STOP immediately - no exceptions
-# 2. Perform comprehensive troubleshooting 
+# 2. Perform comprehensive troubleshooting
 # 3. Identify and fix root cause
 # 4. Run additional validation cycles
 # 5. Document all issues and resolutions
@@ -188,11 +188,11 @@ show_usage() {
 perform_deep_health_troubleshooting() {
     local issue_type="$1"
     local issue_details="$2"
-    
+
     log_health "CRITICAL" "DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: $issue_type"
     log_health "INFO" "Issue Details: $issue_details"
     log_health "INFO" "Performing comprehensive health analysis..."
-    
+
     # 1. Container State Analysis
     log_health "INFO" "=== CONTAINER STATE ANALYSIS ==="
     if docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep "$CONTAINER_NAME"; then
@@ -202,7 +202,7 @@ perform_deep_health_troubleshooting() {
     else
         log_health "ERROR" "Container $CONTAINER_NAME not found in docker ps output"
     fi
-    
+
     # 2. Resource Usage Analysis
     log_health "INFO" "=== RESOURCE USAGE ANALYSIS ==="
     if docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}" | grep "$CONTAINER_NAME"; then
@@ -210,7 +210,7 @@ perform_deep_health_troubleshooting() {
     else
         log_health "WARN" "Cannot capture resource usage - container may not be running"
     fi
-    
+
     # 3. Log Analysis - Last 50 lines
     log_health "INFO" "=== CONTAINER LOG ANALYSIS ==="
     docker logs --tail 50 "$CONTAINER_NAME" 2>&1 | while read line; do
@@ -222,7 +222,7 @@ perform_deep_health_troubleshooting() {
             log_health "INFO" "Log: $line"
         fi
     done
-    
+
     # 4. Network Connectivity Analysis
     log_health "INFO" "=== NETWORK CONNECTIVITY ANALYSIS ==="
     docker network ls | grep purebliss-net && log_health "SUCCESS" "Pure Bliss network exists" || log_health "ERROR" "Pure Bliss network missing"
@@ -231,7 +231,7 @@ perform_deep_health_troubleshooting() {
     else
         log_health "ERROR" "Container network connectivity issues"
     fi
-    
+
     # 5. Dependency Health Check
     log_health "INFO" "=== DEPENDENCY HEALTH CHECK ==="
     local dependencies=""
@@ -243,7 +243,7 @@ perform_deep_health_troubleshooting() {
         "plane") dependencies="postgres redis vault" ;;
         *) log_health "INFO" "No specific dependencies defined for $SERVICE_NAME" ;;
     esac
-    
+
     for dep in $dependencies; do
         if docker ps --format "{{.Names}}" | grep -q "purebliss-$dep"; then
             log_health "SUCCESS" "Dependency $dep is running"
@@ -251,13 +251,13 @@ perform_deep_health_troubleshooting() {
             log_health "ERROR" "Critical dependency $dep is not running"
         fi
     done
-    
+
     # 6. Port and Process Analysis
     log_health "INFO" "=== PORT AND PROCESS ANALYSIS ==="
     netstat -tlnp 2>/dev/null | grep -E ":80:|:443:|:8080:|:3000:|:3100:|:5432:|:6379:|:8200:|:9090:" | while read line; do
         log_health "INFO" "Port usage: $line"
     done
-    
+
     # 7. Generate Remediation Recommendations
     log_health "INFO" "=== REMEDIATION RECOMMENDATIONS ==="
     case "$issue_type" in
@@ -278,10 +278,10 @@ perform_deep_health_troubleshooting() {
             log_health "INFO" "RECOMMENDATION: Review logs, check configuration, verify resources"
             ;;
     esac
-    
+
     log_health "CRITICAL" "DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above"
     log_health "CRITICAL" "RESOLUTION REQUIRED: All identified issues must be fixed before proceeding"
-    
+
     return 1 # Always return failure to ensure troubleshooting stops progression
 }
 
@@ -305,7 +305,7 @@ validate_container_exists() {
         else
             log_health "ERROR" "Container $CONTAINER_NAME does not exist"
         fi
-        
+
         # TRIGGER DEEP HEALTH TROUBLESHOOTING
         perform_deep_health_troubleshooting "container_not_running" "Container $CONTAINER_NAME is not in running state"
 

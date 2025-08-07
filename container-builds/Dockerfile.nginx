@@ -46,7 +46,7 @@ ENV SSL_AUTO_RENEW=true
 FROM phase4 AS phase5
 RUN mkdir -p /var/log/nginx /opt/my-secure-ha-stack/logs
 COPY logs/ /var/log/nginx/
-USER nginx
+# USER nginx removed to allow root for entrypoint permission fix
 ENV AUDIT_LOGGING=true
 ENV SECURITY_HEADERS=true
 

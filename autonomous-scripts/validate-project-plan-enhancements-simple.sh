@@ -79,8 +79,8 @@ if [[ -x "/opt/dev-purebliss/autonomous-scripts/auto-endpoint-diagnostics.sh" ]]
     else
         log_info "Endpoint diagnostics available but help command may have issues"
     fi
-    
-    # Test detection capability  
+
+    # Test detection capability
     log_info "Testing container detection..."
     if /opt/dev-purebliss/autonomous-scripts/auto-endpoint-diagnostics.sh detect >/dev/null 2>&1; then
         log_success "Container detection working"
@@ -97,10 +97,10 @@ log_validation "Checking Docker and container status..."
 
 if docker ps >/dev/null 2>&1; then
     log_success "Docker daemon is accessible"
-    
+
     container_count=$(docker ps --format "{{.Names}}" | wc -l)
     log_info "Running containers: $container_count"
-    
+
     # Look for PureBliss-related containers
     purebliss_count=0
     while IFS= read -r container; do
@@ -109,7 +109,7 @@ if docker ps >/dev/null 2>&1; then
             log_info "Found PureBliss container: $container"
         fi
     done < <(docker ps --format "{{.Names}}")
-    
+
     log_success "PureBliss containers: $purebliss_count"
 else
     log_error "Docker daemon not accessible"
@@ -121,11 +121,11 @@ log_validation "Validating project documentation..."
 
 if [[ -f "PROJECT_PLAN_ENHANCED.md" ]]; then
     log_success "Enhanced project plan exists"
-    
+
     # Check if file has content
     if [[ -s "PROJECT_PLAN_ENHANCED.md" ]]; then
         log_success "Project plan has content"
-        
+
         # Check for enhancement keywords
         enhancement_count=0
         for keyword in "autonomous" "endpoint" "diagnostics" "enhanced" "purebliss"; do
@@ -133,7 +133,7 @@ if [[ -f "PROJECT_PLAN_ENHANCED.md" ]]; then
                 enhancement_count=$((enhancement_count + 1))
             fi
         done
-        
+
         if [[ $enhancement_count -gt 2 ]]; then
             log_success "Project plan includes enhancement keywords ($enhancement_count/5)"
         else
@@ -152,10 +152,10 @@ log_validation "Checking git repository status..."
 
 if git status >/dev/null 2>&1; then
     log_success "Git repository accessible"
-    
+
     current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
     log_info "Current branch: $current_branch"
-    
+
     # Check for uncommitted changes
     uncommitted=$(git status --porcelain 2>/dev/null | wc -l)
     if [[ $uncommitted -eq 0 ]]; then

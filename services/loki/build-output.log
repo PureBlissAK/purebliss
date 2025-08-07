@@ -1,0 +1,70 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from loki-enhanced-dockerfile
+#1 transferring dockerfile: 1.75kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/grafana/loki:2.9.0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/9] FROM docker.io/grafana/loki:2.9.0
+#4 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 1.67kB done
+#5 DONE 0.0s
+
+#6 [2/9] RUN apk add --no-cache     curl     netcat-openbsd     ca-certificates     tzdata     bash
+#6 0.207 fetch https://dl-cdn.alpinelinux.org/alpine/v3.18/main/x86_64/APKINDEX.tar.gz
+#6 0.466 fetch https://dl-cdn.alpinelinux.org/alpine/v3.18/community/x86_64/APKINDEX.tar.gz
+#6 0.776 (1/15) Installing ncurses-terminfo-base (6.4_p20230506-r0)
+#6 0.786 (2/15) Installing libncursesw (6.4_p20230506-r0)
+#6 0.805 (3/15) Installing readline (8.2.1-r1)
+#6 0.819 (4/15) Installing bash (5.2.15-r5)
+#6 0.846 Executing bash-5.2.15-r5.post-install
+#6 0.851 (5/15) Installing brotli-libs (1.0.9-r14)
+#6 0.867 (6/15) Installing libunistring (1.1-r1)
+#6 0.904 (7/15) Installing libidn2 (2.3.4-r1)
+#6 0.920 (8/15) Installing nghttp2-libs (1.57.0-r0)
+#6 0.930 (9/15) Installing libpsl (0.21.5-r0)
+#6 0.938 (10/15) Installing libcurl (8.12.1-r0)
+#6 0.954 (11/15) Installing curl (8.12.1-r0)
+#6 0.975 (12/15) Installing libmd (1.0.4-r2)
+#6 0.985 (13/15) Installing libbsd (0.11.7-r1)
+#6 0.996 (14/15) Installing netcat-openbsd (1.219-r1)
+#6 1.005 (15/15) Installing tzdata (2025b-r0)
+#6 1.113 Executing busybox-1.36.1-r0.trigger
+#6 1.123 OK: 17 MiB in 34 packages
+#6 DONE 1.3s
+
+#7 [3/9] RUN mkdir -p /etc/loki /loki/data /loki/chunks     && chown -R loki:loki /loki /etc/loki
+#7 DONE 0.3s
+
+#8 [4/9] COPY local-config.yaml /etc/loki/local-config.yaml
+#8 DONE 0.1s
+
+#9 [5/9] RUN chown loki:loki /etc/loki/local-config.yaml
+#9 DONE 0.3s
+
+#10 [6/9] COPY .env /etc/loki/.env
+#10 DONE 0.1s
+
+#11 [7/9] RUN chown loki:loki /etc/loki/.env
+#11 DONE 0.2s
+
+#12 [8/9] RUN echo '#!/bin/bash' > /usr/local/bin/loki-health-check.sh     && echo 'timeout 10 curl -f http://localhost:3100/ready || exit 1' >> /usr/local/bin/loki-health-check.sh     && chmod +x /usr/local/bin/loki-health-check.sh
+#12 DONE 0.3s
+
+#13 [9/9] WORKDIR /loki
+#13 DONE 0.1s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 0.5s done
+#14 writing image sha256:68c456813071247474b359540e95f867a6fc291149acdf038131a4e56455f147 done
+#14 naming to docker.io/library/purebliss-loki:phase3-enhanced done
+#14 DONE 0.5s

@@ -30,7 +30,7 @@ function validate_container_health() {
     if docker ps | grep -q purebliss-$SERVICE_NAME; then
         local health_status
         health_status=$(docker inspect --format='{{.State.Health.Status}}' purebliss-$SERVICE_NAME 2>/dev/null || echo "no_healthcheck")
-        
+
         case "$health_status" in
             "healthy")
                 log_success "$SERVICE_NAME container is healthy"
@@ -63,12 +63,24 @@ function validate_container_health() {
 function validate_vault_integration() {
     log_check "Validating $SERVICE_NAME Vault integration..."
 
-    export VAULT_ADDR="https://127.0.0.1:8200"
+    # Auto-detect Vault protocol (HTTP/HTTPS) and validate endpoint
+    VAULT_ADDR_CANDIDATES=("https://127.0.0.1:8200" "http://127.0.0.1:8200")
     export VAULT_SKIP_VERIFY=1
-    
     if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
         export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-        
+        for addr in "${VAULT_ADDR_CANDIDATES[@]}"; do
+            export VAULT_ADDR="$addr"
+            if vault status >/dev/null 2>&1; then
+                log_check "Detected working Vault endpoint: $VAULT_ADDR"
+                break
+            else
+                log_check "Vault endpoint $VAULT_ADDR not responding, trying next..."
+            fi
+        done
+        if ! vault status >/dev/null 2>&1; then
+            log_error "No working Vault endpoint detected (HTTP/HTTPS). Aborting validation."
+            return 1
+        fi
         case "$INTEGRATION_TYPE" in
             "kv_secrets")
                 validate_kv_secrets_integration
@@ -94,7 +106,7 @@ function validate_kv_secrets_integration() {
 
     if vault kv get secret/$SERVICE_NAME >/dev/null 2>&1; then
         log_success "KV secrets accessible for $SERVICE_NAME"
-        
+
         # Test secret retrieval
         local admin_password
         admin_password=$(vault kv get -field=admin_password secret/$SERVICE_NAME 2>/dev/null || echo "")
@@ -116,7 +128,7 @@ function validate_database_integration() {
     # Test database role
     if vault read database/roles/$SERVICE_NAME-role >/dev/null 2>&1; then
         log_success "Database role configured for $SERVICE_NAME"
-        
+
         # Test credential generation
         if vault read database/creds/$SERVICE_NAME-role >/dev/null 2>&1; then
             log_success "Dynamic credentials can be generated for $SERVICE_NAME"
@@ -136,7 +148,7 @@ function validate_pki_integration() {
     # Test PKI engine
     if vault read pki-$SERVICE_NAME/cert/ca >/dev/null 2>&1; then
         log_success "PKI CA certificate available for $SERVICE_NAME"
-        
+
         # Test certificate generation
         if vault write pki-$SERVICE_NAME/issue/$SERVICE_NAME-role common_name="test.dev.purebliss.app" ttl="1h" >/dev/null 2>&1; then
             log_success "PKI certificate can be generated for $SERVICE_NAME"
@@ -155,7 +167,7 @@ function validate_monitoring_integration() {
 
     if vault kv get $SERVICE_NAME-config/main >/dev/null 2>&1; then
         log_success "Monitoring configuration accessible for $SERVICE_NAME"
-        
+
         # Test configuration retrieval
         local scrape_interval
         scrape_interval=$(vault kv get -field=scrape_interval $SERVICE_NAME-config/main 2>/dev/null || echo "")
