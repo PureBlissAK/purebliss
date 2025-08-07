@@ -8,7 +8,7 @@ services:
     ports:
       - "3001:3000"
     volumes:
-      - ${GRAFANA_DATA_PATH}:/var/lib/grafana
+      - /raid-storage/grafana/data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SERVER_HTTP_PORT=3000
@@ -17,6 +17,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
     networks:
       - purebliss-net
 networks:

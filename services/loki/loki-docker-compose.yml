@@ -6,7 +6,7 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ${LOKI_DATA_PATH}:/loki
+      - /raid-storage/loki/data:/loki
       - ${LOKI_LOG_PATH}:/var/log/loki/loki.log
       - ./local-config.yaml:/etc/loki/local-config.yaml:ro
     command: -config.file=/etc/loki/local-config.yaml
@@ -18,6 +18,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
     networks:
       - purebliss-net
 networks:

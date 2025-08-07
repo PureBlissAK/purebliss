@@ -1,10 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 set -euo pipefail
 
 LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
 VAULT_SECRETS_FILE="/opt/my-secure-ha-stack/secrets/vault-init.json"
 VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
-VAULT_AUTO_UNSEAL_SCRIPT="/vault/config/vault-auto-unseal.sh"
 
 # Logging functions
 function log_info() {
@@ -24,7 +23,7 @@ function wait_for_vault() {
     log_info "Waiting for Vault to become available at ${VAULT_ADDR}..."
     local retries=30
     local count=0
-    
+
     while [[ $count -lt $retries ]]; do
         if curl -s -k "${VAULT_ADDR}/v1/sys/health" &> /dev/null; then
             log_success "Vault is available."
@@ -34,7 +33,7 @@ function wait_for_vault() {
         log_info "Vault not ready, waiting... (attempt $count/$retries)"
         sleep 2
     done
-    
+
     log_error "Vault did not become available after $retries attempts."
     return 1
 }
@@ -67,22 +66,28 @@ function initialize_vault() {
 # 3. Unseal Vault
 function unseal_vault() {
     log_info "Checking Vault seal status..."
-    if ! vault status -format=json | jq -e .sealed; then
+    local sealed
+    sealed=$(vault status -format=json | jq -r .sealed)
+
+    if [[ "$sealed" != "true" ]]; then
         log_success "Vault is already unsealed."
         return 0
     fi
 
-    log_info "Vault is sealed. Attempting auto-unseal..."
-    if [[ -x "$VAULT_AUTO_UNSEAL_SCRIPT" ]]; then
-        if "$VAULT_AUTO_UNSEAL_SCRIPT"; then
-            log_success "Vault unsealed successfully via auto-unseal script."
-            return 0
-        else
-            log_error "Auto-unseal script failed. Manual intervention may be required."
-            return 1
-        fi
+    log_info "Vault is sealed. Attempting to unseal..."
+    local unseal_key
+    unseal_key=$(jq -r .unseal_keys_b64[0] < "$VAULT_SECRETS_FILE")
+
+    if [[ -z "$unseal_key" ]]; then
+        log_error "Could not find unseal key in $VAULT_SECRETS_FILE"
+        return 1
+    fi
+
+    if vault operator unseal "$unseal_key"; then
+        log_success "Vault unsealed successfully."
+        return 0
     else
-        log_error "Auto-unseal script not found or not executable at $VAULT_AUTO_UNSEAL_SCRIPT"
+        log_error "Failed to unseal Vault."
         return 1
     fi
 }
@@ -114,7 +119,7 @@ function start_vault_server() {
 # Main execution
 function main() {
     log_info "Vault container entrypoint started."
-    
+
     # Start Vault in the background to initialize
     vault server -config=/vault/config/vault.hcl &
     VAULT_PID=$!
@@ -125,7 +130,7 @@ function main() {
     login_and_store_token
 
     log_success "Vault is initialized, unsealed, and ready for use."
-    
+
     # Bring the Vault server process to the foreground
     log_info "Bringing Vault server to the foreground."
     wait $VAULT_PID

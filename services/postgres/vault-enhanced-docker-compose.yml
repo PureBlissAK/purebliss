@@ -1,0 +1,86 @@
+# PostgreSQL with Enhanced Vault Integration
+# Uses improved entrypoint with better error handling and Vault CLI management
+# Pure Bliss Elite Standards: Zero-Trust, Dynamic Secrets, Microservices
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: purebliss-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_bootstrap_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+      # Vault integration
+      VAULT_ADDR: "http://purebliss-vault:8200"
+      VAULT_SKIP_VERIFY: "1"
+
+      # Database settings
+      POSTGRES_INITDB_ARGS: "--auth-local=md5 --auth-host=md5 --encoding=UTF8 --locale=en_US.UTF-8"
+      POSTGRES_HOST_AUTH_METHOD: "md5"
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      # Data persistence
+      - postgres_data:/var/lib/postgresql/data
+
+      # Initialization scripts
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+
+      # Enhanced Vault entrypoint
+      - ./vault-entrypoint-enhanced.sh:/usr/local/bin/vault-entrypoint-enhanced.sh:ro
+
+      # Secrets mount
+      - postgres_secrets:/run/secrets:rw
+
+      # Vault token access
+      - /opt/my-secure-ha-stack/secrets:/vault/secrets:ro
+
+      # Logging
+      - /opt/my-secure-ha-stack/logs:/opt/logs:rw
+
+    entrypoint: ["/usr/local/bin/vault-entrypoint-enhanced.sh"]
+    command: ["docker-entrypoint.sh", "postgres"]
+
+    networks:
+      - purebliss-net
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres -h localhost -p 5432"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /var/run/postgresql:noexec,nosuid,size=100m
+
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+volumes:
+  postgres_data:
+    driver: local
+    name: purebliss_postgres_data
+  postgres_secrets:
+    driver: local
+    name: purebliss_postgres_secrets
+
+networks:
+  purebliss-net:
+    external: true

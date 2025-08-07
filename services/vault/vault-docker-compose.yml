@@ -3,53 +3,44 @@
 
 services:
   vault:
-    build:
-      context: .
-      dockerfile: vault-dockerfile.yml
+    image: purebliss-vault:latest
     container_name: purebliss-vault
     restart: unless-stopped
-
+    entrypoint: ["/vault/entrypoint.sh"]
+    command: [] # Entrypoint script will handle Vault startup
     environment:
       VAULT_ADDR: https://127.0.0.1:8200
-      # VAULT_SKIP_VERIFY is needed for the healthcheck and initial CLI interactions
-      # with self-signed certs. Remove or use caution in production for client apps.
-      VAULT_SKIP_VERIFY: "true"
-      # DEV MODE: Auto-unseals with fixed root token for development
-      VAULT_DEV_ROOT_TOKEN_ID: "dev-root-token-purebliss"
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-
+      VAULT_API_ADDR: https://127.0.0.1:8200
+      VAULT_CLUSTER_ADDR: https://127.0.0.1:8201
     ports:
-      - "8200:8200" # Vault HTTP/HTTPS listener
-      - "8201:8201" # Vault cluster listener for Raft
-
+      - "8200:8200"
+      - "8201:8201"
     volumes:
-      # Mount the Vault HCL configuration (TLS enabled)
       - ./vault.hcl:/vault/config/vault.hcl:ro
-      # Mount the directory containing your TLS certificates.
       - ./certs:/vault/certs:ro
-      # Named volumes for Vault's persistent storage (Raft) and logs
-      - vaultdata:/vault/data
+      - /raid-storage/vault/data:/vault/data
       - vaultlogs:/vault/logs
-
-    command: ["vault", "server", "-dev", "-dev-root-token-id=dev-root-token-purebliss", "-dev-listen-address=0.0.0.0:8200"]
-
+      - /opt/my-secure-ha-stack/logs/dev-environment-setup.log:/opt/my-secure-ha-stack/logs/dev-environment-setup.log
     cap_add:
-      - IPC_LOCK # Prevent Vault from being swapped to disk (security)
-
-    # Use default entrypoint
-
+      - IPC_LOCK
     healthcheck:
-      test: ["CMD-SHELL", "vault status -tls-skip-verify || exit 0"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s # Give Vault time to initialize
-
+      start_period: 30s
+      test: ["CMD-SHELL", "vault status -address=https://127.0.0.1:8200 || exit 1"]
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
     networks:
-      - purebliss-net # Connect Vault to your shared network
-
+      - purebliss-net
     secrets:
-      - postgres_password # Reference the Docker secret by its name
+      - postgres_password
 
   # NEW SERVICE: Vault Agent
   vault-agent:
@@ -65,14 +56,27 @@ services:
       VAULT_SKIP_VERIFY: "true" # Agent needs this for self-signed Vault certs
     cap_add:
       - IPC_LOCK # Prevent Vault Agent from being swapped to disk (security)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '1.0'
     networks:
       - purebliss-net # Connect to the same network as Vault
     depends_on:
       - vault # Ensure Vault server is up before agent tries to connect
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -k https://vault:8200/v1/sys/health | grep 'initialized' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 # Define named volumes for Vault's persistent data
 volumes:
-  vaultdata:
   vaultlogs:
   vault-agent-data:
 

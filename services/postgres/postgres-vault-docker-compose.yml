@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  purebliss-postgres:
+    image: postgres:16
+    container_name: purebliss-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: purebliss_app
+      POSTGRES_USER: vault_admin
+      POSTGRES_PASSWORD: vault_password
+      # Enable SSL/TLS connections
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=md5"
+    volumes:
+      - postgres-vault-data:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./postgres-ssl-entrypoint.sh:/docker-entrypoint-initdb.d/02-ssl-setup.sh:ro
+      - /raid-storage/letsencrypt:/raid-storage/letsencrypt:ro
+    command: |
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U vault_admin -d purebliss_app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - purebliss-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '1.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PostgreSQL Prometheus Exporter with Vault integration
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: purebliss-postgres-exporter
+    restart: unless-stopped
+    environment:
+      # Initial connection - will be updated with Vault dynamic credentials
+      DATA_SOURCE_NAME: "postgresql://vault_admin:vault_password@purebliss-postgres:5432/purebliss_app?sslmode=require"
+    depends_on:
+      - purebliss-postgres
+    networks:
+      - purebliss-net
+    ports:
+      - "9187:9187"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9187/metrics || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres-vault-data:
+    driver: local
+
+networks:
+  purebliss-net:
+    external: true

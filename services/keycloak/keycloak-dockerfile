@@ -1,1 +1,25 @@
 FROM quay.io/keycloak/keycloak:24.0.5
+# Use official Keycloak image as base
+FROM quay.io/keycloak/keycloak:24.0.5
+
+# Set environment variables for DB and Redis
+ENV KC_DB=postgres
+ENV KC_DB_URL_HOST=purebliss-postgres
+ENV KC_DB_URL_PORT=5432
+ENV KC_DB_USERNAME=keycloak
+ENV KC_DB_PASSWORD=keycloak_secure_password
+ENV KC_DB_SCHEMA=public
+
+# Correct Redis integration for Keycloak 24+
+ENV KC_CACHE=ispn
+ENV KC_CACHE_STACK=redis
+ENV KC_CACHE_REDIS_HOST=purebliss-redis
+ENV KC_CACHE_REDIS_PORT=6379
+
+# Add healthcheck for /auth/realms/master endpoint using bash /dev/tcp (no curl required)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD bash -c 'timeout 5 bash -c "printf \"GET /auth/realms/master HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n\" >&3; cat <&3" 3<>/dev/tcp/localhost/8080 | grep -q "200 OK"' || exit 1
+
+# Entrypoint and default command
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
+CMD ["start-dev"]

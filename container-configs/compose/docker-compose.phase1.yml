@@ -1,0 +1,23 @@
+version: '3.8'
+
+# Phase 1 overrides
+services:
+  nginx:
+    image: nginx:phase1
+    build:
+      context: /opt/my-secure-ha-stack
+      dockerfile: /opt/dev-purebliss/container-builds/Dockerfile.nginx
+      target: phase1
+    environment:
+      - BUILD_PHASE=1
+    
+  redis:
+    image: redis:phase1
+    build:
+      context: /opt/my-secure-ha-stack
+      dockerfile: /opt/dev-purebliss/container-builds/Dockerfile.redis
+      target: phase1
+    environment:
+      - BUILD_PHASE=1
+
+  # Add other services as needed

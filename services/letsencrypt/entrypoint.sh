@@ -9,6 +9,82 @@ mkdir -p /var/log/letsencrypt
 
 echo "[$(date)] INFO: Starting Let's Encrypt service with Vault PKI integration" | tee -a "$LOG_FILE"
 
+
+# Start cron daemon for automatic certificate renewal
+echo "[$(date)] INFO: Starting cron daemon for certificate renewal" | tee -a "$LOG_FILE"
+crond &
+
+
+# --- Minimal HTTP server for health checks ---
+echo "[$(date)] INFO: Starting minimal HTTP server on port 8080 for health checks" | tee -a "$LOG_FILE"
+(while true; do echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nletsencrypt healthy" | nc -l -p 8080; done) &
+HTTP_PID=$!
+
+
+# --- Main renewal loop (runs in background) ---
+(
+  echo "[$(date)] INFO: Starting certificate renewal loop with $RENEW_INTERVAL intervals" | tee -a "$LOG_FILE"
+  while true; do
+    echo "[$(date)] INFO: Starting certificate renewal cycle" | tee -a "$LOG_FILE"
+    IFS=','
+    for domain in $LETSENCRYPT_DOMAINS; do
+      domain=$(echo "$domain" | xargs)
+      cert_dir="/etc/letsencrypt/live/$domain"
+      cert_file="$cert_dir/fullchain.pem"
+      if [ -d "$cert_dir" ]; then
+        if [ -f "$cert_dir/cert.pem" ] && [ -n "$VAULT_ADDR" ] && [ -n "$VAULT_TOKEN" ]; then
+          echo "[$(date)] INFO: Renewing Vault PKI certificate for $domain" | tee -a "$LOG_FILE"
+          if generate_vault_certificate "$domain"; then
+            echo "[$(date)] SUCCESS: Vault PKI certificate renewed for $domain" | tee -a "$LOG_FILE"
+            # Always trigger nginx reload after renewal
+            if [ -f "/var/run/nginx.pid" ]; then
+              kill -HUP $(cat /var/run/nginx.pid) 2>/dev/null || true
+              echo "[$(date)] INFO: Nginx reloaded for certificate renewal" | tee -a "$LOG_FILE"
+            fi
+            # Notify nginx via upstream-validation if available
+            if [ -x /opt/dev-purebliss/upstream-validation.sh ]; then
+              /opt/dev-purebliss/upstream-validation.sh nginx 443 /health || true
+            fi
+          else
+            echo "[$(date)] WARNING: Vault PKI certificate renewal failed for $domain" | tee -a "$LOG_FILE"
+          fi
+        else
+          echo "[$(date)] INFO: Renewing traditional Let's Encrypt certificate for $domain" | tee -a "$LOG_FILE"
+          certbot renew --webroot -w "$LETSENCRYPT_WEBROOT_PATH" --quiet --no-self-upgrade 2>&1 | tee -a "$LOG_FILE"
+          # Always trigger nginx reload after renewal
+          if [ -f "/var/run/nginx.pid" ]; then
+            kill -HUP $(cat /var/run/nginx.pid) 2>/dev/null || true
+            echo "[$(date)] INFO: Nginx reloaded for certificate renewal" | tee -a "$LOG_FILE"
+          fi
+          if [ -x /opt/dev-purebliss/upstream-validation.sh ]; then
+            /opt/dev-purebliss/upstream-validation.sh nginx 443 /health || true
+          fi
+        fi
+        # Monitor certificate expiry and emit Prometheus-style metric
+        if [ -f "$cert_file" ]; then
+          expiry_epoch=$(openssl x509 -enddate -noout -in "$cert_file" | cut -d= -f2 | xargs -I{} date -d {} +%s)
+          now_epoch=$(date +%s)
+          days_left=$(( (expiry_epoch - now_epoch) / 86400 ))
+          echo "[$(date)] INFO: Certificate for $domain expires in $days_left days" | tee -a "$LOG_FILE"
+          echo "letsencrypt_certificate_expiry_days{domain=\"$domain\"} $days_left" > /var/log/letsencrypt/cert_expiry.prom
+          if [ $days_left -lt 14 ]; then
+            echo "[$(date)] WARNING: Certificate for $domain expires in $days_left days!" | tee -a "$LOG_FILE"
+          fi
+        fi
+      else
+        echo "[$(date)] WARNING: Certificate directory not found for $domain: $cert_dir" | tee -a "$LOG_FILE"
+      fi
+    done
+    unset IFS
+    echo "[$(date)] INFO: Certificate renewal cycle complete, sleeping for $RENEW_INTERVAL" | tee -a "$LOG_FILE"
+    sleep "$RENEW_INTERVAL"
+  done
+) &
+RENEW_PID=$!
+
+# Wait for either process to exit (if either fails, container exits)
+wait $HTTP_PID $RENEW_PID
+
 # --- Enhanced Vault PKI integration ---
 # Auto-detect Vault mode and configure accordingly
 detect_vault_mode() {

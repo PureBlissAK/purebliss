@@ -5,17 +5,27 @@ services:
     container_name: purebliss-codeserver
     restart: unless-stopped
     ports:
-      - "8443:8443"
+      - "8444:8080"
     environment:
-      - PASSWORD=changeme
+      - PASSWORD=${CODESERVER_PASSWORD:-changeme-secure-password}
+      - VAULT_ADDR=${VAULT_ADDR:-http://purebliss-vault:8200}
+      - VAULT_TOKEN=${VAULT_TOKEN:-}
     volumes:
-      - ${CODESERVER_DATA_PATH}:/home/coder/project
-      - ${CODESERVER_LOG_PATH}:/var/log/codeserver/codeserver.log
+      - /raid-storage/codeserver/data:/home/coder/project
+      - ${CODESERVER_LOG_PATH:-/tmp/codeserver.log}:/var/log/codeserver/codeserver.log
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8443"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
     networks:
       - purebliss-net
 networks:

@@ -56,7 +56,7 @@ table_manager:
   retention_deletes_enabled: false
   retention_period: 0s
 
-# Compactor
+# Compactor - configured for proper operation
 compactor:
   working_directory: /loki/boltdb-shipper-compactor
   shared_store: filesystem

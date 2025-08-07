@@ -2,23 +2,22 @@ version: '3.8'
 
 services:
   purebliss-keycloak:
-    image: quay.io/keycloak/keycloak:24.0.5
+    image: keycloak:purebliss-enhanced
     container_name: purebliss-keycloak
     restart: unless-stopped
     ports:
       - "8080:8080"
       - "8443:8443"
-    entrypoint: ["/opt/keycloak-redis-simple-entrypoint.sh"]
+    entrypoint: ["/opt/keycloak/bin/enhanced-entrypoint.sh"]
     volumes:
-      - ./keycloak-redis-simple-entrypoint.sh:/opt/keycloak-redis-simple-entrypoint.sh:ro
+      - ./vault-role-id:/opt/dev-purebliss/services/keycloak/vault-role-id:ro
+      - ./vault-secret-id:/opt/dev-purebliss/services/keycloak/vault-secret-id:ro
       - keycloak-data:/opt/keycloak/data
     environment:
-      # PostgreSQL Configuration
-      POSTGRES_HOST: purebliss-postgres
-      POSTGRES_PORT: 5432
-      KEYCLOAK_DB_NAME: keycloak
-      KEYCLOAK_DB_USER: keycloak
-      KEYCLOAK_DB_PASSWORD: keycloak_secure_password
+      # Vault Configuration
+      USE_VAULT: "true"
+      VAULT_ADDR: "http://purebliss-vault:8200"
+      VAULT_SKIP_VERIFY: "true"
 
       # Redis Configuration for Caching and Sessions
       REDIS_HOST: purebliss-redis
@@ -46,12 +45,12 @@ services:
       KC_CACHE: ispn
       KC_CACHE_STACK: tcp
 
-    depends_on: []
+    # depends_on removed: Postgres, Redis, and Vault are managed outside this compose file and are already running
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/auth/health/ready || exit 1"]
+      test: ["CMD-SHELL", "/usr/bin/curl -f http://localhost:8080/health/ready || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 10
+      retries: 5
       start_period: 120s
     networks:
       - purebliss-net

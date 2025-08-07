@@ -1,0 +1,32 @@
+# Enhanced PostgreSQL Health Check Configuration
+
+healthcheck:
+  test: |
+    bash -c '
+      # Multi-stage health check for PostgreSQL
+      
+      # Stage 1: Process check
+      if ! pgrep -f "postgres" > /dev/null; then
+        echo "PostgreSQL process not running"
+        exit 1
+      fi
+      
+      # Stage 2: Ready check
+      if ! pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}; then
+        echo "PostgreSQL not ready for connections"
+        exit 1
+      fi
+      
+      # Stage 3: Connection test
+      if ! psql -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres} -c "SELECT 1;" > /dev/null 2>&1; then
+        echo "PostgreSQL connection test failed"
+        exit 1
+      fi
+      
+      echo "PostgreSQL is healthy"
+      exit 0
+    '
+  interval: 10s
+  timeout: 5s
+  retries: 5
+  start_period: 30s

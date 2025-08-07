@@ -1,0 +1,19 @@
+FROM postgres:16
+
+# Install required packages for our entrypoint
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create directory for logs
+RUN mkdir -p /opt/logs && chmod 755 /opt/logs
+
+# Copy our independent entrypoint script
+COPY entrypoint-independent.sh /usr/local/bin/entrypoint-independent.sh
+RUN chmod +x /usr/local/bin/entrypoint-independent.sh
+
+# Set our custom entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint-independent.sh"]
+
+# Default command (PostgreSQL server)
+CMD ["postgres"]

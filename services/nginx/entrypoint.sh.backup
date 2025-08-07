@@ -1,0 +1,452 @@
+#!/bin/bash
+set -euo pipefail
+
+# Enhanced Nginx Entrypoint Script with Vau    # Try AppRole authentication
+    if [[ -n "${VAULT_ROLE_ID:-}" && -n "${VAULT_SECRET_ID:-}" ]]; then
+        log_info "Using AppRole authentication with Vault..."
+        
+        if vault write auth/approle/login role_id="${VAULT_ROLE_ID:-}" secret_id="${VAULT_SECRET_ID:-}" >/dev/null 2>&1; then
+            local token
+            token=$(vault write -field=token auth/approle/login role_id="${VAULT_ROLE_ID:-}" secret_id="${VAULT_SECRET_ID:-}")
+            export VAULT_TOKEN="$token"tion
+# Supports independent container startup with comprehensive SSL/TLS certificate management
+
+LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
+VAULT_ADDR="${VAULT_ADDR:-http://vault:8200}"
+VAULT_SKIP_VERIFY="${VAULT_SKIP_VERIFY:-true}"
+DOMAIN="${DOMAIN:-dev.purebliss.app}"
+USE_VAULT="${USE_VAULT:-true}"
+VAULT_ROLE_ID="${VAULT_ROLE_ID:-}"
+VAULT_SECRET_ID="${VAULT_SECRET_ID:-}"
+VAULT_DEV_TOKEN="${VAULT_DEV_TOKEN:-}"
+
+function log_info() {
+    echo "[$(date)] INFO: $1"
+    echo "[$(date)] INFO: $1" >> "$LOG_FILE" 2>/dev/null || true
+}
+
+function log_error() {
+    echo "[$(date)] ERROR: $1"
+    echo "[$(date)] ERROR: $1" >> "$LOG_FILE" 2>/dev/null || true
+}
+
+function log_success() {
+    echo "[$(date)] SUCCESS: $1"
+    echo "[$(date)] SUCCESS: $1" >> "$LOG_FILE" 2>/dev/null || true
+}
+
+function install_vault_cli() {
+    if ! command -v vault &> /dev/null; then
+        log_info "Installing Vault CLI..."
+        
+        # Download and install Vault CLI
+        cd /tmp
+        wget -q "https://releases.hashicorp.com/vault/1.17.3/vault_1.17.3_linux_amd64.zip"
+        unzip -q vault_1.17.3_linux_amd64.zip
+        chmod +x vault
+        mv vault /usr/local/bin/
+        rm -f vault_1.17.3_linux_amd64.zip
+        
+        log_success "Vault CLI installed successfully"
+    else
+        log_info "Vault CLI already available"
+    fi
+}
+
+function wait_for_vault() {
+    local retries=30
+    local count=0
+    
+    log_info "Waiting for Vault to be available at $VAULT_ADDR..."
+    
+    export VAULT_ADDR VAULT_SKIP_VERIFY
+    
+    while [[ $count -lt $retries ]]; do
+        if vault status >/dev/null 2>&1; then
+            log_success "Vault is available"
+            return 0
+        fi
+        
+        count=$((count + 1))
+        log_info "Vault not ready, attempt $count/$retries..."
+        sleep 2
+    done
+    
+    log_error "Vault not available after $retries attempts"
+    return 1
+}
+
+function vault_authenticate() {
+    export VAULT_ADDR VAULT_SKIP_VERIFY
+    
+    # Try AppRole authentication first
+    if [[ -n "$VAULT_ROLE_ID" && -n "$VAULT_SECRET_ID" ]]; then
+        log_info "Authenticating to Vault using AppRole..."
+        
+        if vault write auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID" >/dev/null 2>&1; then
+            local token
+            token=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+            export VAULT_TOKEN="$token"
+            log_success "Vault AppRole authentication successful"
+            return 0
+        else
+            log_error "Vault AppRole authentication failed"
+        fi
+    fi
+    
+    # Try dev token authentication
+    if [[ -n "${VAULT_DEV_TOKEN:-}" ]]; then
+        log_info "Using Vault dev token for authentication..."
+        export VAULT_TOKEN="${VAULT_DEV_TOKEN:-}"
+        
+        if vault token lookup >/dev/null 2>&1; then
+            log_success "Vault dev token authentication successful"
+            return 0
+        else
+            log_error "Vault dev token authentication failed"
+        fi
+    fi
+    
+    # Try standard token authentication (VAULT_TOKEN env var)
+    if [[ -n "${VAULT_TOKEN:-}" ]]; then
+        log_info "Using provided Vault token for authentication..."
+        
+        if vault token lookup >/dev/null 2>&1; then
+            log_success "Vault token authentication successful"
+            return 0
+        else
+            log_error "Vault token authentication failed"
+        fi
+    fi
+    
+    # Try token from file
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+        log_info "Using Vault token from file..."
+        export VAULT_TOKEN
+        VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
+        
+        if vault token lookup >/dev/null 2>&1; then
+            log_success "Vault token file authentication successful"
+            return 0
+        else
+            log_error "Vault token file authentication failed"
+        fi
+    fi
+    
+    log_error "All Vault authentication methods failed"
+    return 1
+}
+
+function setup_vault_pki() {
+    export VAULT_ADDR VAULT_SKIP_VERIFY VAULT_TOKEN
+    
+    log_info "Setting up Vault PKI engine for Nginx..."
+    
+    # Enable PKI secrets engine
+    if ! vault secrets list | grep -q "^pki-nginx/"; then
+        log_info "Enabling PKI secrets engine for Nginx..."
+        vault secrets enable -path=pki-nginx pki
+        vault secrets tune -max-lease-ttl=8760h pki-nginx
+        log_success "PKI secrets engine enabled"
+    else
+        log_info "PKI secrets engine already enabled"
+    fi
+    
+    # Generate root CA
+    if ! vault read pki-nginx/cert/ca >/dev/null 2>&1; then
+        log_info "Generating root CA certificate..."
+        vault write pki-nginx/root/generate/internal \
+            common_name="Pure Bliss Internal CA" \
+            ttl=8760h
+        log_success "Root CA certificate generated"
+    else
+        log_info "Root CA certificate already exists"
+    fi
+    
+    # Configure CA and CRL URLs
+    vault write pki-nginx/config/urls \
+        issuing_certificates="$VAULT_ADDR/v1/pki-nginx/ca" \
+        crl_distribution_points="$VAULT_ADDR/v1/pki-nginx/crl"
+    
+    # Create role for Nginx certificates
+    if ! vault read pki-nginx/roles/nginx-role >/dev/null 2>&1; then
+        log_info "Creating Nginx PKI role..."
+        vault write pki-nginx/roles/nginx-role \
+            allowed_domains="dev.purebliss.app,*.dev.purebliss.app" \
+            allow_subdomains=true \
+            max_ttl=8760h \
+            generate_lease=true
+        log_success "Nginx PKI role created"
+    else
+        log_info "Nginx PKI role already exists"
+    fi
+}
+
+function generate_certificates() {
+    export VAULT_ADDR VAULT_SKIP_VERIFY VAULT_TOKEN
+    
+    local cert_dir="/etc/nginx/certs"
+    mkdir -p "$cert_dir"
+    
+    log_info "Generating SSL certificates for $DOMAIN..."
+    
+    # Generate certificate from Vault
+    local cert_response
+    cert_response=$(vault write -format=json pki-nginx/issue/nginx-role common_name="$DOMAIN" ttl=8760h)
+    
+    if [[ $? -eq 0 ]]; then
+        # Extract certificate components
+        echo "$cert_response" | jq -r '.data.certificate' > "$cert_dir/$DOMAIN.crt"
+        echo "$cert_response" | jq -r '.data.private_key' > "$cert_dir/$DOMAIN.key"
+        echo "$cert_response" | jq -r '.data.ca_chain[]' > "$cert_dir/ca.crt"
+        
+        # Create combined certificate file
+        cat "$cert_dir/$DOMAIN.crt" "$cert_dir/ca.crt" > "$cert_dir/$DOMAIN-fullchain.crt"
+        
+        # Set proper permissions
+        chmod 600 "$cert_dir"/*.key
+        chmod 644 "$cert_dir"/*.crt
+        chown -R nginx:nginx "$cert_dir"
+        
+        log_success "SSL certificates generated and saved to $cert_dir"
+        
+        # Store certificate serial for renewal tracking
+        echo "$cert_response" | jq -r '.data.serial_number' > "$cert_dir/.serial_number"
+        
+        return 0
+    else
+        log_error "Failed to generate SSL certificates from Vault"
+        return 1
+    fi
+}
+
+function generate_fallback_certificates() {
+    local cert_dir="/etc/nginx/certs"
+    mkdir -p "$cert_dir"
+    
+    log_info "Generating fallback self-signed certificates for $DOMAIN..."
+    
+    # Generate self-signed certificate for development
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout "$cert_dir/$DOMAIN.key" \
+        -out "$cert_dir/$DOMAIN.crt" \
+        -subj "/C=US/ST=Dev/L=Dev/O=Pure Bliss/CN=$DOMAIN"
+    
+    # Create combined certificate file
+    cp "$cert_dir/$DOMAIN.crt" "$cert_dir/$DOMAIN-fullchain.crt"
+    cp "$cert_dir/$DOMAIN.crt" "$cert_dir/ca.crt"
+    
+    # Set proper permissions
+    chmod 600 "$cert_dir"/*.key
+    chmod 644 "$cert_dir"/*.crt
+    chown -R nginx:nginx "$cert_dir"
+    
+    log_success "Fallback self-signed certificates generated"
+}
+
+function configure_nginx() {
+    local cert_dir="/etc/nginx/certs"
+    
+    log_info "Configuring Nginx with SSL/TLS certificates..."
+    
+    # Check if we're in testing mode (no backend services available)
+    local testing_mode=true
+    if [[ -n "${ENABLE_BACKEND_SERVICES:-}" ]]; then
+        testing_mode=false
+        log_info "Production mode: backend service proxying enabled"
+    else
+        log_info "Testing mode detected: creating minimal configuration without backend services"
+    fi
+    
+    # Create Nginx configuration for HTTPS
+    cat > /etc/nginx/conf.d/ssl.conf << EOF
+# HTTPS server configuration
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name $DOMAIN *.dev.purebliss.app;
+
+    # SSL certificate configuration
+    ssl_certificate $cert_dir/$DOMAIN-fullchain.crt;
+    ssl_certificate_key $cert_dir/$DOMAIN.key;
+
+    # SSL security settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
+    ssl_ecdh_curve secp384r1;
+    ssl_session_timeout 10m;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Referrer-Policy "strict-origin-when-cross-origin";
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "healthy\\n";
+        add_header Content-Type text/plain;
+    }
+    
+    # Default location
+    location / {
+        return 200 "Pure Bliss Development Gateway - SSL/TLS Operational\\n";
+        add_header Content-Type text/plain;
+    }
+EOF
+
+    if [[ "$testing_mode" == "false" ]]; then
+        # Add backend service proxy configurations only if services are available
+        cat >> /etc/nginx/conf.d/ssl.conf << EOF
+
+    # Proxy to backend services
+    location /keycloak/ {
+        proxy_pass http://purebliss-keycloak:8080/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /vault/ {
+        proxy_pass https://purebliss-vault:8200/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /prometheus/ {
+        proxy_pass http://purebliss-prometheus:9090/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /grafana/ {
+        proxy_pass http://purebliss-grafana:3000/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /loki/ {
+        proxy_pass http://purebliss-loki:3100/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /plane/ {
+        proxy_pass http://purebliss-plane:3000/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /code-server/ {
+        proxy_pass http://purebliss-codeserver:8080/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection upgrade;
+        proxy_set_header Accept-Encoding gzip;
+    }
+EOF
+    fi
+
+    # Common configuration for both testing and production modes
+    cat >> /etc/nginx/conf.d/ssl.conf << EOF
+
+    # Default root for static files
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+}
+
+# HTTP server (redirect to HTTPS)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMAIN *.dev.purebliss.app;
+
+    # Health check endpoint (allow HTTP for health checks)
+    location /health {
+        access_log off;
+        return 200 "healthy\\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Redirect all other HTTP traffic to HTTPS
+    location / {
+        return 301 https://\$server_name\$request_uri;
+    }
+}
+EOF
+
+    # Test Nginx configuration
+    if nginx -t; then
+        log_success "Nginx configuration is valid"
+        return 0
+    else
+        log_error "Nginx configuration is invalid"
+        return 1
+    fi
+}
+
+function start_nginx() {
+    log_info "Starting Nginx service..."
+    
+    # Run Nginx in daemon mode for container
+    exec nginx -g "daemon off;"
+}
+
+# Main execution function
+function main() {
+    log_info "Starting Nginx container with Vault PKI integration..."
+    
+    # Install dependencies
+    install_vault_cli
+    
+    # Certificate management
+    if [[ "$USE_VAULT" == "true" ]]; then
+        if wait_for_vault && vault_authenticate; then
+            setup_vault_pki
+            if generate_certificates; then
+                log_success "Vault PKI certificates generated successfully"
+            else
+                log_error "Vault PKI certificate generation failed, using fallback"
+                generate_fallback_certificates
+            fi
+        else
+            log_error "Vault not available or authentication failed, using fallback certificates"
+            generate_fallback_certificates
+        fi
+    else
+        log_info "Vault integration disabled, using fallback certificates"
+        generate_fallback_certificates
+    fi
+    
+    # Configure and start Nginx
+    configure_nginx
+    start_nginx
+}
+
+# Error handling
+trap 'log_error "Nginx entrypoint script failed at line $LINENO"' ERR
+
+# Run main function
+main "$@"

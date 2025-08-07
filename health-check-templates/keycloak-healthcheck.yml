@@ -1,0 +1,39 @@
+# Enhanced Keycloak Health Check Configuration
+# Addresses "no-healthcheck" status found in logs
+
+healthcheck:
+  test: |
+    bash -c '
+      # Multi-stage health check for Keycloak
+      
+      # Stage 1: Process check
+      if ! pgrep -f "keycloak" > /dev/null; then
+        echo "Keycloak process not running"
+        exit 1
+      fi
+      
+      # Stage 2: Port check
+      if ! nc -z localhost 8080; then
+        echo "Keycloak port 8080 not accessible"
+        exit 1
+      fi
+      
+      # Stage 3: HTTP response check
+      if ! curl -f -s --connect-timeout 3 --max-time 5 "http://localhost:8080" > /dev/null; then
+        echo "Keycloak HTTP endpoint not responding"
+        exit 1
+      fi
+      
+      # Stage 4: Admin console check
+      if ! curl -f -s --connect-timeout 3 --max-time 5 "http://localhost:8080/admin" > /dev/null; then
+        echo "Keycloak admin console not accessible"
+        exit 1
+      fi
+      
+      echo "Keycloak is healthy"
+      exit 0
+    '
+  interval: 15s
+  timeout: 10s
+  retries: 5
+  start_period: 60s  # Allow more time for initial startup

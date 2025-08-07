@@ -1,0 +1,8 @@
+# Use the official PostgreSQL 16 image
+FROM postgres:16
+
+# Copy the initialization script into the container
+COPY entrypoint.sh /docker-entrypoint-initdb.d/entrypoint.sh
+
+# Make the script executable
+RUN chmod +x /docker-entrypoint-initdb.d/entrypoint.sh

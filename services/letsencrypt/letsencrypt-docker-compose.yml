@@ -5,8 +5,7 @@ services:
       dockerfile: letsencrypt-dockerfile
     container_name: purebliss-letsencrypt
     volumes:
-      - ./webroot:/mnt/raid0/nginx/html
-      - ${LETSENCRYPT_CERT_PATH:-/mnt/raid0/nginx/certs/live}:/etc/letsencrypt/live
+      - /raid-storage/letsencrypt:/etc/letsencrypt
       - ${RAID0_MOUNT:-/mnt/raid0}/nginx/html:/var/www/html:ro
       - /opt/my-secure-ha-stack/secrets:/opt/my-secure-ha-stack/secrets:ro
       - letsencrypt-logs:/var/log/letsencrypt
@@ -32,6 +31,14 @@ services:
       retries: 3
       start_period: 60s
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '1.0'
     logging:
       driver: "json-file"
       options:

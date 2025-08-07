@@ -8,10 +8,10 @@ services:
     ports:
       - "6379:6379"
     # Optional: Mount custom config if needed
-    # volumes:
-    #   - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
-    #   - ${REDIS_DATA_PATH}:/data
-    #   - ${REDIS_LOG_PATH}:/var/log/redis/redis.log
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - /raid-storage/redis/data:/data
+      - ${REDIS_LOG_PATH}:/var/log/redis/redis.log
     # environment:
     #   - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
@@ -24,13 +24,15 @@ services:
     labels:
       org.purebliss.service: "redis"
       org.purebliss.role: "cache"
-    # Optional: resource limits
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 256M
-    #     reservations:
-    #       memory: 64M
+    # Resource limits for optimal performance
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
 networks:
   purebliss-net:
     external: true

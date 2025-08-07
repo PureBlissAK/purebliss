@@ -1025,10 +1025,10 @@ function main() {
             vault_redis_integration_fix
             ;;
         "keycloak_integration"|"keycloak")
+            vault_keycloak_integration_fix
+            ;;
         "nginx_integration"|"nginx")
             vault_nginx_integration_fix
-            ;;
-            vault_keycloak_integration_fix
             ;;
         "nginx_pki_integration"|"nginx_pki"|"nginx")
             vault_nginx_pki_integration_fix

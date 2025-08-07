@@ -268,9 +268,9 @@ function start_all_services_sequential() {
       fi
     fi
 
-    # Special handling for vault - must unseal immediately
-    if [[ "$service" == "vault" ]]; then
-      echo "[$(date)] INFO: Vault healthy - auto-unsealing..." | tee -a "$LOG_FILE"
+    # Special handling for vault - must unseal after vault-agent is healthy
+    if [[ "$service" == "vault-agent" ]]; then
+      echo "[$(date)] INFO: Vault and Vault Agent healthy - auto-unsealing..." | tee -a "$LOG_FILE"
       if ! vault_auto_unseal_enhanced; then
         echo "[$(date)] ERROR: Failed to unseal Vault - aborting sequential startup" | tee -a "$LOG_FILE"
         return 1
@@ -1575,14 +1575,14 @@ function start_letsencrypt() {
 # --- Redis Independent Container Startup ---
 function start_redis() {
   echo "[$(date)] INFO: Starting Redis with independent container startup and Vault integration..." | tee -a "$LOG_FILE"
-  
+
   # Clean up any existing Redis resources
   docker rm -f purebliss-redis >/dev/null 2>&1 || true
   docker volume rm purebliss_redis_data >/dev/null 2>&1 || true
-  
+
   # Change to Redis service directory
   cd /opt/dev-purebliss/services/redis
-  
+
   # Build Redis image with all Vault integration logic
   echo "[$(date)] INFO: Building Redis container with comprehensive Vault integration..." | tee -a "$LOG_FILE"
   if docker build -t purebliss-redis-image -f redis-dockerfile . >> "$LOG_FILE" 2>&1; then
@@ -1591,11 +1591,11 @@ function start_redis() {
     echo "[$(date)] ERROR: Failed to build Redis image" | tee -a "$LOG_FILE"
     return 1
   fi
-  
+
   # Auto-detect Vault configuration
   local vault_addr="http://127.0.0.1:8200"
   local vault_token="dev-root-token-purebliss"
-  
+
   if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
      ! docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
     vault_addr="https://127.0.0.1:8200"
@@ -1603,10 +1603,10 @@ function start_redis() {
       vault_token=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
     fi
   fi
-  
+
   # Create network if it doesn't exist
   docker network create purebliss-net >/dev/null 2>&1 || true
-  
+
   # Start Redis with independent container startup
   echo "[$(date)] INFO: Starting Redis container with environment: VAULT_ADDR=$vault_addr" | tee -a "$LOG_FILE"
   if docker run -d \
@@ -1622,7 +1622,7 @@ function start_redis() {
     --restart unless-stopped \
     purebliss-redis-image >> "$LOG_FILE" 2>&1; then
     echo "[$(date)] SUCCESS: Redis started as independent container with Vault integration" | tee -a "$LOG_FILE"
-    
+
     # Post-startup: Configure Redis authentication in Vault
     sleep 5
     echo "[$(date)] INFO: Configuring Redis authentication in Vault..." | tee -a "$LOG_FILE"
@@ -1631,7 +1631,7 @@ function start_redis() {
     else
       echo "[$(date)] WARNING: Redis Vault onboarding had issues, but container is running" | tee -a "$LOG_FILE"
     fi
-    
+
     return 0
   else
     echo "[$(date)] ERROR: Failed to start Redis container" | tee -a "$LOG_FILE"
@@ -1639,35 +1639,94 @@ function start_redis() {
   fi
 }
 
-# --- Nginx Service Startup ---
+# --- Nginx Independent Container Startup ---
 function start_nginx() {
-  echo "[$(date)] INFO: Starting Nginx SSL/TLS compliant container..." | tee -a "$LOG_FILE"
+  echo "[$(date)] INFO: Starting Nginx with independent container startup and Vault PKI SSL certificate automation..." | tee -a "$LOG_FILE"
+
+  # Clean up any existing Nginx resources
+  docker rm -f purebliss-nginx >/dev/null 2>&1 || true
+  docker volume rm purebliss_nginx_certs purebliss_nginx_dhparam >/dev/null 2>&1 || true
+
+  # Change to Nginx service directory
   cd /opt/dev-purebliss/services/nginx
 
-  # Stop and rebuild container
-  docker compose -f nginx-docker-compose.yml down 2>&1 | tee -a "$LOG_FILE"
-  docker compose -f nginx-docker-compose.yml up -d --build 2>&1 | tee -a "$LOG_FILE"
-
-  # Wait for container to be ready
-  sleep 10
-
-  # Run comprehensive SSL/TLS compliance validation
-  echo "[$(date)] INFO: Running SSL/TLS compliance validation..." | tee -a "$LOG_FILE"
-  if /opt/dev-purebliss/services/nginx/validate-ssl-compliance.sh; then
-    echo "[$(date)] SUCCESS: Nginx is 100% SSL/TLS compliant" | tee -a "$LOG_FILE"
+  # Build Nginx image with all Vault integration logic
+  echo "[$(date)] INFO: Building Nginx container with comprehensive Vault PKI integration..." | tee -a "$LOG_FILE"
+  if docker build -t purebliss-nginx-image -f nginx-dockerfile . >> "$LOG_FILE" 2>&1; then
+    echo "[$(date)] SUCCESS: Nginx image built with standalone SSL/TLS capabilities" | tee -a "$LOG_FILE"
   else
-    echo "[$(date)] ERROR: Nginx SSL/TLS compliance validation failed" | tee -a "$LOG_FILE"
-    echo "[$(date)] INFO: Restarting Nginx container for retry..." | tee -a "$LOG_FILE"
-    docker restart purebliss-nginx 2>&1 | tee -a "$LOG_FILE"
-    sleep 10
-    if /opt/dev-purebliss/services/nginx/validate-ssl-compliance.sh; then
-      echo "[$(date)] SUCCESS: Nginx SSL/TLS compliance achieved after restart" | tee -a "$LOG_FILE"
-    else
-      echo "[$(date)] ERROR: Nginx SSL/TLS compliance failed after restart" | tee -a "$LOG_FILE"
-      exit 1
+    echo "[$(date)] ERROR: Failed to build Nginx image" | tee -a "$LOG_FILE"
+    return 1
+  fi
+
+  # Auto-detect Vault configuration
+  local vault_addr="http://127.0.0.1:8200"
+  local vault_token="dev-root-token-purebliss"
+  local domain="${LOCAL_HOSTNAME:-dev.purebliss.app}"
+
+  if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
+     ! docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
+    vault_addr="https://127.0.0.1:8200"
+    if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
+      vault_token=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
     fi
   fi
-  echo "[$(date)] SUCCESS: Nginx service startup completed with SSL/TLS compliance" | tee -a "$LOG_FILE"
+
+  # Create network if it doesn't exist
+  docker network create purebliss-net >/dev/null 2>&1 || true
+
+  # Start Nginx with independent container startup
+  echo "[$(date)] INFO: Starting Nginx container with environment: VAULT_ADDR=$vault_addr, DOMAIN=$domain" | tee -a "$LOG_FILE"
+  if docker run -d \
+    --name purebliss-nginx \
+    --network purebliss-net \
+    -p 80:80 \
+    -p 443:443 \
+    -e VAULT_ADDR="$vault_addr" \
+    -e VAULT_TOKEN="$vault_token" \
+    -e DOMAIN="$domain" \
+    -e USE_VAULT="true" \
+    -e VAULT_SKIP_VERIFY="true" \
+    -v purebliss_nginx_certs:/etc/nginx/ssl \
+    -v purebliss_nginx_dhparam:/etc/nginx/dhparam \
+    -v /opt/my-secure-ha-stack/logs/dev-environment-setup.log:/opt/my-secure-ha-stack/logs/dev-environment-setup.log \
+    --restart unless-stopped \
+    purebliss-nginx-image >> "$LOG_FILE" 2>&1; then
+    echo "[$(date)] SUCCESS: Nginx started as independent container with Vault PKI integration" | tee -a "$LOG_FILE"
+
+    # Wait for SSL certificate generation
+    echo "[$(date)] INFO: Waiting for Vault PKI certificate generation..." | tee -a "$LOG_FILE"
+    sleep 15
+
+    # Post-startup: Validate SSL/TLS compliance
+    echo "[$(date)] INFO: Running comprehensive SSL/TLS compliance validation..." | tee -a "$LOG_FILE"
+    if docker exec purebliss-nginx nginx -t >/dev/null 2>&1; then
+      echo "[$(date)] SUCCESS: Nginx configuration valid" | tee -a "$LOG_FILE"
+
+      # Test HTTPS endpoint
+      if curl -k -s -o /dev/null -w "%{http_code}" "https://$domain" | grep -q "200\|301\|302"; then
+        echo "[$(date)] SUCCESS: Nginx HTTPS endpoint responding correctly" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] WARNING: Nginx HTTPS endpoint not responding as expected" | tee -a "$LOG_FILE"
+      fi
+
+      # Configure Nginx in Vault for future certificate renewals
+      if onboard_nginx_to_vault; then
+        echo "[$(date)] SUCCESS: Nginx onboarded to Vault for PKI certificate automation" | tee -a "$LOG_FILE"
+      else
+        echo "[$(date)] WARNING: Nginx Vault onboarding had issues, but container is running with SSL" | tee -a "$LOG_FILE"
+      fi
+
+      return 0
+    else
+      echo "[$(date)] ERROR: Nginx configuration invalid after startup" | tee -a "$LOG_FILE"
+      docker logs purebliss-nginx | tail -20 | tee -a "$LOG_FILE"
+      return 1
+    fi
+  else
+    echo "[$(date)] ERROR: Failed to start Nginx container" | tee -a "$LOG_FILE"
+    return 1
+  fi
 }
 
 # Function to auto-unseal Vault if sealed and wait for API readiness
@@ -1690,6 +1749,9 @@ function start_service_robust() {
 
     # Clean up any existing container first
     docker rm -f "purebliss-$service_name" >/dev/null 2>&1 || true
+    if [[ "$service_name" == "vault" ]]; then
+        docker rm -f "purebliss-vault-agent" >/dev/null 2>&1 || true
+    fi
 
     # Start the service based on type
     local success=false
@@ -1757,44 +1819,9 @@ function start_service_robust() {
       # Use the Vault-integrated PostgreSQL with proper credentials
       echo "[$(date)] INFO: Starting PostgreSQL with full Vault integration..." | tee -a "$LOG_FILE"
 
-      # Start PostgreSQL with Simple Configuration + Post-Startup Vault Integration
-      echo "[$(date)] INFO: Starting PostgreSQL with post-startup Vault integration..." | tee -a "$LOG_FILE"
-
-      # Ensure Vault is ready before starting PostgreSQL
-      if ! vault_status_check; then
-        echo "[$(date)] ERROR: Vault must be ready before starting PostgreSQL" | tee -a "$LOG_FILE"
-        return 1
-      fi
-
-      # Start PostgreSQL with simple configuration first
-      if (cd "$service_dir" && docker compose -f "simple-docker-compose.yml" up -d >> "$LOG_FILE" 2>&1); then
+      # Use the new Dockerfile for postgres
+      if (cd "$service_dir" && docker build -t purebliss-postgres-image -f postgres-dockerfile.yml . >> "$LOG_FILE" 2>&1 && docker run -d --name purebliss-postgres --network purebliss-net -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -v postgres_data:/var/lib/postgresql/data purebliss-postgres-image >> "$LOG_FILE" 2>&1); then
         success=true
-        echo "[$(date)] SUCCESS: PostgreSQL started with simple configuration" | tee -a "$LOG_FILE"
-
-        # Post-startup: Set up Vault integration
-        echo "[$(date)] INFO: Configuring post-startup Vault integration for PostgreSQL..." | tee -a "$LOG_FILE"
-
-        # Wait for PostgreSQL to be ready
-        sleep 10
-
-        # Create databases for services
-        if docker exec purebliss-postgres psql -U postgres -c "
-        CREATE DATABASE IF NOT EXISTS keycloak;
-        CREATE DATABASE IF NOT EXISTS plane;
-        CREATE DATABASE IF NOT EXISTS vikunja;
-        CREATE USER IF NOT EXISTS keycloak WITH PASSWORD 'keycloak_dev_$(date +%s)';
-        CREATE USER IF NOT EXISTS plane WITH PASSWORD 'plane_dev_$(date +%s)';
-        GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
-        GRANT ALL PRIVILEGES ON DATABASE plane TO plane;
-        " >> "$LOG_FILE" 2>&1; then
-          echo "[$(date)] SUCCESS: PostgreSQL databases and users created for services" | tee -a "$LOG_FILE"
-        else
-          echo "[$(date)] WARNING: Database creation had issues, but PostgreSQL is running" | tee -a "$LOG_FILE"
-        fi
-
-      else
-        echo "[$(date)] ERROR: Failed to start PostgreSQL with simple configuration" | tee -a "$LOG_FILE"
-        return 1
       fi
     else
       # Standard service startup
@@ -1807,57 +1834,10 @@ function start_service_robust() {
         if (cd "$service_dir" && docker compose up -d >> "$LOG_FILE" 2>&1); then
           success=true
         fi
-      elif [[ "$service_name" == "redis" ]]; then
-        # Redis with independent container startup and Vault integration
-        echo "[$(date)] INFO: Starting Redis with independent container startup and Vault integration..." | tee -a "$LOG_FILE"
-        
-        # Clean up any existing Redis container and data
-        docker rm -f purebliss-redis >/dev/null 2>&1 || true
-        docker volume rm purebliss_redis_data >/dev/null 2>&1 || true
-        
-        # Build the Redis image with all Vault logic
-        echo "[$(date)] INFO: Building Redis container with Vault integration..." | tee -a "$LOG_FILE"
-        if docker build -t purebliss-redis-image -f "$service_dir/redis-dockerfile" "$service_dir" >> "$LOG_FILE" 2>&1; then
-          echo "[$(date)] SUCCESS: Redis image built successfully" | tee -a "$LOG_FILE"
-        else
-          echo "[$(date)] ERROR: Failed to build Redis image" | tee -a "$LOG_FILE"
-          return 1
-        fi
-        
-        # Setup Vault configuration for Redis
-        local vault_addr="http://127.0.0.1:8200"
-        local vault_token="dev-root-token-purebliss"
-        
-        # Auto-detect Vault mode
-        if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
-           ! docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
-          vault_addr="https://127.0.0.1:8200"
-          if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
-            vault_token=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
-          fi
-        fi
-        
-        # Create the purebliss-net network if it doesn't exist
-        docker network create purebliss-net >/dev/null 2>&1 || true
-        
-        # Start Redis container with independent startup capability
-        if docker run -d \
-          --name purebliss-redis \
-          --network purebliss-net \
-          -p 6379:6379 \
-          -e VAULT_ADDR="$vault_addr" \
-          -e VAULT_TOKEN="$vault_token" \
-          -e USE_VAULT="true" \
-          -e VAULT_SKIP_VERIFY="true" \
-          -v purebliss_redis_data:/data \
-          -v /opt/my-secure-ha-stack/logs/dev-environment-setup.log:/opt/my-secure-ha-stack/logs/dev-environment-setup.log \
-          --restart unless-stopped \
-          purebliss-redis-image >> "$LOG_FILE" 2>&1; then
-          success=true
-          echo "[$(date)] SUCCESS: Redis started with independent container and Vault integration" | tee -a "$LOG_FILE"
-        else
-          echo "[$(date)] ERROR: Failed to start Redis container" | tee -a "$LOG_FILE"
-        fi
+      # Start redis with the new entrypoint
+      if (cd "$service_dir" && docker build -t purebliss-redis-image -f redis-dockerfile . >> "$LOG_FILE" 2>&1 && docker run -d --name purebliss-redis --network purebliss-net -p 6379:6379 -e USE_VAULT=true -e VAULT_ADDR=https://purebliss-vault:8200 -e VAULT_SKIP_VERIFY=true -e VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token) -v redis_data:/data purebliss-redis-image >> "$LOG_FILE" 2>&1); then
+        success=true
+      fi
       elif [[ "$service_name" == "loki" && -f "$service_dir/loki-docker-compose.yml" ]]; then
         # Special handling for Loki with Vault integration
         if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then

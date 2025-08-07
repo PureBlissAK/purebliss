@@ -14,13 +14,21 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ${PROMETHEUS_DATA_PATH}:/prometheus
+      - /raid-storage/prometheus/data:/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: '2.0'
+        reservations:
+          memory: 1.5G
+          cpus: '1.0'
     networks:
       - purebliss-net
 networks:

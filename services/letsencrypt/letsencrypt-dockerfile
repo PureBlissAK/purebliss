@@ -5,15 +5,26 @@ RUN apk add --no-cache \
     curl \
     jq \
     ca-certificates \
+    dcron \
     && curl -fsSL https://releases.hashicorp.com/vault/1.17.3/vault_1.17.3_linux_amd64.zip -o vault.zip \
     && unzip vault.zip \
     && mv vault /usr/local/bin/ \
     && rm vault.zip \
     && chmod +x /usr/local/bin/vault
 
+
 # Copy enhanced entrypoint script with Vault PKI support
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# Install auto-renewal script and schedule via cron
+COPY renew-certificate.sh /usr/local/bin/renew-certificate.sh
+RUN chmod +x /usr/local/bin/renew-certificate.sh && \
+    mkdir -p /etc/crontabs && \
+    echo "0 * * * * /usr/local/bin/renew-certificate.sh >> /var/log/letsencrypt/letsencrypt-renewal.log 2>&1" > /etc/crontabs/root
+
+# Copy best-practices directory for phase5+ (relative path)
+COPY best-practices/ /opt/best-practices/
 
 # Create necessary directories for Vault PKI certificates
 RUN mkdir -p /etc/letsencrypt/live /var/log/letsencrypt

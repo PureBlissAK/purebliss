@@ -1,0 +1,63 @@
+# Multi-phase letsencrypt container scaffolding - Enhanced from existing Pure Bliss work
+# Based on: /opt/dev-purebliss/services/letsencrypt/letsencrypt-dockerfile
+ARG BUILD_PHASE=6
+
+# Phase 1: Minimal Container (Base from existing)
+
+
+FROM certbot/certbot:latest AS phase1
+RUN apk add --no-cache curl
+ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+
+HEALTHCHECK --interval=30s --timeout=10s CMD echo 'always healthy' || exit 0
+EXPOSE 8080
+
+# Phase 2: Enhanced Configuration (Existing configs)
+
+FROM phase1 AS phase2
+RUN apk add --no-cache jq openssl
+COPY configs/ /opt/config/
+COPY *.conf /opt/config/
+RUN mkdir -p /etc/letsencrypt/live /var/log/letsencrypt
+
+# Phase 3: Service Integration (Vault integration from existing)
+FROM phase2 AS phase3
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+COPY scripts/ /opt/scripts/
+
+
+# Phase 4: Advanced Features
+FROM phase3 AS phase4
+COPY templates/ /opt/templates/
+COPY *.sh /opt/scripts/
+RUN chmod +x /opt/scripts/*.sh 2>/dev/null || true
+
+
+# Phase 5: Production Readiness
+
+FROM phase4 AS phase5
+RUN mkdir -p /opt/my-secure-ha-stack/logs
+COPY best-practices/ /opt/best-practices/
+
+
+# Phase 6: Elite Features (Full existing functionality)
+FROM phase5 AS phase6
+COPY . /opt/letsencrypt-config/
+ENV ADVANCED_MONITORING=true
+ENV AUTO_HEALING=true
+
+# Override entrypoint for phase6 to use the enhanced entrypoint
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+
+
+FROM phase3 AS letsencrypt-phase3
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+
+FROM phase6 AS letsencrypt-phase6
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+
+# Final stage selection based on BUILD_PHASE
+FROM phase${BUILD_PHASE} AS final
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]

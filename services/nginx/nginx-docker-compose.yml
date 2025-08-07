@@ -1,25 +1,58 @@
 version: '3.8'
+
 services:
   nginx:
-    image: nginx:latest
+    build:
+      context: .
+      dockerfile: nginx-dockerfile
+    image: purebliss-nginx:latest
     container_name: purebliss-nginx
-    ports:
-      - "443:443"
-      - "80:80"
+    restart: unless-stopped
+    entrypoint: ["/entrypoint.sh"]
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR:-http://vault:8200}
+      VAULT_SKIP_VERIFY: ${VAULT_SKIP_VERIFY:-true}
+      DOMAIN: ${DOMAIN:-dev.purebliss.app}
+      USE_VAULT: ${USE_VAULT:-true}
+      VAULT_ROLE_ID: ${VAULT_ROLE_ID}
+      VAULT_SECRET_ID: ${VAULT_SECRET_ID}
+      VAULT_DEV_TOKEN: ${VAULT_DEV_TOKEN:-}
     volumes:
-      - /srv/nginx/certs:/etc/nginx/certs
-      - ${RAID0_MOUNT}/nginx/html:/usr/share/nginx/html:ro
-      - /opt/pure-bliss-dev/shared/configs/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - /opt/dev-purebliss/web:/opt/dev-purebliss/web:ro
-    env_file:
-      - /opt/my-secure-ha-stack/config.env
+      - nginx_certs:/etc/nginx/certs
+      - nginx_logs:/var/log/nginx
+      - /opt/my-secure-ha-stack/logs:/opt/my-secure-ha-stack/logs
     networks:
       - purebliss-net
+    ports:
+      - "80:80"
+      - "443:443"
     healthcheck:
-      test: ["CMD", "nginx", "-t"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || curl -fk https://localhost:443/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  nginx_certs:
+    driver: local
+  nginx_logs:
+    driver: local
+
 networks:
   purebliss-net:
+    driver: bridge
     external: true

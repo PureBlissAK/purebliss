@@ -1,190 +1,89 @@
 #!/bin/bash
 set -euo pipefail
 
+# Define log file paths
 LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
-echo "[$(date)] INFO: Starting Redis container initialization" >> "$LOG_FILE"
+FALLBACK_LOG="/tmp/redis-entrypoint.log"
 
-# Environment variable validation and defaults
-: "${VAULT_ADDR:=http://127.0.0.1:8200}"
-: "${VAULT_SKIP_VERIFY:=true}"
-: "${DB_ROLE:=redis-role}"
-: "${USE_VAULT:=true}"
-: "${REDIS_AUTH_ENABLED:=false}"
-: "${REDIS_PASSWORD:=}"
+# Function for robust logging
+log_msg() {
+    local message="$1"
+    local log_entry="[$(date +'%Y-%m-%dT%H:%M:%S%z')] [redis-entrypoint] $message"
 
-echo "[$(date)] INFO: Redis entrypoint - VAULT_ADDR=$VAULT_ADDR, USE_VAULT=$USE_VAULT" >> "$LOG_FILE"
-
-# Function to wait for Vault availability
-wait_for_vault() {
-    if [[ "$USE_VAULT" != "true" ]]; then
-        echo "[$(date)] INFO: Vault integration disabled, skipping Vault checks" >> "$LOG_FILE"
-        return 0
+    # Attempt to write to the primary log file, fallback if it fails
+    if ! echo "$log_entry" >> "$LOG_FILE" 2>/dev/null; then
+        echo "$log_entry" >> "$FALLBACK_LOG"
     fi
+}
 
-    echo "[$(date)] INFO: Waiting for Vault to be available..." >> "$LOG_FILE"
+log_msg "INFO: Redis container starting up."
+
+# Dependency check function
+wait_for_service() {
+    local host="$1"
+    local port="$2"
+    local service_name="$3"
+    log_msg "INFO: Waiting for $service_name at $host:$port..."
     for i in {1..30}; do
-        if curl -sk "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
-            echo "[$(date)] INFO: Vault is ready" >> "$LOG_FILE"
+        if nc -z "$host" "$port"; then
+            log_msg "SUCCESS: $service_name is available."
             return 0
-        fi
-        if [[ $i -eq 30 ]]; then
-            echo "[$(date)] WARNING: Vault not ready after 30 attempts, proceeding without Vault" >> "$LOG_FILE"
-            export USE_VAULT="false"
-            return 1
         fi
         sleep 2
     done
+    log_msg "ERROR: $service_name not available after 60 seconds."
+    exit 1
 }
 
-# Function to authenticate with Vault
-vault_authenticate() {
-    if [[ "$USE_VAULT" != "true" ]]; then
-        return 0
-    fi
+# Vault integration
+if [[ "${USE_VAULT:-true}" == "true" ]]; then
+    log_msg "INFO: Vault integration enabled."
 
-    echo "[$(date)] INFO: Authenticating to Vault..." >> "$LOG_FILE"
-    
-    # Try AppRole authentication first
-    if [[ -f "/run/secrets/vault-role-id" && -f "/run/secrets/vault-secret-id" ]]; then
-        export VAULT_ROLE_ID=$(cat /run/secrets/vault-role-id)
-        export VAULT_SECRET_ID=$(cat /run/secrets/vault-secret-id)
-        echo "[$(date)] INFO: Using AppRole authentication" >> "$LOG_FILE"
-        
-        # Install jq if not available
-        if ! command -v jq >/dev/null 2>&1; then
-            apk add --no-cache jq curl
-        fi
-        
-        TOKEN_RESPONSE=$(vault write -format=json auth/approle/login \
-            role_id="$VAULT_ROLE_ID" \
-            secret_id="$VAULT_SECRET_ID" 2>/dev/null || echo "null")
-        
-        if [[ "$TOKEN_RESPONSE" != "null" ]]; then
-            export VAULT_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.auth.client_token')
-            echo "[$(date)] INFO: AppRole authentication successful" >> "$LOG_FILE"
-            return 0
+    if [ -z "${VAULT_ADDR}" ]; then
+        log_msg "ERROR: VAULT_ADDR not set. Disabling Vault integration."
+        USE_VAULT="false"
+    else
+        wait_for_service "$(echo "$VAULT_ADDR" | awk -F[/:] '{print $4}')" "$(echo "$VAULT_ADDR" | awk -F[/:] '{print $5}')" "Vault"
+
+        log_msg "INFO: Authenticating to Vault using AppRole."
+        if [ -z "${REDIS_VAULT_ROLE_ID}" ] || [ -z "${REDIS_VAULT_SECRET_ID}" ]; then
+            log_msg "ERROR: Vault AppRole credentials not set. Disabling Vault integration."
+            USE_VAULT="false"
         else
-            echo "[$(date)] WARNING: AppRole authentication failed, trying dev token" >> "$LOG_FILE"
+            VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$REDIS_VAULT_ROLE_ID" secret_id="$REDIS_VAULT_SECRET_ID")
+            if [ -z "$VAULT_TOKEN" ]; then
+                log_msg "ERROR: Vault AppRole login failed. Disabling Vault integration."
+                USE_VAULT="false"
+            else
+                log_msg "SUCCESS: Vault AppRole login successful."
+                export VAULT_TOKEN
+
+                log_msg "INFO: Retrieving Redis password from Vault."
+                REDIS_PASSWORD=$(vault kv get -field=password secret/redis)
+                if [ -z "$REDIS_PASSWORD" ]; then
+                    log_msg "WARNING: Failed to retrieve Redis password. Proceeding without authentication."
+                else
+                    log_msg "SUCCESS: Redis password retrieved from Vault."
+                fi
+            fi
         fi
     fi
-    
-    # Fallback to dev token
-    export VAULT_TOKEN="dev-root-token-purebliss"
-    echo "[$(date)] INFO: Using dev token for Vault authentication" >> "$LOG_FILE"
-}
+fi
 
-# Function to retrieve Redis configuration from Vault
-get_redis_config() {
-    if [[ "$USE_VAULT" != "true" ]]; then
-        echo "[$(date)] INFO: Using fallback Redis configuration" >> "$LOG_FILE"
-        export REDIS_PASSWORD="${REDIS_PASSWORD:-}"
-        export REDIS_AUTH_ENABLED="${REDIS_AUTH_ENABLED:-false}"
-        return 0
+if [[ "${USE_VAULT:-true}" != "true" ]]; then
+    log_msg "INFO: Vault integration disabled. Starting Redis without authentication."
+    REDIS_PASSWORD=""
+fi
+
+# Configure Redis
+log_msg "INFO: Configuring Redis."
+{
+    echo "appendonly yes"
+    echo "dir /data"
+    if [ -n "${REDIS_PASSWORD-}" ]; then
+        echo "requirepass $REDIS_PASSWORD"
     fi
+} > /usr/local/etc/redis/redis.conf
 
-    echo "[$(date)] INFO: Retrieving Redis configuration from Vault..." >> "$LOG_FILE"
-    
-    # Try to get Redis password from Vault KV store
-    REDIS_CONFIG=$(vault kv get -format=json secret/redis/auth 2>/dev/null || echo "null")
-    
-    if [[ "$REDIS_CONFIG" != "null" ]]; then
-        export REDIS_PASSWORD=$(echo "$REDIS_CONFIG" | jq -r '.data.data.password // empty')
-        export REDIS_AUTH_ENABLED=$(echo "$REDIS_CONFIG" | jq -r '.data.data.auth_enabled // "false"')
-        echo "[$(date)] INFO: Retrieved Redis configuration from Vault" >> "$LOG_FILE"
-    else
-        echo "[$(date)] WARNING: Could not retrieve Redis config from Vault, using defaults" >> "$LOG_FILE"
-        export REDIS_PASSWORD=""
-        export REDIS_AUTH_ENABLED="false"
-    fi
-}
-
-# Function to configure Redis
-configure_redis() {
-    echo "[$(date)] INFO: Configuring Redis server..." >> "$LOG_FILE"
-    
-    # Create Redis configuration directory
-    mkdir -p /usr/local/etc/redis
-    
-    # Generate Redis configuration
-    cat > /usr/local/etc/redis/redis.conf <<EOF
-# Redis Configuration - Generated by entrypoint.sh
-# Bind to all interfaces for container networking
-bind 0.0.0.0
-
-# Enable protected mode for security
-protected-mode yes
-
-# Set the port
-port 6379
-
-# TCP listen backlog
-tcp-backlog 511
-
-# Close the connection after a client is idle for N seconds
-timeout 0
-
-# TCP keepalive
-tcp-keepalive 300
-
-# Logging
-loglevel notice
-logfile ""
-
-# Set the number of databases
-databases 16
-
-# Enable AOF persistence for data durability
-appendonly yes
-appendfilename "appendonly.aof"
-appendfsync everysec
-
-# Memory management
-maxmemory-policy allkeys-lru
-
-# Security settings
-EOF
-
-    # Add authentication if enabled
-    if [[ "$REDIS_AUTH_ENABLED" == "true" && -n "$REDIS_PASSWORD" ]]; then
-        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf
-        echo "[$(date)] INFO: Redis authentication enabled" >> "$LOG_FILE"
-    else
-        echo "[$(date)] INFO: Redis authentication disabled" >> "$LOG_FILE"
-    fi
-    
-    echo "[$(date)] INFO: Redis configuration created" >> "$LOG_FILE"
-}
-
-# Function to start Redis server
-start_redis() {
-    echo "[$(date)] INFO: Starting Redis server..." >> "$LOG_FILE"
-    
-    # Log the final configuration
-    echo "[$(date)] INFO: Redis starting with auth_enabled=$REDIS_AUTH_ENABLED" >> "$LOG_FILE"
-    
-    # Start Redis server with configuration
-    exec redis-server /usr/local/etc/redis/redis.conf
-}
-
-# Main execution flow
-main() {
-    echo "[$(date)] INFO: Redis container startup initiated" >> "$LOG_FILE"
-    
-    # Wait for Vault if enabled
-    wait_for_vault
-    
-    # Authenticate to Vault if available
-    vault_authenticate
-    
-    # Get Redis configuration from Vault
-    get_redis_config
-    
-    # Configure Redis
-    configure_redis
-    
-    # Start Redis server
-    start_redis
-}
-
-# Execute main function
-main "$@"
+log_msg "INFO: Starting Redis server."
+exec redis-server /usr/local/etc/redis/redis.conf

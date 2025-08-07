@@ -1,0 +1,23 @@
+version: '3.8'
+
+# Phase 6 overrides
+services:
+  nginx:
+    image: nginx:phase6
+    build:
+      context: /opt/my-secure-ha-stack
+      dockerfile: /opt/dev-purebliss/container-builds/Dockerfile.nginx
+      target: phase6
+    environment:
+      - BUILD_PHASE=6
+    
+  redis:
+    image: redis:phase6
+    build:
+      context: /opt/my-secure-ha-stack
+      dockerfile: /opt/dev-purebliss/container-builds/Dockerfile.redis
+      target: phase6
+    environment:
+      - BUILD_PHASE=6
+
+  # Add other services as needed

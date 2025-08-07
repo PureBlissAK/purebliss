@@ -1,31 +1,43 @@
 # Pure Bliss Redis Container - Independent Startup with Vault Integration
 # Follows Pure Bliss standards for container independence and security
-FROM redis:7
 
-# Install required packages for Vault integration and logging
+# Stage 1: Builder stage to fetch dependencies
+FROM debian:bullseye-slim as builder
+
+# Install required packages for downloading Vault
 RUN apt-get update && apt-get install -y \
     curl \
-    jq \
-    bash \
-    wget \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Vault CLI for dynamic secret retrieval
-RUN wget https://releases.hashicorp.com/vault/1.17.3/vault_1.17.3_linux_amd64.zip && \
-    unzip vault_1.17.3_linux_amd64.zip && \
+# Install Vault CLI
+RUN curl -Lo vault.zip https://releases.hashicorp.com/vault/1.17.3/vault_1.17.3_linux_amd64.zip && \
+    unzip vault.zip && \
     mv vault /usr/local/bin/ && \
     chmod +x /usr/local/bin/vault && \
-    rm vault_1.17.3_linux_amd64.zip
+    rm vault.zip
 
-# Copy the comprehensive entrypoint script with all Vault logic
+# Stage 2: Final Redis image
+FROM redis:7
+
+# Copy Vault CLI from the builder stage
+COPY --from=builder /usr/local/bin/vault /usr/local/bin/vault
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the comprehensive entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Create necessary directories and set permissions
 RUN mkdir -p /data /usr/local/etc/redis /opt/my-secure-ha-stack/logs && \
     chown -R redis:redis /data /usr/local/etc/redis && \
-    chmod 755 /opt/my-secure-ha-stack/logs
+    chmod 777 /opt/my-secure-ha-stack/logs
 
 # Health check for standalone operation
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
