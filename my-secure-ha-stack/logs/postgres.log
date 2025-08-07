@@ -1,0 +1,10 @@
+[2025-08-06 14:00:23] POSTGRES: PostgreSQL entrypoint started
+[2025-08-06 14:00:23] POSTGRES: Database initialization script created
+[2025-08-06 14:00:23] POSTGRES: Starting PostgreSQL server
+[2025-08-06 14:00:33] POSTGRES: PostgreSQL is ready and accepting connections
+[2025-08-06 14:00:33] POSTGRES: All application databases created and users configured
+[2025-08-06 22:34:36] POSTGRES: PostgreSQL entrypoint started
+[2025-08-06 22:34:36] POSTGRES: Database initialization script created
+[2025-08-06 22:34:36] POSTGRES: Starting PostgreSQL server
+[2025-08-06 22:34:46] POSTGRES: PostgreSQL is ready and accepting connections
+[2025-08-06 22:34:46] POSTGRES: All application databases created and users configured

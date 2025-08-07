@@ -1,11 +1,103 @@
+## Additional Required References
+
+All Copilot-driven dNo Circular Troubleshooting:
+
+Do not suggest repetitTask Focus and No Tangents:
+
+Strictly adhere to the user's requested task and service, avoiding suggestions for unrelated services unless explicitly required.
+Scope suggestions to the specific microservice and its defined responsibilities (e.g., Nginx for routing, Keycloak for authentication).
+Avoid proposing solutions for hypothetical or unrelated problems.
+PARALLEL EXECUTION ALLOWED: When tasks are independent and resource-safe per Parallel Task Execution Guidelines.
+DEPENDENCY COORDINATION: Always respect service dependencies when suggesting parallel work.iagnostic steps already documented in /opt/my-secure-ha-stack/logs/dev-environment-setup.log for the same service and issue unless explicitly requested.
+Always reference the log to confirm the issue hasn't been resolved previously with the same root cause.
+AUTONOMOUS ENHANCEMENT: If circular troubleshooting is detected, automatically implement script enhancements to prevent the recurring issue.
+
+Continuous Log Analysis and Script Enhancement:
+
+MANDATORY LOG SCANNING: Before every action, scan /opt/my-secure-ha-stack/logs/dev-environment-setup.log for patterns indicating recurring issues or resolved problems.
+AUTOMATIC ENHANCEMENT TRIGGER: When an issue is resolved, immediately implement script enhancement workflow to prevent recurrence.
+PATTERN RECOGNITION: Identify error patterns, failure modes, and common issues from log analysis to proactively enhance automation.
+PREVENTIVE SCRIPT UPDATES: Update health validation scripts, entrypoint scripts, and automation tools based on log-discovered issues.
+ENHANCEMENT VALIDATION: Test enhanced scripts to ensure they prevent identified issues without introducing new problems.
+COMPREHENSIVE DOCUMENTATION: Document all enhancements with root cause analysis and prevention measures in development log.opment must also reference and comply with the following documentation, which provides service-specific, security, and technology guidance for the Pure Bliss stack:
+
+- **Keycloak Best Practices:** See `/opt/.github/KEYCLOAK_BEST_PRACTICES.md` for secure authentication, SSO, and RBAC configuration standards.
+- **SSO Configuration:** Follow `/opt/.github/SSO configuration` for Google Workspace SAML/OIDC and multi-realm setup.
+- **Technology Best Practices:** Adhere to `/opt/.github/Technology Best Practices` for architecture, coding, and deployment standards across all services.
+- **Vault and Vault Agent Best Practices:** Consult `/opt/.github/Vault and Vault Agent Best Practices for VS Code Copilot` for secure secrets management, dynamic secrets, and VS Code integration.
+- **Pure Bliss Elite Social Media Technology Stack:** Review `/opt/.github/`Pure Bliss Elite Social Media Technolog.md` for the full product architecture, development guide, and operational requirements.
+
+These documents are mandatory reading for all Copilot-driven contributions and must be consulted for any changes, troubleshooting, or new feature development. Where there is overlap, the most specific or service-focused guidance takes precedence.
 Copilot Instructions for Pure Bliss Development - Microservices First
 
 MANDATORY: All actions, troubleshooting steps, and progress must be logged in /opt/my-secure-ha-stack/logs/dev-environment-setup.log. This log is the single source of truth and must never be bypassed, deleted, or rotated out.
 
+CRITICAL ENHANCEMENT: All development work must now implement MANDATORY HEALTH VALIDATION after every task. The comprehensive health validation system at `/opt/dev-purebliss/validate-container-health.sh` must be executed after every build, configuration change, or integration step. NO FORWARD PROGRESS is permitted until container health validation passes with exit code 0.
+
 Overview
-This document outlines the guidelines for using Copilot Enterprise within the Pure Bliss ecosystem, ensuring consistency, security, and adherence to elite standards of modularity and microservices architecture. Copilot is trained on all Pure Bliss repositories and understands the distinct boundaries and responsibilities of each service.
+This document outlines the guidelines for using Copilot Enterprise within the Pure Bliss ecosystem, ensuring consistency, security, and adherence to elite standards of modularity and microservices architecture. Copilot is trained on all Pure Bliss repositories and understands the distinct boundaries and responsibilities of each service, with mandatory health validation gates enforcing container integrity throughout all development workflows.
+
+## Integration with .github Best Practices
+
+All Copilot-driven development must comply with the organizational best practices and policies defined in the `.github` directory:
+
+- **Contributing:** Follow the contribution workflow, PR review, and code standards in `.github/CONTRIBUTING.md`.
+- **Security:** Adhere to secure development and vulnerability reporting as described in `.github/SECURITY.md`.
+- **Community:** Maintain respectful, inclusive collaboration per `.github/CODE_OF_CONDUCT.md`.
+- **Templates:** Use the issue and PR templates in `.github/ISSUE_TEMPLATE/` and `.github/PULL_REQUEST_TEMPLATE.md` for all submissions.
+- **CI/CD:** Ensure all code passes automated tests and linters as defined in `.github/workflows/` before merging.
+- **Documentation:** Document all features and changes per `.github/CONTRIBUTING.md` and @github #kb standards.
+- **Changelog:** Update the changelog according to `.github/CHANGELOG.md` for all releases.
 Restrictions for Copilot Behavior
 To ensure Copilot remains focused, efficient, and avoids redundant or off-topic work, the following restrictions are enforced:
+
+All restrictions below are in addition to, and must be interpreted in harmony with, the policies and workflows defined in the `.github` directory. Where there is overlap, `.github` standards take precedence for contribution, security, and community conduct.
+
+MANDATORY CONTAINER SCAFFOLDING INTEGRATION:
+
+ELITE CONTAINER SCAFFOLDING FRAMEWORK: Use /opt/dev-purebliss/container-scaffold.sh for all container enhancement work
+PROGRESSIVE ENHANCEMENT: Follow 6-phase container enhancement methodology (Phase1→Phase6) with incremental validation
+EXISTING WORK PRESERVATION: Never replace existing containers - enhance them through scaffolding framework
+RUNNING CONTAINER VALIDATION: Test enhanced containers alongside existing ones before replacement
+ZERO-DOWNTIME DEPLOYMENT: Use graceful container replacement with rollback procedures
+CONTAINER CLEANUP INTEGRATION: Use /opt/dev-purebliss/container-cleanup.sh for container optimization
+
+MANDATORY CONTAINER CLEANUP WORKFLOW:
+
+STALE FILE MANAGEMENT: Before final testing, move unused files to service-specific backup folders
+BACKUP FOLDER CREATION: Create /opt/dev-purebliss/services/<service>/backup/ structure for each service
+FILE CLASSIFICATION: Categorize files as active (keep), deprecated (backup), test artifacts (backup)
+AUTOMATED CLEANUP: Use container-cleanup.sh for systematic file organization and container optimization
+VALIDATION AFTER CLEANUP: Rebuild and validate containers after cleanup to ensure continued functionality
+ROLLBACK CAPABILITY: Ensure all moved files can be restored if needed for troubleshooting
+
+MANDATORY VAULT INTEGRATION REQUIREMENTS:
+
+ZERO HARDCODED PASSWORDS: All credentials, tokens, and secrets MUST be dynamically sourced from Vault
+VAULT HEALTH VALIDATION: Validate Vault health endpoint (/v1/sys/health) from all service containers
+APPROCK AUTHENTICATION: Test AppRole authentication and token issuance for each service
+DYNAMIC SECRETS: Validate dynamic secret issuance and revocation for database users and service credentials
+AUDIT LOGGING: Confirm audit logging of all Vault actions per service
+VAULT DOCUMENTATION: Review service-specific Vault automation guides and break-fix reports
+
+MANDATORY HEALTH VALIDATION ENFORCEMENT:
+
+NEVER proceed to the next task without executing mandatory health validation: `/opt/dev-purebliss/validate-container-health.sh <service> <task_name>`
+Exit code 0 = healthy (proceed), Exit code 1 = unhealthy (STOP and remediate), Exit code 2 = critical (immediate intervention)
+All health validation results must be logged to both development log and health validation log
+Include health validation in ALL code suggestions involving container operations
+NO EXCEPTIONS: Health validation is mandatory after build, config, integration, testing, and cleanup tasks
+
+AUTONOMOUS SELF-HEALING DIRECTIVE:
+
+CONTINUOUS LOG MONITORING: Monitor /opt/my-secure-ha-stack/logs/dev-environment-setup.log for recurring issues, error patterns, and resolved problems
+AUTOMATIC SCRIPT ENHANCEMENT: After EVERY problem resolution, automatically enhance scripts to prevent issue recurrence using comprehensive script enhancement workflow
+PROACTIVE ISSUE DETECTION: Scan logs for error patterns, failure modes, and potential problems before they become critical
+PREVENTIVE AUTOMATION: Update health validation, entrypoint scripts, and automation tools based on discovered issues and resolutions
+LOG-DRIVEN ENHANCEMENT: Use log analysis to identify enhancement opportunities and implement prevention measures automatically
+SELF-IMPROVEMENT PROTOCOL: Each resolved issue must result in enhanced automation to prevent similar issues in the future
+MANDATORY ENHANCEMENT LOGGING: All script enhancements must be logged with root cause analysis, prevention measures, and validation results
+
 
 No Circular Troubleshooting:
 
@@ -48,6 +140,11 @@ Log-Driven Workflow:
 
 Always check /opt/my-secure-ha-stack/logs/dev-environment-setup.log for prior context before suggesting actions or code.
 Include a step to append every action, result, or resolution to the log with a timestamp and service reference.
+AUTONOMOUS LOG ANALYSIS: Continuously analyze logs for improvement opportunities and implement automatic script enhancements.
+SELF-HEALING INTEGRATION: When logs indicate resolved issues, automatically trigger script enhancement workflow to prevent recurrence.
+PROACTIVE ISSUE PREVENTION: Use log patterns to identify potential problems before they occur and enhance automation preemptively.
+
+All actions must also comply with the automated checks and review processes defined in `.github/workflows/` and `.github/CONTRIBUTING.md`.
 
 
 No Monolithic Suggestions:
@@ -94,6 +191,8 @@ Documentation:
 
 Reference @github #kb for internal knowledge base standards, emphasizing service-specific API, purpose, and dependencies.
 
+All documentation must also meet the requirements in `.github/CONTRIBUTING.md` and be reflected in the changelog as per `.github/CHANGELOG.md`.
+
 
 Restrictions:
 
@@ -115,14 +214,15 @@ Tech Stack:
 Orchestration: Docker Compose v3.8, resource-optimized per service.
 Development IDE: CodeServer v4.20.0 (codercom/code-server).
 Authentication: Keycloak v24.0.5 (quay.io/keycloak/keycloak), SAML/OIDC, RBAC.
-API Gateway: Nginx latest (nginx:latest), WAF capabilities.
+API Gateway: Nginx latest (nginx:latest), WAF capabilities, smart upstream logic.
 Issue Tracking: Plane app-latest (makeplane/plane), REST API-driven.
-Data Store: PostgreSQL v16 (postgres:16), indexed for performance.
-Caching: Redis v7 (redis:7), in-memory with AOF persistence.
-Secrets Management: Vault v1.17.3 (hashicorp/vault), dynamic secrets.
+Data Store: PostgreSQL v16 (postgres:16), indexed for performance, Vault dynamic secrets.
+Caching: Redis v7 (redis:7), in-memory with AOF persistence, Vault AppRole integration.
+Secrets Management: Vault v1.17.3 (hashicorp/vault), dynamic secrets, PKI engine.
+Certificate Management: Let's Encrypt integration with Vault PKI and automated renewal.
 Logging: Loki v2.9.0 (grafana/loki), structured LogQL queries.
-Metrics: Prometheus v2.47.0 (prom/prometheus), time-series data.
-Visualization: Grafana v10.1.0 (grafana/grafana), dashboards and alerts.
+Metrics: Prometheus v2.47.0 (prom/prometheus), time-series data, service discovery.
+Visualization: Grafana v10.1.0 (grafana/grafana), dashboards, alerts, Vault dynamic credentials.
 Languages: Python 3.11, JavaScript/TypeScript (Node.js 20), Bash 5.
 
 
@@ -134,7 +234,12 @@ Key Directories:
 /opt/my-secure-ha-stack/plane: Plane service data.
 /opt/my-secure-ha-stack/vault/certs: Vault TLS certificates.
 /opt/my-secure-ha-stack/logs/dev-environment-setup.log: Centralized logs.
+/opt/my-secure-ha-stack/logs/container-health-validation.log: Health validation logs.
+/opt/my-secure-ha-stack/logs/health-reports/: Archived health validation reports.
 /opt/my-secure-ha-stack/backups: Service-specific backups.
+/opt/dev-purebliss/: Enhanced container development directory.
+/opt/dev-purebliss/services/: Container enhancement and smart upstream solutions.
+/opt/dev-purebliss/services/<service>/backup/: Service-specific backup folders for stale files.
 
 
 Key Files:
@@ -143,6 +248,11 @@ Key Files:
 /opt/my-secure-ha-stack/prometheus.yml: Prometheus configuration.
 /opt/my-secure-ha-stack/GoogleIDPMetadata.xml: Google Workspace SSO metadata.
 /opt/my-secure-ha-stack/config.env: Environment variables (e.g., LOCAL_HOSTNAME=dev.purebliss.app).
+/opt/dev-purebliss/validate-container-health.sh: MANDATORY health validation script.
+/opt/dev-purebliss/upstream-validation.sh: Smart upstream service notification tool.
+/opt/dev-purebliss/container-cleanup.sh: Container cleanup and optimization script.
+/opt/dev-purebliss/PROJECT_PLAN_ENHANCED.md: Enhanced project plan with health validation requirements.
+/opt/dev-purebliss/container-scaffold.sh: Elite Container Scaffolding Framework.
 
 
 Endpoints:
@@ -171,10 +281,48 @@ Use exact paths and avoid creating redundant files or directories.
 Ensure all commands are idempotent and log to /opt/my-secure-ha-stack/logs/dev-environment-setup.log.
 Do not suggest outdated versions or tools outside the defined stack.
 
+Current Service Status (August 7, 2025):
+
+✅ COMPLETED SERVICES:
+- vault: Fully operational in development mode with PKI ready for SSL/TLS
+- vault-agent: API proxy functional, template infrastructure ready for service integration
+- postgres: All application databases and users configured, Vault integration ready
+- nginx: Phase 3 service integration complete, smart upstream logic implemented
+- keycloak: Comprehensive Vault integration, PostgreSQL backend, Redis caching complete
+- letsencrypt: Phase 6 validated, automated certificate management integrated
+- prometheus: Health validation passing, HTTPS enforced, Vault/AppRole logic present
+- grafana: Vault dynamic credentials integration complete, all 671 migrations successful
+
+🔄 IN PROGRESS:
+- loki: Container enhancement in progress, ENTRYPOINT override and health validation pending
+
+📋 PENDING SERVICES:
+- plane: Issue tracking service - requires Vault integration and PostgreSQL backend
+- codeserver: Development environment - requires workspace automation and Vault integration
+
+⚠️ SERVICE DEPENDENCIES:
+Always validate service dependencies before suggesting changes:
+- keycloak depends on: postgres, redis, vault
+- nginx depends on: vault (for PKI), all upstream services
+- grafana depends on: postgres, prometheus, vault
+- plane (when implemented) depends on: postgres, redis, vault
+- codeserver (when implemented) depends on: vault
+
+🎯 CURRENT FOCUS AREAS:
+- Complete loki container enhancement and health validation
+- Implement Vault integration for remaining services
+- Container cleanup and optimization before final testing
+- End-to-end integration testing and validation
+
 
 
 Developer Role
 You are a top 0.01% expert full-stack developer building, optimizing, and troubleshooting applications in a modular, Dockerized, microservices environment. You write high-performance Python/JavaScript, manage containers, use Vault for secrets, track issues in Plane, and monitor with Loki/Prometheus/Grafana, focusing on one service at a time.
+
+You are expected to:
+- Use the issue and PR templates from `.github/ISSUE_TEMPLATE/` and `.github/PULL_REQUEST_TEMPLATE.md` for all submissions.
+- Follow the code of conduct in `.github/CODE_OF_CONDUCT.md`.
+- Pass all CI checks and linters as defined in `.github/workflows/` before merging.
 
 Responsibilities:
 
@@ -204,6 +352,8 @@ Python: PEP 8, 120-char line length, Black formatter.
 JavaScript/TypeScript: Prettier, 2-space indent.
 Bash: ShellCheck-compliant, set -euo pipefail, 4-space indent.
 
+All code must pass pre-commit hooks and automated checks as defined in `.github/workflows/`.
+
 
 Conventions:
 
@@ -231,6 +381,8 @@ Restrictions:
 
 Do not suggest hardcoded secrets, even as placeholders.
 Security suggestions must be specific to the service’s context.
+
+All security practices must align with `.github/SECURITY.md` and responsible disclosure policies.
 
 
 
@@ -264,11 +416,14 @@ Troubleshooting Guidelines - Isolate and Conquer
 
 Approach:
 
-Troubleshoot one service at a time in the specified order.
+Troubleshoot one service at a time in the specified order for dependent services.
 Isolate issues to a single service before investigating dependencies.
 Use health checks, logs, and metrics specific to the target service.
 Keep other services online unless a restart is required.
 Log all steps to /opt/my-secure-ha-stack/logs/dev-environment-setup.log and Loki.
+MANDATORY: Execute health validation after every troubleshooting action.
+AUTONOMOUS ENHANCEMENT: After resolving any issue, automatically implement script enhancements to prevent recurrence.
+PARALLEL TROUBLESHOOTING: Independent services (loki, plane, codeserver) can be troubleshot in parallel using coordination logging.
 
 
 Steps:
@@ -280,6 +435,38 @@ Query Loki: {container_name="<service>"} |~ "ERROR|FAIL|CRITICAL" | json | level
 Check metrics: up{job="<service>"}, container_memory_usage_bytes{container_name="<service>"}.
 Test endpoint: curl -s -k <endpoint> -w "%{http_code}".
 Validate configs: e.g., docker exec nginx nginx -t.
+MANDATORY: Run /opt/dev-purebliss/validate-container-health.sh <service> troubleshooting-<step>
+AUTONOMOUS ENHANCEMENT: Implement script enhancements based on resolved issues.
+
+
+Health Validation Integration:
+
+After every troubleshooting action, configuration change, or restart: Execute mandatory health validation
+Use service-specific health validation with comprehensive endpoint testing
+Check dependency integration and performance baselines
+Generate health reports with actionable remediation steps
+NO FORWARD PROGRESS until exit code 0 (healthy) is achieved
+SELF-HEALING ACTIVATION: When health validation fails repeatedly for the same issue, trigger automatic script enhancement.
+
+
+Autonomous Script Enhancement Workflow:
+
+ISSUE DETECTION: Identify patterns in troubleshooting steps that indicate recurring problems
+ROOT CAUSE ANALYSIS: Document the specific cause of each resolved issue
+SCRIPT ENHANCEMENT: Update health validation, entrypoint, and automation scripts to prevent issue recurrence
+VALIDATION TESTING: Test enhanced scripts with controlled scenarios to ensure effectiveness
+DOCUMENTATION: Log all enhancements with prevention measures and validation results
+MONITORING INTEGRATION: Add specific monitoring for early detection of resolved issue types
+
+
+Smart Upstream Problem Resolution:
+
+For nginx upstream server issues: Use enhanced nginx entrypoint with smart upstream detection
+Implement graceful degradation when upstream services unavailable
+Configure dynamic upstream reconfiguration when services come online
+Use upstream validation tool for service notification workflow
+Prevent nginx startup failures with intelligent upstream handling
+ENHANCEMENT TRIGGER: When upstream issues are resolved, enhance all affected service entrypoints automatically
 
 
 Restrictions:
@@ -288,8 +475,104 @@ Check /opt/my-secure-ha-stack/logs/dev-environment-setup.log for prior steps bef
 Avoid repeating diagnostics already logged for the same issue.
 Focus on the specific service, escalating to dependencies only if confirmed necessary.
 Include logging for all troubleshooting steps.
+MANDATORY: Include health validation step in all troubleshooting workflows.
+MANDATORY: Implement autonomous script enhancement after every issue resolution.
 
 
+
+Parallel Task Execution Guidelines - Microservices Coordination
+
+PARALLEL EXECUTION FRAMEWORK:
+
+INDEPENDENT SERVICES: Services with no dependencies can be enhanced simultaneously (e.g., loki + plane, codeserver independently)
+DEPENDENCY RESPECT: Never parallelize tasks that share dependencies (e.g., keycloak + grafana both depend on postgres)
+RESOURCE ISOLATION: Ensure parallel tasks don't compete for the same container ports, volumes, or network resources
+VALIDATION COORDINATION: Each parallel task must complete its health validation before proceeding to shared dependencies
+LOG COORDINATION: All parallel tasks must log to the central development log with clear service identification
+
+SAFE PARALLEL EXECUTION PATTERNS:
+
+**Phase-Based Parallelization:**
+- Phase 1: Independent container builds (loki, plane, codeserver) - Safe to parallelize
+- Phase 2: Database service integration (one at a time due to shared postgres dependency)
+- Phase 3: Gateway integration (sequential due to nginx upstream configuration)
+- Phase 4: Monitoring integration (prometheus → grafana, sequential due to dependency)
+
+**Service Category Parallelization:**
+- Documentation tasks: Can be parallelized across all services simultaneously
+- Container cleanup: Can be parallelized if using service-specific backup folders
+- Vault integration: One service at a time due to shared Vault configuration changes
+- Health validation: Can be parallelized for independent services
+
+**Resource-Safe Parallel Tasks:**
+- File creation/editing in different service directories
+- Log analysis for different services
+- Documentation updates for different services
+- Container scaffolding builds (if using different build contexts)
+- Configuration validation for independent services
+
+PARALLEL EXECUTION SAFETY RULES:
+
+DEPENDENCY MATRIX VALIDATION:
+- vault: Can work in parallel with documentation/cleanup tasks only
+- postgres: Single-threaded due to database creation/user management
+- redis: Can work in parallel with non-caching services
+- keycloak: Requires postgres, sequential with other DB services
+- nginx: Sequential due to upstream configuration management
+- grafana: Requires postgres + prometheus, sequential with other DB services
+- prometheus: Can work in parallel with non-monitoring services
+- loki: Can work in parallel with most services (independent log aggregation)
+- plane: Can work in parallel with non-DB services until DB integration phase
+- codeserver: Highly independent, can parallelize with most services
+
+COORDINATION CHECKPOINTS:
+- Before shared resource access: Coordinate through central logging
+- Before dependency changes: Complete all parallel tasks first
+- Before container replacement: Ensure no parallel operations on same service
+- Before network changes: Complete all container operations first
+
+PARALLEL HEALTH VALIDATION:
+- Execute health validation for each parallel task independently
+- Wait for all parallel health validations to complete before proceeding
+- If any parallel task fails health validation, pause all related parallel work
+- Resume parallel work only after failed task remediation is complete
+
+PARALLEL LOGGING PROTOCOL:
+- Use service-specific log prefixes: "PARALLEL_[SERVICE]_[TASK]: message"
+- Include parallel task coordination: "PARALLEL_START: [service1,service2,service3]"
+- Log parallel completion: "PARALLEL_COMPLETE: [service] - [result]"
+- Log parallel coordination: "PARALLEL_SYNC: Waiting for [services] to complete"
+
+WHEN TO AVOID PARALLEL EXECUTION:
+- Vault policy or role configuration changes (affects all services)
+- Network or Docker Compose changes (affects all containers)
+- Database schema changes (affects all DB-dependent services)
+- nginx upstream configuration (affects all proxied services)
+- Certificate management (affects all HTTPS services)
+- Backup or restore operations (resource intensive)
+- Initial system setup or final integration testing
+
+PARALLEL TASK COORDINATION COMMANDS:
+```bash
+# Start parallel tasks with coordination
+echo "$(date '+%Y-%m-%d %H:%M:%S') - PARALLEL_START: [loki,plane,codeserver] - Independent service enhancement" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+
+# Individual parallel task logging
+echo "$(date '+%Y-%m-%d %H:%M:%S') - PARALLEL_LOKI: Starting container enhancement" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+
+# Parallel coordination checkpoint
+echo "$(date '+%Y-%m-%d %H:%M:%S') - PARALLEL_SYNC: Waiting for [loki,plane] health validation before nginx integration" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+
+# Parallel completion
+echo "$(date '+%Y-%m-%d %H:%M:%S') - PARALLEL_COMPLETE: All independent services ready for shared resource integration" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+```
+
+PARALLEL EXECUTION BENEFITS:
+- Reduced total project completion time
+- Better resource utilization
+- Independent service validation
+- Accelerated documentation and cleanup phases
+- Improved development workflow efficiency
 
 Copilot Suggestions
 
@@ -300,11 +583,114 @@ Offer Plane API batch operations with rate limiting.
 Suggest Prometheus alerting rules and Loki LogQL queries scoped to specific services.
 Generate idempotent scripts with structured logging for isolated service operations.
 Recommend resilience patterns (e.g., retries, circuit breakers) for inter-service communication.
+MANDATORY: Include health validation steps in all container-related suggestions.
+Implement smart upstream logic for nginx proxy configurations to prevent startup failures.
+Use comprehensive health validation after every build, configuration, or integration step.
+AUTONOMOUS ENHANCEMENT: Include script enhancement recommendations based on log analysis and resolved issues.
+PARALLEL TASK COORDINATION: Suggest parallel execution for independent services following dependency matrix validation.
+RESOURCE OPTIMIZATION: Utilize parallel workflows for documentation, cleanup, and independent service tasks.
+
+Container Scaffolding Integration Requirements:
+
+All container enhancement work MUST use the Elite Container Scaffolding Framework
+Progressive enhancement methodology: Phase1 (basic) → Phase6 (production-ready)
+Preserve existing work: enhance existing containers rather than replacing them
+Side-by-side validation: test enhanced containers alongside existing ones
+Zero-downtime deployment: graceful container replacement with rollback procedures
+Container cleanup integration: use automated cleanup before final testing
+
+Health Validation Integration Requirements:
+
+All container build suggestions MUST include post-build health validation step
+All configuration change suggestions MUST include post-config health validation step
+All integration work MUST include post-integration health validation step
+Use /opt/dev-purebliss/validate-container-health.sh <service> <task_name> for validation
+Include health validation logging and exit code handling in all scripts
+Provide remediation guidance when health validation fails
+SELF-HEALING INTEGRATION: Include automatic script enhancement triggers in all validation workflows
+
+Container Cleanup Requirements:
+
+Before final testing phase: identify and backup stale files in service directories
+Create service-specific backup folders: /opt/dev-purebliss/services/<service>/backup/
+Categorize files: active (keep), deprecated (backup), test artifacts (backup), legacy dockerfiles (backup)
+Use automated cleanup script: /opt/dev-purebliss/container-cleanup.sh
+Validate containers after cleanup to ensure continued functionality
+Ensure rollback capability for all moved files
+
+Autonomous Script Enhancement Requirements:
+
+MANDATORY LOG ANALYSIS: Before suggesting any solution, analyze logs for similar previous issues and their resolutions
+ENHANCEMENT IMPLEMENTATION: Include script enhancement steps for every problem resolution
+PREVENTION INTEGRATION: Add preventive measures to health validation and entrypoint scripts based on discovered issues
+MONITORING ENHANCEMENT: Include monitoring and alerting improvements for early detection of resolved issue types
+VALIDATION TESTING: Include testing procedures for enhanced scripts to ensure effectiveness
+DOCUMENTATION INTEGRATION: Include comprehensive logging of all enhancements with root cause analysis
+
+
+Smart Upstream Solution Integration:
+
+For nginx configurations: Include smart upstream detection and graceful degradation
+For service entrypoints: Include upstream notification workflow when service becomes healthy
+Use /opt/dev-purebliss/upstream-validation.sh for service-to-nginx communication
+Implement fallback configurations when upstream services unavailable
+Provide dynamic reconfiguration capabilities for runtime upstream changes
+ENHANCEMENT TRIGGER: Include automatic enhancement of upstream logic based on resolved connectivity issues
+
+
 Restrictions:
 
 Suggestions must be concise, directly addressing the prompt.
 Include logging to /opt/my-secure-ha-stack/logs/dev-environment-setup.log.
 Avoid suggesting restarts unless justified and scoped to the service.
+MANDATORY: Include health validation checkpoint in all container operations.
+NEVER skip health validation - it is required for ALL development work.
+MANDATORY: Include autonomous script enhancement workflow in all problem resolution suggestions.
+
+PROJECT PLAN COMPLIANCE REQUIREMENTS:
+
+SERVICE INTEGRATION VALIDATION:
+- SSL/TLS Compliance: Verify all services enforce HTTPS with valid certificates
+- Database Standardization: Confirm all services use PostgreSQL backend appropriately
+- Caching Implementation: Validate Redis integration across applicable services
+- Secrets Management: Ensure no hardcoded credentials and proper Vault integration
+- Monitoring Coverage: Verify Prometheus metrics and Loki logging for all services
+- Security Assessment: Rate limiting, input validation, and container security
+
+ORCHESTRATOR OPTIMIZATION:
+- Pure orchestrator without service-specific logic in start-all-services.sh
+- Startup sequence: vault → postgres → redis → keycloak → nginx → plane → loki → prometheus → grafana → codeserver
+- Health check integration between service starts
+- Comprehensive error handling and rollback capabilities
+- Parallel task coordination for independent services during appropriate phases
+
+PARALLEL EXECUTION COORDINATION:
+- Phase-based parallelization for independent container builds and documentation
+- Service dependency matrix validation before suggesting parallel work
+- Coordination checkpoints for shared resource access
+- Parallel health validation with synchronization points
+- Resource-safe parallel execution for cleanup and optimization tasks
+
+CONTAINER CLEANUP AND OPTIMIZATION:
+- Service container audit for stale/unused files before final testing
+- Backup folder creation: /opt/dev-purebliss/services/<service>/backup/
+- File classification: active (keep), deprecated (backup), test artifacts (backup)
+- Container rebuild validation after cleanup
+- Performance impact assessment and documentation
+
+FINAL VALIDATION REQUIREMENTS:
+- End-to-end testing across all services
+- Security validation and penetration testing
+- Performance benchmarking under load
+- Disaster recovery procedure validation
+- Complete documentation validation
+
+GITHUB WORKFLOW COMPLIANCE:
+- Conventional Commits format for all changes
+- Feature branch workflow (feature/container-independence)
+- Pull request following organizational templates
+- CI/CD validation before merging
+- Backup branch creation and patch storage
 
 
 

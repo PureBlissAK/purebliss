@@ -1,0 +1,1139 @@
+2025-08-06 18:12:34 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: deploy-basic-keycloak
+2025-08-06 18:12:34 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 18:12:34 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 18:12:34 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 18:12:34 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 18:12:34 - HEALTH_VALIDATION [ERROR]: Unknown health status: 
+no-healthcheck
+2025-08-06 18:12:34 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 18:12:34 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 18:12:34 - HEALTH_VALIDATION [ERROR]: Keycloak health endpoint not responding
+2025-08-06 18:12:34 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 18:12:34 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 18:12:34 - HEALTH_VALIDATION [INFO]: Checking dependency: postgres (required)
+2025-08-06 18:12:35 - HEALTH_VALIDATION [ERROR]: Required dependency postgres is not reachable
+2025-08-06 18:12:35 - HEALTH_VALIDATION [INFO]: Checking dependency: redis (required)
+2025-08-06 18:12:35 - HEALTH_VALIDATION [ERROR]: Required dependency redis is not reachable
+2025-08-06 18:12:35 - HEALTH_VALIDATION [ERROR]: Dependency validation failed
+2025-08-06 18:12:35 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 18:12:36 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.71%, Memory=1.39GiB (/%)
+2025-08-06 18:12:36 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 18:12:36 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 18:12:36 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-deploy-basic-keycloak.json
+2025-08-06 18:12:36 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: keycloak is unhealthy after deploy-basic-keycloak
+2025-08-06 18:12:36 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: script-enhancement-implementation
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 18:16:30 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 18:16:30 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak exists but is in state: exited
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Last 10 lines of container logs:
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,680[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.jgroups.protocols.pbcast.GMS[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151m6dce3abe07a8-20429: no members discovered after 2001 ms: creating cluster as coordinator[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,691[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.infinispan.CLUSTER[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151m[39mISPN000094: Received new cluster view for channel [38;5;188mISPN[39m: [38;5;188m[6dce3abe07a8-20429|0] (1) [6dce3abe07a8-20429][39m[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,794[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.infinispan.CLUSTER[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151m[39mISPN000079: Channel `[38;5;188mISPN[39m` local address is `[38;5;188m6dce3abe07a8-20429[39m`, physical addresses are `[38;5;188m[172.32.0.7:7800][39m`[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,805[39m[38;5;188m [39m[38;5;137mWARN [39m[38;5;188m [[39m[38;5;69morg.infinispan.CONFIG[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151mISPN000569: Unable to persist Infinispan internal caches as no global state enabled[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,174[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.infinispan.CLUSTER[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151m[39mISPN000080: Disconnecting JGroups channel `[38;5;188mISPN[39m`[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mERROR: Failed to start server in (development) mode[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mERROR: Failed to obtain JDBC connection[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mERROR: FATAL: password authentication failed for user "keycloak"[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mFor more details run the same command passing the '--verbose' option. Also you can use '--help' to see the details about the usage of the particular command.[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:30 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 18:16:30 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-script-enhancement-implementation.json
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: enable-db-redis-healthcheck
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 18:16:38 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 18:16:38 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak exists but is in state: exited
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Last 10 lines of container logs:
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,680[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.jgroups.protocols.pbcast.GMS[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151m6dce3abe07a8-20429: no members discovered after 2001 ms: creating cluster as coordinator[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,691[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.infinispan.CLUSTER[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151m[39mISPN000094: Received new cluster view for channel [38;5;188mISPN[39m: [38;5;188m[6dce3abe07a8-20429|0] (1) [6dce3abe07a8-20429][39m[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,794[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.infinispan.CLUSTER[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151m[39mISPN000079: Channel `[38;5;188mISPN[39m` local address is `[38;5;188m6dce3abe07a8-20429[39m`, physical addresses are `[38;5;188m[172.32.0.7:7800][39m`[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:12,805[39m[38;5;188m [39m[38;5;137mWARN [39m[38;5;188m [[39m[38;5;69morg.infinispan.CONFIG[39m[38;5;188m] ([39m[38;5;71mkeycloak-cache-init[39m[38;5;188m) [39m[38;5;151mISPN000569: Unable to persist Infinispan internal caches as no global state enabled[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,174[39m[38;5;188m [39m[38;5;107mINFO [39m[38;5;188m [[39m[38;5;69morg.infinispan.CLUSTER[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151m[39mISPN000080: Disconnecting JGroups channel `[38;5;188mISPN[39m`[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mERROR: Failed to start server in (development) mode[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mERROR: Failed to obtain JDBC connection[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mERROR: FATAL: password authentication failed for user "keycloak"[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Container log: [39m[38;5;145m2025-08-06 22:16:13,248[39m[38;5;188m [39m[38;5;203mERROR[39m[38;5;188m [[39m[38;5;69morg.keycloak.quarkus.runtime.cli.ExecutionExceptionHandler[39m[38;5;188m] ([39m[38;5;71mmain[39m[38;5;188m) [39m[38;5;151mFor more details run the same command passing the '--verbose' option. Also you can use '--help' to see the details about the usage of the particular command.[39m[38;5;203m[39m[38;5;227m
+2025-08-06 18:16:38 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 18:16:38 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-enable-db-redis-healthcheck.json
+2025-08-06 18:18:32 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: db-password-sync
+2025-08-06 18:18:32 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 18:18:32 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 18:18:32 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 18:18:32 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak does not exist
+2025-08-06 18:18:32 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 18:18:32 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-db-password-sync.json
+2025-08-06 18:26:19 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: db-password-sync
+2025-08-06 18:26:19 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 18:26:19 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 18:26:19 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 18:26:19 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak does not exist
+2025-08-06 18:26:19 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 18:26:19 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-db-password-sync.json
+2025-08-06 18:26:43 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: post-password-fix
+2025-08-06 18:26:43 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 18:26:43 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 18:26:43 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 18:26:43 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 18:26:43 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 18:27:44 - HEALTH_VALIDATION [ERROR]: Health check timeout after 30 attempts
+2025-08-06 18:27:44 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 18:27:44 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 18:27:44 - HEALTH_VALIDATION [ERROR]: Keycloak health endpoint not responding
+2025-08-06 18:27:44 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 18:27:44 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 18:27:44 - HEALTH_VALIDATION [INFO]: Checking dependency: postgres (required)
+2025-08-06 18:27:44 - HEALTH_VALIDATION [ERROR]: Required dependency postgres is not reachable
+2025-08-06 18:27:44 - HEALTH_VALIDATION [INFO]: Checking dependency: redis (required)
+2025-08-06 18:27:44 - HEALTH_VALIDATION [ERROR]: Required dependency redis is not reachable
+2025-08-06 18:27:44 - HEALTH_VALIDATION [ERROR]: Dependency validation failed
+2025-08-06 18:27:44 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 18:27:46 - HEALTH_VALIDATION [INFO]: Container performance: CPU=3.82%, Memory=798.2MiB (/%)
+2025-08-06 18:27:46 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 18:27:46 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 18:27:46 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-post-password-fix.json
+2025-08-06 18:27:46 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: keycloak is unhealthy after post-password-fix
+2025-08-06 18:27:46 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: update-health-validation
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 19:06:29 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Health check output: /bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Keycloak health endpoint not responding
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Checking dependency: postgres (required)
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Required dependency postgres is not reachable
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Checking dependency: redis (required)
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Required dependency redis is not reachable
+2025-08-06 19:06:29 - HEALTH_VALIDATION [ERROR]: Dependency validation failed
+2025-08-06 19:06:29 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 19:06:31 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.20%, Memory=857.7MiB (/%)
+2025-08-06 19:06:31 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 19:06:31 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 19:06:31 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-update-health-validation.json
+2025-08-06 19:06:31 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: keycloak is unhealthy after update-health-validation
+2025-08-06 19:06:31 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 19:09:31 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: custom-healthcheck-enhancement
+2025-08-06 19:09:31 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 19:09:31 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 19:09:31 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 19:09:31 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 19:09:31 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 19:09:31 - HEALTH_VALIDATION [ERROR]: Health check output: /bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+2025-08-06 19:09:31 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 19:09:31 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 19:09:36 - HEALTH_VALIDATION [SUCCESS]: Keycloak /auth/realms/master endpoint responding (custom health check)
+2025-08-06 19:09:36 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 19:09:36 - HEALTH_VALIDATION [INFO]: Checking dependency: postgres (required)
+2025-08-06 19:09:36 - HEALTH_VALIDATION [ERROR]: Required dependency postgres is not reachable
+2025-08-06 19:09:36 - HEALTH_VALIDATION [INFO]: Checking dependency: redis (required)
+2025-08-06 19:09:36 - HEALTH_VALIDATION [ERROR]: Required dependency redis is not reachable
+2025-08-06 19:09:36 - HEALTH_VALIDATION [ERROR]: Dependency validation failed
+2025-08-06 19:09:36 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 19:09:38 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.28%, Memory=859.2MiB (/%)
+2025-08-06 19:09:38 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 19:09:38 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 19:09:38 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-custom-healthcheck-enhancement.json
+2025-08-06 19:09:38 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: keycloak is unhealthy after custom-healthcheck-enhancement
+2025-08-06 19:09:38 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 19:15:58 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: config-fix
+2025-08-06 19:15:58 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 19:15:58 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 19:15:58 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 19:15:58 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 19:15:58 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 19:16:53 - HEALTH_VALIDATION [ERROR]: Health check failed after 27 attempts
+2025-08-06 19:16:53 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 19:16:53 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 19:16:53 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 19:16:53 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 19:16:53 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 19:16:53 - HEALTH_VALIDATION [INFO]: Checking dependency: postgres (required)
+2025-08-06 19:16:53 - HEALTH_VALIDATION [ERROR]: Required dependency postgres is not reachable
+2025-08-06 19:16:53 - HEALTH_VALIDATION [INFO]: Checking dependency: redis (required)
+2025-08-06 19:16:53 - HEALTH_VALIDATION [ERROR]: Required dependency redis is not reachable
+2025-08-06 19:16:53 - HEALTH_VALIDATION [ERROR]: Dependency validation failed
+2025-08-06 19:16:53 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 19:16:54 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=0B (/%)
+2025-08-06 19:16:54 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 19:16:54 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 19:16:54 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-config-fix.json
+2025-08-06 19:16:54 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: keycloak is unhealthy after config-fix
+2025-08-06 19:16:54 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 19:38:54 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: dependency-check
+2025-08-06 19:38:54 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 19:38:54 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 19:38:54 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 19:38:54 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 19:38:54 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: Health check failed after 26 attempts
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 19:39:47 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 19:39:47 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 19:39:47 - HEALTH_VALIDATION [INFO]: Checking dependency: postgres (required)
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: Required dependency postgres is not reachable
+2025-08-06 19:39:47 - HEALTH_VALIDATION [INFO]: Checking dependency: redis (required)
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: Required dependency redis is not reachable
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: Dependency validation failed
+2025-08-06 19:39:47 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 19:39:47 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=0B (/%)
+2025-08-06 19:39:47 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 19:39:47 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 19:39:47 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-dependency-check.json
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: keycloak is unhealthy after dependency-check
+2025-08-06 19:39:47 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: entrypoint-bash-dev-tcp-enhancement
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 19:51:11 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 19:51:11 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak exists but is in state: exited
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Last 10 lines of container logs:
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container log: [Wed Aug  6 11:50:58 PM UTC 2025] INFO: Starting Keycloak container setup
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container log: [Wed Aug  6 11:50:58 PM UTC 2025] INFO: Waiting for PostgreSQL at purebliss-postgres:5432 (up to 2 minutes)...
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container log: [Wed Aug  6 11:50:58 PM UTC 2025] INFO: PostgreSQL is available after 1 attempts.
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container log: [Wed Aug  6 11:50:58 PM UTC 2025] INFO: Waiting for Redis at purebliss-redis:6379 (up to 2 minutes)...
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container log: [Wed Aug  6 11:50:58 PM UTC 2025] INFO: Redis is available after 1 attempts.
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container log: [Wed Aug  6 11:50:58 PM UTC 2025] INFO: Vault integration enabled. Retrieving database credentials.
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Container log: /opt/keycloak/bin/enhanced-entrypoint.sh: line 60: VAULT_ROLE_ID: unbound variable
+2025-08-06 19:51:11 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 19:51:11 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-entrypoint-bash-dev-tcp-enhancement.json
+2025-08-06 19:59:41 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for purebliss-keycloak after task: unknown-task
+2025-08-06 19:59:41 - HEALTH_VALIDATION [INFO]: Container name: purebliss-purebliss-keycloak
+2025-08-06 19:59:41 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-purebliss-keycloak exists and is running
+2025-08-06 19:59:41 - HEALTH_VALIDATION [ERROR]: Container purebliss-purebliss-keycloak is not running
+2025-08-06 19:59:41 - HEALTH_VALIDATION [ERROR]: Container purebliss-purebliss-keycloak does not exist
+2025-08-06 19:59:41 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 19:59:41 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-purebliss-keycloak-unknown-task.json
+2025-08-06 20:01:43 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: post-fix-validation
+2025-08-06 20:01:43 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:01:43 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:01:43 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:01:43 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:01:43 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 20:02:07 - HEALTH_VALIDATION [ERROR]: Health check failed after 12 attempts
+2025-08-06 20:02:07 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:02:07 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:02:12 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 20:02:12 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 20:02:12 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:03:24 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: dependency-enhancement-validation
+2025-08-06 20:03:24 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:03:24 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:03:25 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:03:25 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:03:25 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 20:03:25 - HEALTH_VALIDATION [ERROR]: Health check output: /bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+2025-08-06 20:03:25 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:03:25 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:03:30 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 20:03:30 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 20:03:30 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:03:30 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 20:03:30 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 20:03:30 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 20:03:30 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 20:08:37 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: troubleshooting-curl-fix
+2025-08-06 20:08:37 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:08:37 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:08:37 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:08:37 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:08:37 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 20:08:37 - HEALTH_VALIDATION [ERROR]: Health check output: /bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+2025-08-06 20:08:37 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:08:37 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:08:42 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 20:08:42 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 20:08:42 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:08:42 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 20:08:42 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 20:08:42 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 20:08:42 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 20:13:49 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: validate-keycloak-health
+2025-08-06 20:13:49 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:13:49 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:13:49 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:13:49 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:13:49 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 20:13:49 - HEALTH_VALIDATION [ERROR]: Health check output: /bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+/bin/sh: line 1: curl: command not found
+2025-08-06 20:13:49 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:13:49 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:13:54 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 20:13:54 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 20:13:54 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:13:54 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 20:13:54 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 20:13:54 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 20:13:54 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 20:18:35 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: validate-keycloak-health-after-fixes
+2025-08-06 20:18:35 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:18:35 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:18:35 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:18:35 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:18:35 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 20:19:05 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: validate-keycloak-health-final-check
+2025-08-06 20:19:05 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:19:05 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:19:05 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:19:05 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:19:05 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 20:21:10 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: validate-keycloak-final-check-after-reconfig
+2025-08-06 20:21:10 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:21:10 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:21:10 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 20:21:10 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak does not exist
+2025-08-06 20:21:10 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 20:21:10 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-validate-keycloak-final-check-after-reconfig.json
+2025-08-06 20:23:43 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: validate-keycloak-health-after-conflict-removal
+2025-08-06 20:23:43 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:23:43 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:23:43 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 20:23:43 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak does not exist
+2025-08-06 20:23:43 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 20:23:43 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-validate-keycloak-health-after-conflict-removal.json
+2025-08-06 20:24:11 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: validate-keycloak-health-after-depends-fix
+2025-08-06 20:24:11 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:24:11 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:24:11 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:24:11 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:24:11 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 20:29:53 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: build-curl-default
+2025-08-06 20:29:53 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:29:53 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:29:53 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:29:53 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:29:53 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 20:30:54 - HEALTH_VALIDATION [ERROR]: Health check timeout after 30 attempts
+2025-08-06 20:30:54 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:30:54 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:30:59 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 20:30:59 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 20:30:59 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:30:59 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 20:30:59 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 20:30:59 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 20:30:59 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 20:38:30 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: build-curl-libgssapi
+2025-08-06 20:38:30 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:38:30 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:38:30 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:38:30 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:38:30 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 20:39:30 - HEALTH_VALIDATION [ERROR]: Health check timeout after 30 attempts
+2025-08-06 20:39:30 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:39:30 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:39:36 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 20:39:36 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 20:39:36 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:39:36 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 20:39:36 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 20:39:36 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 20:39:36 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 20:49:40 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: build-curl-final
+2025-08-06 20:49:40 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:49:40 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:49:41 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:49:41 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:49:41 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 20:50:41 - HEALTH_VALIDATION [ERROR]: Health check timeout after 30 attempts
+2025-08-06 20:50:41 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:50:41 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:50:46 - HEALTH_VALIDATION [ERROR]: Keycloak /auth/realms/master endpoint not responding (custom health check)
+2025-08-06 20:50:46 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 20:50:46 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:50:46 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 20:50:46 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 20:50:47 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 20:50:47 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 20:52:21 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: health-endpoint-enhancement
+2025-08-06 20:52:21 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 20:52:21 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 20:52:21 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 20:52:21 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 20:52:21 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 20:52:21 - HEALTH_VALIDATION [ERROR]: Health check output:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 404
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 404
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 404
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 404
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 404
+2025-08-06 20:52:21 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 20:52:21 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 20:52:26 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 20:52:26 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 20:52:26 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 20:52:26 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 20:52:26 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 20:52:26 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 20:52:26 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 21:00:01 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: healthcheck-fix
+2025-08-06 21:00:01 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:00:01 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:00:01 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:00:01 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:00:01 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 21:01:02 - HEALTH_VALIDATION [ERROR]: Health check timeout after 30 attempts
+2025-08-06 21:01:02 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 21:01:02 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:01:07 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:01:07 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:01:07 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:01:07 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:01:07 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:01:07 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 21:01:07 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: fast-healthcheck-final
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:09:42 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak is not running
+2025-08-06 21:09:42 - HEALTH_VALIDATION [ERROR]: Container purebliss-keycloak exists but is in state: exited
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Last 10 lines of container logs:
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] INFO: Waiting for PostgreSQL at purebliss-postgres:5432 (up to 2 minutes)...
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] INFO: PostgreSQL is available after 1 attempts.
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] INFO: Waiting for Redis at purebliss-redis:6379 (up to 2 minutes)...
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] INFO: Redis is available after 1 attempts.
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] INFO: Vault integration disabled. Using development defaults.
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] INFO: Environment variables before Keycloak start:
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] ENV: KC_RUN_IN_CONTAINER=true
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] ENV: KC_DB_USERNAME=keycloak
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: [Thu Aug  7 01:09:27 AM UTC 2025] ENV: KC_DB_PASSWORD=keycloak_secure_password
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Container log: /opt/keycloak/bin/entrypoint.sh: line 127: KC_DB_URL: unbound variable
+2025-08-06 21:09:42 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 21:09:42 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-fast-healthcheck-final.json
+2025-08-06 21:12:16 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: fixed-dburl-and-healthcheck
+2025-08-06 21:12:16 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:12:17 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:12:17 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:12:17 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:12:17 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 21:12:17 - HEALTH_VALIDATION [ERROR]: Health check output: curl: error while loading shared libraries: libcurl.so.4: cannot open shared object file: No such file or directory
+curl: error while loading shared libraries: libcurl.so.4: cannot open shared object file: No such file or directory
+curl: error while loading shared libraries: libcurl.so.4: cannot open shared object file: No such file or directory
+curl: error while loading shared libraries: libcurl.so.4: cannot open shared object file: No such file or directory
+2025-08-06 21:12:17 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 21:12:17 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:12:22 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:12:22 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:12:22 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:12:22 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:12:22 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:12:22 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 21:12:22 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 21:15:38 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: final-complete-validation
+2025-08-06 21:15:38 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:15:38 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:15:38 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:15:38 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:15:38 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:15:38 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:15:43 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:15:43 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:15:43 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:15:43 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:15:43 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:15:43 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 21:15:43 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 21:18:24 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: final-complete-with-tools
+2025-08-06 21:18:24 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:18:24 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:18:24 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:18:24 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:18:24 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:18:24 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:18:29 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:18:29 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:18:29 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:18:29 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:18:29 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:18:29 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 21:18:29 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 21:21:22 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: final-validated
+2025-08-06 21:21:22 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:21:22 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:21:22 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:21:22 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:21:22 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:21:22 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:21:27 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:21:27 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:21:27 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:21:27 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:21:27 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:21:27 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 21:21:27 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 21:26:09 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: project-plan-update
+2025-08-06 21:26:09 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:26:09 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:26:09 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:26:09 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:26:09 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:26:09 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:26:14 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:26:14 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:26:14 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:26:14 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:26:14 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:26:14 - HEALTH_VALIDATION [ERROR]: PostgreSQL authentication failed from keycloak
+2025-08-06 21:26:14 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 1
+2025-08-06 21:29:33 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: enhanced-authentication-fix
+2025-08-06 21:29:33 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:29:33 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:29:33 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:29:33 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:29:33 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:29:33 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:29:38 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:29:38 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:29:38 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:29:38 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:29:38 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:29:38 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 21:29:38 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 21:29:38 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 21:29:38 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 21:29:38 - HEALTH_VALIDATION [ERROR]: Redis authentication failed from keycloak
+2025-08-06 21:29:38 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 1
+2025-08-06 21:30:01 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: final-authentication-fix
+2025-08-06 21:30:01 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:30:01 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:30:01 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:30:01 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:30:01 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:30:01 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:30:06 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:30:06 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:30:06 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:30:06 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:30:06 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:30:06 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 21:30:06 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 21:30:06 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 21:30:06 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 21:30:06 - HEALTH_VALIDATION [SUCCESS]: Redis connectivity confirmed for Keycloak (uses Redis through caching layer)
+2025-08-06 21:30:06 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 0
+2025-08-06 21:30:06 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 21:30:08 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.10%, Memory=659.7MiB (/%)
+2025-08-06 21:30:08 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 21:30:08 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 21:30:08 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-final-authentication-fix.json
+2025-08-06 21:30:08 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: keycloak is healthy after final-authentication-fix
+2025-08-06 21:30:08 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 21:31:07 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: project-completion-validation
+2025-08-06 21:31:07 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:31:07 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:31:07 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:31:07 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:31:07 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:31:07 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:31:12 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:31:12 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:31:12 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:31:12 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:31:12 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:31:12 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 21:31:12 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 21:31:12 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 21:31:12 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 21:31:12 - HEALTH_VALIDATION [SUCCESS]: Redis connectivity confirmed for Keycloak (uses Redis through caching layer)
+2025-08-06 21:31:12 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 0
+2025-08-06 21:31:12 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 21:31:14 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.09%, Memory=660.4MiB (/%)
+2025-08-06 21:31:14 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 21:31:14 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 21:31:14 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-project-completion-validation.json
+2025-08-06 21:31:14 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: keycloak is healthy after project-completion-validation
+2025-08-06 21:31:14 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 21:34:25 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: env-enhancement-validation
+2025-08-06 21:34:25 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 21:34:25 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 21:34:25 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 21:34:25 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 21:34:25 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 21:34:25 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 21:34:30 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 21:34:30 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 21:34:30 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 21:34:30 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 21:34:30 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 21:34:30 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 21:34:30 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 21:34:30 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 21:34:30 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 21:34:31 - HEALTH_VALIDATION [SUCCESS]: Redis connectivity confirmed for Keycloak (uses Redis through caching layer)
+2025-08-06 21:34:31 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 0
+2025-08-06 21:34:31 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 21:34:32 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.10%, Memory=662.5MiB (/%)
+2025-08-06 21:34:32 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 21:34:32 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 21:34:32 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-env-enhancement-validation.json
+2025-08-06 21:34:32 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: keycloak is healthy after env-enhancement-validation
+2025-08-06 21:34:32 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 21:38:38 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: initial-setup
+2025-08-06 21:38:38 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 21:38:38 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 21:38:38 - HEALTH_VALIDATION [ERROR]: Container purebliss-letsencrypt is not running
+2025-08-06 21:38:38 - HEALTH_VALIDATION [ERROR]: Container purebliss-letsencrypt does not exist
+2025-08-06 21:38:38 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 21:38:38 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-initial-setup.json
+2025-08-06 21:40:40 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: build-phase1
+2025-08-06 21:40:40 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 21:40:40 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 21:40:40 - HEALTH_VALIDATION [ERROR]: Container purebliss-letsencrypt is not running
+2025-08-06 21:40:40 - HEALTH_VALIDATION [ERROR]: Container purebliss-letsencrypt does not exist
+2025-08-06 21:40:40 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 21:40:40 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-build-phase1.json
+2025-08-06 21:45:13 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: build-phase1
+2025-08-06 21:45:13 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 21:45:13 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 21:45:13 - HEALTH_VALIDATION [ERROR]: Container purebliss-letsencrypt is not running
+2025-08-06 21:45:13 - HEALTH_VALIDATION [ERROR]: Container purebliss-letsencrypt does not exist
+2025-08-06 21:45:13 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 21:45:13 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-build-phase1.json
+2025-08-06 21:45:30 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: build-phase1
+2025-08-06 21:45:30 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 21:45:30 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 21:45:30 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-letsencrypt is running
+2025-08-06 21:45:30 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-letsencrypt
+2025-08-06 21:45:30 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 21:46:31 - HEALTH_VALIDATION [ERROR]: Health check timeout after 30 attempts
+2025-08-06 21:46:31 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 21:46:31 - HEALTH_VALIDATION [INFO]: Validating service endpoints for letsencrypt
+2025-08-06 21:46:31 - HEALTH_VALIDATION [WARN]: No specific endpoint validation defined for letsencrypt
+2025-08-06 21:46:31 - HEALTH_VALIDATION [INFO]: Validating dependencies for letsencrypt
+2025-08-06 21:46:31 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for letsencrypt
+2025-08-06 21:46:31 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-letsencrypt
+2025-08-06 21:46:33 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.01%, Memory=432KiB (/%)
+2025-08-06 21:46:33 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 21:46:33 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 21:46:33 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-build-phase1.json
+2025-08-06 21:46:33 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: letsencrypt is unhealthy after build-phase1
+2025-08-06 21:46:33 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: phase5
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 22:23:15 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-letsencrypt is running
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-letsencrypt
+2025-08-06 22:23:15 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 22:23:15 - HEALTH_VALIDATION [ERROR]: Health check output:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+2025-08-06 22:23:15 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: Validating service endpoints for letsencrypt
+2025-08-06 22:23:15 - HEALTH_VALIDATION [WARN]: No specific endpoint validation defined for letsencrypt
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: Validating dependencies for letsencrypt
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for letsencrypt
+2025-08-06 22:23:15 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-letsencrypt
+2025-08-06 22:23:16 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.01%, Memory=436KiB (/%)
+2025-08-06 22:23:16 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 22:23:16 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 22:23:16 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-phase5.json
+2025-08-06 22:23:16 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: letsencrypt is unhealthy after phase5
+2025-08-06 22:23:16 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: phase5
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 22:30:18 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-letsencrypt is running
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-letsencrypt
+2025-08-06 22:30:18 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 22:30:18 - HEALTH_VALIDATION [ERROR]: Health check output:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+2025-08-06 22:30:18 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: Validating service endpoints for letsencrypt
+2025-08-06 22:30:18 - HEALTH_VALIDATION [WARN]: No specific endpoint validation defined for letsencrypt
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: Validating dependencies for letsencrypt
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for letsencrypt
+2025-08-06 22:30:18 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-letsencrypt
+2025-08-06 22:30:21 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=436KiB (/%)
+2025-08-06 22:30:21 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 22:30:21 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 22:30:21 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-phase5.json
+2025-08-06 22:30:21 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: letsencrypt is unhealthy after phase5
+2025-08-06 22:30:21 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: phase6-build-complete
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 22:41:40 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-letsencrypt is running
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-letsencrypt
+2025-08-06 22:41:40 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-06 22:41:40 - HEALTH_VALIDATION [ERROR]: Health check output:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Could not connect to server
+2025-08-06 22:41:40 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: Validating service endpoints for letsencrypt
+2025-08-06 22:41:40 - HEALTH_VALIDATION [WARN]: No specific endpoint validation defined for letsencrypt
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: Validating dependencies for letsencrypt
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for letsencrypt
+2025-08-06 22:41:40 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-letsencrypt
+2025-08-06 22:41:41 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=440KiB (/%)
+2025-08-06 22:41:41 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 22:41:41 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 22:41:41 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-phase6-build-complete.json
+2025-08-06 22:41:41 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: letsencrypt is unhealthy after phase6-build-complete
+2025-08-06 22:41:41 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: phase6-final
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 22:54:34 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-letsencrypt is running
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-letsencrypt
+2025-08-06 22:54:34 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: Validating service endpoints for letsencrypt
+2025-08-06 22:54:34 - HEALTH_VALIDATION [WARN]: No specific endpoint validation defined for letsencrypt
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: Validating dependencies for letsencrypt
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for letsencrypt
+2025-08-06 22:54:34 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-letsencrypt
+2025-08-06 22:54:36 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=1.188MiB (/%)
+2025-08-06 22:54:36 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 22:54:36 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 22:54:36 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-phase6-final.json
+2025-08-06 22:54:36 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: letsencrypt is healthy after phase6-final
+2025-08-06 22:54:36 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for letsencrypt after task: phase6-documented
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: Container name: purebliss-letsencrypt
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-letsencrypt exists and is running
+2025-08-06 22:56:44 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-letsencrypt is running
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-letsencrypt
+2025-08-06 22:56:44 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: Validating service endpoints for letsencrypt
+2025-08-06 22:56:44 - HEALTH_VALIDATION [WARN]: No specific endpoint validation defined for letsencrypt
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: Validating dependencies for letsencrypt
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for letsencrypt
+2025-08-06 22:56:44 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-letsencrypt
+2025-08-06 22:56:46 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=1.188MiB (/%)
+2025-08-06 22:56:46 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 22:56:46 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 22:56:46 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-letsencrypt-phase6-documented.json
+2025-08-06 22:56:46 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: letsencrypt is healthy after phase6-documented
+2025-08-06 22:56:46 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for nginx after task: letsencrypt-integration
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Container name: purebliss-nginx
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-nginx exists and is running
+2025-08-06 22:59:07 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-nginx is running
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-nginx
+2025-08-06 22:59:07 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Validating service endpoints for nginx
+2025-08-06 22:59:07 - HEALTH_VALIDATION [SUCCESS]: Nginx HTTP health endpoint responding
+2025-08-06 22:59:07 - HEALTH_VALIDATION [WARN]: Nginx HTTPS health endpoint not responding (may not be configured yet)
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Nginx status endpoint not available (may not be implemented yet)
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Validating dependencies for nginx
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Checking dependency: vault (optional)
+2025-08-06 22:59:07 - HEALTH_VALIDATION [WARN]: Optional dependency vault is not reachable
+2025-08-06 22:59:07 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-nginx
+2025-08-06 22:59:10 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=2.246MiB (/%)
+2025-08-06 22:59:10 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 22:59:10 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 22:59:10 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-nginx-letsencrypt-integration.json
+2025-08-06 22:59:10 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: nginx is healthy after letsencrypt-integration
+2025-08-06 22:59:10 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 23:01:42 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: baseline-validation
+2025-08-06 23:01:42 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 23:01:42 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 23:01:42 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 23:01:42 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 23:01:42 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:01:42 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 23:01:47 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 23:01:47 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 23:01:47 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 23:01:47 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 23:01:47 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 23:01:47 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 23:01:47 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 23:01:47 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 23:01:47 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 23:01:47 - HEALTH_VALIDATION [SUCCESS]: Redis connectivity confirmed for Keycloak (uses Redis through caching layer)
+2025-08-06 23:01:47 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 0
+2025-08-06 23:01:47 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 23:01:49 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.10%, Memory=818.8MiB (/%)
+2025-08-06 23:01:49 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:01:49 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:01:49 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-baseline-validation.json
+2025-08-06 23:01:49 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: keycloak is healthy after baseline-validation
+2025-08-06 23:01:49 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 23:13:20 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: inventory-analysis
+2025-08-06 23:13:20 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 23:13:20 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 23:13:20 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 23:13:20 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 23:13:20 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:13:20 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 23:13:25 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 23:13:25 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 23:13:25 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 23:13:25 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 23:13:25 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 23:13:25 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 23:13:25 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 23:13:25 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 23:13:25 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 23:13:25 - HEALTH_VALIDATION [SUCCESS]: Redis connectivity confirmed for Keycloak (uses Redis through caching layer)
+2025-08-06 23:13:25 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 0
+2025-08-06 23:13:25 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 23:13:27 - HEALTH_VALIDATION [INFO]: Container performance: CPU=3.10%, Memory=820.8MiB (/%)
+2025-08-06 23:13:27 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:13:27 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:13:27 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-inventory-analysis.json
+2025-08-06 23:13:27 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: keycloak is healthy after inventory-analysis
+2025-08-06 23:13:27 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 23:14:40 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: upstream-notification-enhancement
+2025-08-06 23:14:40 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 23:14:40 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 23:14:40 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 23:14:40 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 23:14:40 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:14:40 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 23:14:46 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 23:14:46 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 23:14:46 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 23:14:46 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 23:14:46 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 23:14:46 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 23:14:46 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 23:14:46 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 23:14:46 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 23:14:46 - HEALTH_VALIDATION [SUCCESS]: Redis connectivity confirmed for Keycloak (uses Redis through caching layer)
+2025-08-06 23:14:46 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 0
+2025-08-06 23:14:46 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 23:14:48 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.09%, Memory=823.6MiB (/%)
+2025-08-06 23:14:48 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:14:48 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:14:48 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-upstream-notification-enhancement.json
+2025-08-06 23:14:48 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: keycloak is healthy after upstream-notification-enhancement
+2025-08-06 23:14:48 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 23:19:04 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for keycloak after task: final-completion-validation
+2025-08-06 23:19:04 - HEALTH_VALIDATION [INFO]: Container name: purebliss-keycloak
+2025-08-06 23:19:04 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-keycloak exists and is running
+2025-08-06 23:19:04 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-keycloak is running
+2025-08-06 23:19:04 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-keycloak
+2025-08-06 23:19:04 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:19:04 - HEALTH_VALIDATION [INFO]: Validating service endpoints for keycloak
+2025-08-06 23:19:09 - HEALTH_VALIDATION [SUCCESS]: Keycloak /realms/master endpoint responding (Keycloak 24+ health check)
+2025-08-06 23:19:09 - HEALTH_VALIDATION [INFO]: Keycloak health validated using endpoint: /realms/master
+2025-08-06 23:19:09 - HEALTH_VALIDATION [INFO]: Validating dependencies for keycloak
+2025-08-06 23:19:09 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing postgres independently for keycloak (connectivity)
+2025-08-06 23:19:09 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL reachable from keycloak
+2025-08-06 23:19:09 - HEALTH_VALIDATION [SUCCESS]: PostgreSQL authentication successful from keycloak
+2025-08-06 23:19:09 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: postgres test result: 0
+2025-08-06 23:19:09 - HEALTH_VALIDATION [INFO]: DEPENDENCY_TEST: Testing redis independently for keycloak (connectivity)
+2025-08-06 23:19:09 - HEALTH_VALIDATION [SUCCESS]: Redis reachable from keycloak
+2025-08-06 23:19:09 - HEALTH_VALIDATION [SUCCESS]: Redis connectivity confirmed for Keycloak (uses Redis through caching layer)
+2025-08-06 23:19:09 - HEALTH_VALIDATION [INFO]: DEPENDENCY_RESULT: redis test result: 0
+2025-08-06 23:19:09 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-keycloak
+2025-08-06 23:19:11 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.11%, Memory=817.4MiB (/%)
+2025-08-06 23:19:11 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:19:11 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:19:11 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-keycloak-final-completion-validation.json
+2025-08-06 23:19:11 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: keycloak is healthy after final-completion-validation
+2025-08-06 23:19:11 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 23:22:09 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for prometheus after task: inventory-analysis
+2025-08-06 23:22:09 - HEALTH_VALIDATION [INFO]: Container name: purebliss-prometheus
+2025-08-06 23:22:09 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-prometheus exists and is running
+2025-08-06 23:22:09 - HEALTH_VALIDATION [ERROR]: Container purebliss-prometheus is not running
+2025-08-06 23:22:09 - HEALTH_VALIDATION [ERROR]: Container purebliss-prometheus does not exist
+2025-08-06 23:22:09 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-06 23:22:09 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-prometheus-inventory-analysis.json
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for prometheus after task: initial-startup
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: Container name: purebliss-prometheus
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-prometheus exists and is running
+2025-08-06 23:22:55 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-prometheus is running
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-prometheus
+2025-08-06 23:22:55 - HEALTH_VALIDATION [ERROR]: Unknown health status: 
+no-healthcheck
+2025-08-06 23:22:55 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: Validating service endpoints for prometheus
+2025-08-06 23:22:55 - HEALTH_VALIDATION [ERROR]: Prometheus health endpoint not responding
+2025-08-06 23:22:55 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: Validating dependencies for prometheus
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for prometheus
+2025-08-06 23:22:55 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-prometheus
+2025-08-06 23:22:57 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.04%, Memory=19.94MiB (/%)
+2025-08-06 23:22:57 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:22:57 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:22:57 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-prometheus-initial-startup.json
+2025-08-06 23:22:57 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: prometheus is unhealthy after initial-startup
+2025-08-06 23:22:57 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 23:25:13 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for prometheus after task: healthcheck-enabled
+2025-08-06 23:25:13 - HEALTH_VALIDATION [INFO]: Container name: purebliss-prometheus
+2025-08-06 23:25:13 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-prometheus exists and is running
+2025-08-06 23:25:13 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-prometheus is running
+2025-08-06 23:25:13 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-prometheus
+2025-08-06 23:25:13 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-06 23:25:37 - HEALTH_VALIDATION [ERROR]: Health check failed after 12 attempts
+2025-08-06 23:25:37 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-06 23:25:37 - HEALTH_VALIDATION [INFO]: Validating service endpoints for prometheus
+2025-08-06 23:25:37 - HEALTH_VALIDATION [ERROR]: Prometheus health endpoint not responding
+2025-08-06 23:25:37 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 23:25:37 - HEALTH_VALIDATION [INFO]: Validating dependencies for prometheus
+2025-08-06 23:25:37 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for prometheus
+2025-08-06 23:25:37 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-prometheus
+2025-08-06 23:25:39 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=25.82MiB (/%)
+2025-08-06 23:25:39 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:25:39 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:25:39 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-prometheus-healthcheck-enabled.json
+2025-08-06 23:25:39 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: prometheus is unhealthy after healthcheck-enabled
+2025-08-06 23:25:39 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for prometheus after task: healthcheck-wget
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: Container name: purebliss-prometheus
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-prometheus exists and is running
+2025-08-06 23:27:06 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-prometheus is running
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-prometheus
+2025-08-06 23:27:06 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: Validating service endpoints for prometheus
+2025-08-06 23:27:06 - HEALTH_VALIDATION [ERROR]: Prometheus health endpoint not responding
+2025-08-06 23:27:06 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: Validating dependencies for prometheus
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for prometheus
+2025-08-06 23:27:06 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-prometheus
+2025-08-06 23:27:08 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=20.9MiB (/%)
+2025-08-06 23:27:08 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:27:08 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:27:08 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-prometheus-healthcheck-wget.json
+2025-08-06 23:27:08 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: prometheus is unhealthy after healthcheck-wget
+2025-08-06 23:27:08 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for prometheus after task: endpoint-validation-patch
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: Container name: purebliss-prometheus
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-prometheus exists and is running
+2025-08-06 23:28:50 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-prometheus is running
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-prometheus
+2025-08-06 23:28:50 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: Validating service endpoints for prometheus
+2025-08-06 23:28:50 - HEALTH_VALIDATION [SUCCESS]: Prometheus health endpoint responding
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: Validating dependencies for prometheus
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for prometheus
+2025-08-06 23:28:50 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-prometheus
+2025-08-06 23:28:52 - HEALTH_VALIDATION [INFO]: Container performance: CPU=0.00%, Memory=34.15MiB (/%)
+2025-08-06 23:28:52 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:28:52 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:28:52 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-prometheus-endpoint-validation-patch.json
+2025-08-06 23:28:52 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: prometheus is healthy after endpoint-validation-patch
+2025-08-06 23:28:52 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 23:53:28 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for prometheus after task: https-enforcement-final-validation
+2025-08-06 23:53:28 - HEALTH_VALIDATION [INFO]: Container name: purebliss-prometheus
+2025-08-06 23:53:28 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-prometheus exists and is running
+2025-08-06 23:53:28 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-prometheus is running
+2025-08-06 23:53:28 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-prometheus
+2025-08-06 23:53:29 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:53:29 - HEALTH_VALIDATION [INFO]: Validating service endpoints for prometheus
+2025-08-06 23:53:29 - HEALTH_VALIDATION [SUCCESS]: Prometheus health endpoint responding
+2025-08-06 23:53:29 - HEALTH_VALIDATION [INFO]: Validating dependencies for prometheus
+2025-08-06 23:53:29 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for prometheus
+2025-08-06 23:53:29 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-prometheus
+2025-08-06 23:53:31 - HEALTH_VALIDATION [INFO]: Container performance: CPU=2.25%, Memory=51MiB (/%)
+2025-08-06 23:53:31 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:53:31 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:53:31 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-prometheus-https-enforcement-final-validation.json
+2025-08-06 23:53:31 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: prometheus is healthy after https-enforcement-final-validation
+2025-08-06 23:53:31 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for grafana after task: initial-validation
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: Container name: purebliss-grafana
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-grafana exists and is running
+2025-08-06 23:57:38 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-grafana is running
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-grafana
+2025-08-06 23:57:38 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: Validating service endpoints for grafana
+2025-08-06 23:57:38 - HEALTH_VALIDATION [SUCCESS]: Grafana health endpoint responding
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: Validating dependencies for grafana
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for grafana
+2025-08-06 23:57:38 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-grafana
+2025-08-06 23:57:40 - HEALTH_VALIDATION [INFO]: Container performance: CPU=4.29%, Memory=86.48MiB (/%)
+2025-08-06 23:57:40 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-06 23:57:40 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-06 23:57:40 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-grafana-initial-validation.json
+2025-08-06 23:57:40 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: grafana is healthy after initial-validation
+2025-08-06 23:57:40 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-07 00:22:55 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for all after task: patch-validation
+2025-08-07 00:22:55 - HEALTH_VALIDATION [INFO]: Container name: purebliss-all
+2025-08-07 00:22:55 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-all exists and is running
+2025-08-07 00:22:55 - HEALTH_VALIDATION [ERROR]: Container purebliss-all is not running
+2025-08-07 00:22:55 - HEALTH_VALIDATION [ERROR]: Container purebliss-all does not exist
+2025-08-07 00:22:55 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-07 00:22:55 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-all-patch-validation.json
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for grafana after task: vault-integration-final
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: Container name: purebliss-grafana
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-grafana exists and is running
+2025-08-07 00:53:49 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-grafana is running
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-grafana
+2025-08-07 00:53:49 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: Validating service endpoints for grafana
+2025-08-07 00:53:49 - HEALTH_VALIDATION [SUCCESS]: Grafana health endpoint responding
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: Validating dependencies for grafana
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: No specific dependency validation defined for grafana
+2025-08-07 00:53:49 - HEALTH_VALIDATION [INFO]: Validating performance baseline for purebliss-grafana
+2025-08-07 00:53:52 - HEALTH_VALIDATION [INFO]: Container performance: CPU=1.77%, Memory=92.3MiB (/%)
+2025-08-07 00:53:52 - HEALTH_VALIDATION [SUCCESS]: CPU usage within acceptable range
+2025-08-07 00:53:52 - HEALTH_VALIDATION [SUCCESS]: Memory usage within acceptable range
+2025-08-07 00:53:52 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-grafana-vault-integration-final.json
+2025-08-07 00:53:52 - HEALTH_VALIDATION [SUCCESS]: ✅ HEALTH VALIDATION PASSED: grafana is healthy after vault-integration-final
+2025-08-07 00:53:52 - HEALTH_VALIDATION [SUCCESS]: ✅ PROCEED TO NEXT TASK
+2025-08-07 10:35:56 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for loki after task: phase6-build
+2025-08-07 10:35:56 - HEALTH_VALIDATION [INFO]: Container name: purebliss-loki
+2025-08-07 10:35:56 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-loki exists and is running
+2025-08-07 10:35:56 - HEALTH_VALIDATION [ERROR]: Container purebliss-loki is not running
+2025-08-07 10:35:56 - HEALTH_VALIDATION [ERROR]: Container purebliss-loki does not exist
+2025-08-07 10:35:56 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-07 10:35:56 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-loki-phase6-build.json
+2025-08-07 11:37:00 - HEALTH_VALIDATION: Starting health validation - Service: loki, Task: autonomous-enhancement
+[0;34mℹ️ Checking Docker system health...[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: INFO: Checking Docker system health...
+[0;32m✅ Docker system is healthy[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: SUCCESS: Docker system is healthy
+[0;34mℹ️ Validating loki service...[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: INFO: Validating loki service...
+[0;32m✅ loki container health status: healthy[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: SUCCESS: loki container health status: healthy
+[0;31m❌ loki HTTP endpoint https://dev.purebliss.app/ready is not responding[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: ERROR: loki HTTP endpoint https://dev.purebliss.app/ready is not responding
+[0;34mℹ️ Checking system performance...[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: INFO: Checking system performance...
+[0;32m✅ Disk usage is acceptable: 38%[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: SUCCESS: Disk usage is acceptable: 38%
+[0;32m✅ Memory usage is acceptable: 25%[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: SUCCESS: Memory usage is acceptable: 25%
+[0;31m❌ Health validation FAILED for loki (autonomous-enhancement) - Service issues detected[0m
+2025-08-07 11:37:00 - HEALTH_VALIDATION: ERROR: Health validation FAILED for loki (autonomous-enhancement) - Service issues detected
+2025-08-07 11:37:00 - HEALTH_VALIDATION: Health validation completed with exit code: 1
+2025-08-07 11:45:31 - HEALTH_VALIDATION: Starting health validation - Service: loki, Task: autonomous-integration-test
+[0;34mℹ️ Checking Docker system health...[0m
+2025-08-07 11:45:31 - HEALTH_VALIDATION: INFO: Checking Docker system health...
+[0;32m✅ Docker system is healthy[0m
+2025-08-07 11:45:31 - HEALTH_VALIDATION: SUCCESS: Docker system is healthy
+[0;34mℹ️ Validating loki service...[0m
+2025-08-07 11:45:31 - HEALTH_VALIDATION: INFO: Validating loki service...
+[0;34mℹ️ Found running container: loki_phase1_manual[0m
+2025-08-07 11:45:31 - HEALTH_VALIDATION: INFO: Found running container: loki_phase1_manual
+[0;32m✅ loki container health status: healthy[0m
+2025-08-07 11:45:31 - HEALTH_VALIDATION: SUCCESS: loki container health status: healthy
+[0;31m❌ loki HTTP endpoint https://dev.purebliss.app/ready is not responding[0m
+2025-08-07 11:45:31 - HEALTH_VALIDATION: ERROR: loki HTTP endpoint https://dev.purebliss.app/ready is not responding
+[0;34mℹ️ Triggering autonomous endpoint remediation for loki...[0m
+2025-08-07 11:45:31 - HEALTH_VALIDATION: INFO: Triggering autonomous endpoint remediation for loki...
+[0;31m❌ Autonomous remediation failed for loki[0m
+2025-08-07 11:45:37 - HEALTH_VALIDATION: ERROR: Autonomous remediation failed for loki
+[0;34mℹ️ Checking system performance...[0m
+2025-08-07 11:45:37 - HEALTH_VALIDATION: INFO: Checking system performance...
+[0;32m✅ Disk usage is acceptable: 38%[0m
+2025-08-07 11:45:37 - HEALTH_VALIDATION: SUCCESS: Disk usage is acceptable: 38%
+[0;32m✅ Memory usage is acceptable: 24%[0m
+2025-08-07 11:45:37 - HEALTH_VALIDATION: SUCCESS: Memory usage is acceptable: 24%
+[0;31m❌ Health validation FAILED for loki (autonomous-integration-test) - Service issues detected[0m
+2025-08-07 11:45:37 - HEALTH_VALIDATION: ERROR: Health validation FAILED for loki (autonomous-integration-test) - Service issues detected
+2025-08-07 11:45:37 - HEALTH_VALIDATION: Health validation completed with exit code: 1
+2025-08-07 11:46:18 - HEALTH_VALIDATION: Starting health validation - Service: loki, Task: autonomous-test-final
+[0;34mℹ️ Checking Docker system health...[0m
+2025-08-07 11:46:18 - HEALTH_VALIDATION: INFO: Checking Docker system health...
+[0;32m✅ Docker system is healthy[0m
+2025-08-07 11:46:19 - HEALTH_VALIDATION: SUCCESS: Docker system is healthy
+[0;34mℹ️ Validating loki service...[0m
+2025-08-07 11:46:19 - HEALTH_VALIDATION: INFO: Validating loki service...
+[0;34mℹ️ Found running container: loki_phase1_manual[0m
+2025-08-07 11:46:19 - HEALTH_VALIDATION: INFO: Found running container: loki_phase1_manual
+[0;32m✅ loki container health status: healthy[0m
+2025-08-07 11:46:19 - HEALTH_VALIDATION: SUCCESS: loki container health status: healthy
+[0;34mℹ️ Direct endpoint failed, trying proxy: https://dev.purebliss.app/loki/ready[0m
+2025-08-07 11:46:19 - HEALTH_VALIDATION: INFO: Direct endpoint failed, trying proxy: https://dev.purebliss.app/loki/ready
+[0;31m❌ loki HTTP endpoint https://dev.purebliss.app:3100/ready is not responding[0m
+2025-08-07 11:46:19 - HEALTH_VALIDATION: ERROR: loki HTTP endpoint https://dev.purebliss.app:3100/ready is not responding
+[0;34mℹ️ Triggering autonomous endpoint remediation for loki...[0m
+2025-08-07 11:46:19 - HEALTH_VALIDATION: INFO: Triggering autonomous endpoint remediation for loki...
+[0;31m❌ Autonomous remediation failed for loki[0m
+2025-08-07 11:46:24 - HEALTH_VALIDATION: ERROR: Autonomous remediation failed for loki
+[0;34mℹ️ Checking system performance...[0m
+2025-08-07 11:46:24 - HEALTH_VALIDATION: INFO: Checking system performance...
+[0;32m✅ Disk usage is acceptable: 38%[0m
+2025-08-07 11:46:24 - HEALTH_VALIDATION: SUCCESS: Disk usage is acceptable: 38%
+[0;32m✅ Memory usage is acceptable: 24%[0m
+2025-08-07 11:46:24 - HEALTH_VALIDATION: SUCCESS: Memory usage is acceptable: 24%
+[0;31m❌ Health validation FAILED for loki (autonomous-test-final) - Service issues detected[0m
+2025-08-07 11:46:24 - HEALTH_VALIDATION: ERROR: Health validation FAILED for loki (autonomous-test-final) - Service issues detected
+2025-08-07 11:46:24 - HEALTH_VALIDATION: Health validation completed with exit code: 1

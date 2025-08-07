@@ -169,3 +169,544 @@
 [Tue Aug  5 11:36:24 AM EDT 2025] INFO: Nginx container running independently with HTTP on port 80
 [Tue Aug  5 12:29:00 PM EDT 2025] INFO: Successfully created and pushed purebliss-environment branch containing complete /opt directory structure with all development environment components, vault integrations, and service configurations.
 [Tue Aug  5 12:30:43 PM EDT 2025] INFO: Starting Keycloak Vault+PostgreSQL integration enhancement
+[Tue Aug  5 02:20:40 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 02:20:40 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 02:20:50 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 02:20:50 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 02:20:50 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 02:20:50 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 02:20:50 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 02:20:50 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 02:20:50 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 02:20:50 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 02:20:50 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 02:20:50 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 02:20:50 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 02:20:50 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 02:20:51 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 02:20:51 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 02:20:51 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 02:20:51 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 02:20:51 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 02:20:51 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 02:20:51 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 02:20:51 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 02:20:53 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 418.7MiB
+[Tue Aug  5 02:20:55 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 508.31%
+[Tue Aug  5 02:20:55 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 12ms
+[Tue Aug  5 02:20:55 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 02:20:55 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 02:20:55 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 02:20:55 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 02:20:55 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 02:20:55 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 02:45:23 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 02:45:23 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 02:45:34 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 02:45:34 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 02:45:34 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 02:45:34 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 02:45:34 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 02:45:34 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 02:45:34 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 02:45:34 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 02:45:34 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 02:45:34 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 02:45:34 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 02:45:36 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 377MiB
+[Tue Aug  5 02:45:38 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 604.63%
+[Tue Aug  5 02:45:38 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 11ms
+[Tue Aug  5 02:45:38 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 02:45:38 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 02:45:38 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 02:45:38 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 02:45:38 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 02:45:38 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 03:35:50 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 03:35:50 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 03:36:00 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 03:36:00 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 03:36:00 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 03:36:00 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 03:36:00 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 03:36:00 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 03:36:00 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 03:36:00 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 03:36:00 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 03:36:00 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 03:36:00 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 03:36:00 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 03:36:00 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 03:36:01 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 03:36:01 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 03:36:01 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 03:36:01 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 03:36:01 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 03:36:01 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 03:36:01 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 03:36:01 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 03:36:01 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 03:36:01 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 03:36:01 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 03:36:01 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 03:36:01 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 03:36:01 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 03:36:03 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 372.8MiB
+[Tue Aug  5 03:36:05 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 634.39%
+[Tue Aug  5 03:36:05 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 12ms
+[Tue Aug  5 03:36:05 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 03:36:05 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 03:36:05 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 03:36:05 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 03:36:05 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 03:36:05 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 03:53:18 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 03:53:18 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 03:53:28 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 03:53:28 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 03:53:28 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 03:53:28 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 03:53:28 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 03:53:28 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 03:53:28 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 03:53:28 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 03:53:28 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 03:53:28 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 03:53:28 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 03:53:31 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 423.5MiB
+[Tue Aug  5 03:53:33 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 534.59%
+[Tue Aug  5 03:53:33 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 8ms
+[Tue Aug  5 03:53:33 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 03:53:33 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 03:53:33 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 03:53:33 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 03:53:33 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 03:53:33 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 04:02:39 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 04:02:39 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 04:02:50 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 04:02:50 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 04:02:50 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 04:02:50 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 04:02:50 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 04:02:50 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 04:02:50 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 04:02:50 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 04:02:50 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 04:02:50 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 04:02:50 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 04:02:52 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 350.3MiB
+[Tue Aug  5 04:02:54 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 616.74%
+[Tue Aug  5 04:02:54 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 11ms
+[Tue Aug  5 04:02:54 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 04:02:54 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 04:02:54 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 04:02:54 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 04:02:54 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 04:02:54 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 04:12:52 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 04:12:52 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 04:13:02 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 04:13:02 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 04:13:02 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 04:13:02 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 04:13:02 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 04:13:02 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 04:13:02 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 04:13:02 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 04:13:02 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 04:13:02 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 04:13:02 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 04:13:02 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 04:13:02 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 04:13:03 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 04:13:03 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 04:13:03 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 04:13:03 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 04:13:03 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 04:13:03 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 04:13:03 PM EDT 2025] FAIL: Keycloak-Validation: Container not running, cannot check logs
+[Tue Aug  5 04:13:03 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 04:13:03 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 04:13:03 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 04:13:03 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 04:13:04 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 343.4MiB
+[Tue Aug  5 04:13:06 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 632.50%
+[Tue Aug  5 04:13:06 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 8ms
+[Tue Aug  5 04:13:06 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 04:13:06 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 04:13:06 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 04:13:06 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 04:13:06 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 04:13:06 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 9
+[Tue Aug  5 04:18:25 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 04:18:25 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 04:18:35 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 04:18:35 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 04:18:35 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 04:18:35 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 04:18:36 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 04:18:36 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 04:18:36 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 04:18:36 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 04:18:36 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 04:18:36 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 04:18:36 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 04:18:36 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 04:18:36 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 04:18:36 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 04:18:36 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 04:18:36 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 04:18:36 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 04:18:36 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 04:18:36 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 04:18:36 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 04:18:38 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 227MiB
+[Tue Aug  5 04:18:40 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 494.34%
+[Tue Aug  5 04:18:40 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 8ms
+[Tue Aug  5 04:18:40 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 04:18:40 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 04:18:40 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 04:18:40 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 04:18:40 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 04:18:40 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 04:32:09 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 04:32:09 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 04:32:20 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 04:32:20 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 04:32:20 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 04:32:20 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 04:32:20 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 04:32:20 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 04:32:20 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 04:32:20 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 04:32:20 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 04:32:20 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 04:32:20 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 04:32:22 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 294.9MiB
+[Tue Aug  5 04:32:24 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 576.80%
+[Tue Aug  5 04:32:24 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 8ms
+[Tue Aug  5 04:32:24 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 04:32:24 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 04:32:24 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 04:32:24 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 04:32:24 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 04:32:24 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 04:40:53 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 04:40:53 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 04:41:04 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 04:41:04 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 04:41:04 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 04:41:04 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 04:41:04 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 04:41:04 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 04:41:04 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 04:41:04 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 04:41:04 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 04:41:04 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 04:41:04 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 04:41:06 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 351.4MiB
+[Tue Aug  5 04:41:08 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 630.41%
+[Tue Aug  5 04:41:08 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 11ms
+[Tue Aug  5 04:41:08 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 04:41:08 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 04:41:08 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 04:41:08 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 04:41:08 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 04:41:08 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 05:47:02 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 05:47:02 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 05:47:13 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 05:47:13 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 05:47:13 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 05:47:13 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 05:47:13 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 05:47:13 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 05:47:13 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 05:47:13 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 05:47:13 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 05:47:13 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 05:47:13 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 05:47:16 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 592.1MiB
+[Tue Aug  5 05:47:18 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 477.59%
+[Tue Aug  5 05:47:18 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 7ms
+[Tue Aug  5 05:47:18 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 05:47:18 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 05:47:18 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 05:47:18 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 05:47:18 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 05:47:18 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 05:51:20 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 05:51:20 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 05:51:30 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 05:51:30 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 05:51:30 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 05:51:30 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 05:51:30 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 05:51:30 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 05:51:30 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 05:51:30 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 05:51:30 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 05:51:30 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 05:51:30 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 05:51:33 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 427.1MiB
+[Tue Aug  5 05:51:35 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 478.30%
+[Tue Aug  5 05:51:35 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 7ms
+[Tue Aug  5 05:51:35 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 05:51:35 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 05:51:35 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 05:51:35 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 05:51:35 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 05:51:35 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 05:57:14 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 05:57:14 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 05:57:24 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 05:57:24 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 05:57:24 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 05:57:24 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 05:57:24 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 05:57:24 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 05:57:24 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 05:57:24 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 05:57:24 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 05:57:24 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 05:57:24 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 05:57:26 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 166.3MiB
+[Tue Aug  5 05:57:28 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 475.71%
+[Tue Aug  5 05:57:28 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 10ms
+[Tue Aug  5 05:57:28 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 05:57:28 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 05:57:28 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 05:57:28 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 05:57:28 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 05:57:28 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 06:04:17 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:04:17 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 06:04:27 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 06:04:27 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 06:04:27 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 06:04:27 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 06:04:27 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 06:04:27 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 06:04:27 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 06:04:27 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 06:04:27 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 06:04:27 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 06:04:27 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 06:04:27 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 06:04:27 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 06:04:27 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 06:04:27 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 06:04:28 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 06:04:28 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 06:04:28 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 06:04:28 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 06:04:28 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 06:04:29 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 359.5MiB
+[Tue Aug  5 06:04:31 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 637.78%
+[Tue Aug  5 06:04:31 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 7ms
+[Tue Aug  5 06:04:31 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 06:04:31 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 06:04:31 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 06:04:31 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 06:04:31 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 06:04:31 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 06:09:12 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:09:12 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [1]: Container Status Check
+[Tue Aug  5 06:09:23 PM EDT 2025] PASS: Keycloak-Validation: Container is running
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [2]: Health Endpoint Check
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Health endpoint not accessible
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Ready endpoint not ready
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Live endpoint not alive
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [3]: Admin Console Access
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Admin console not accessible (HTTP 000000)
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [4]: Database Connectivity
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Database connection failed
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [5]: Redis Connectivity
+[Tue Aug  5 06:09:23 PM EDT 2025] PASS: Keycloak-Validation: Redis connection successful (via Docker)
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [6]: Vault Connectivity
+[Tue Aug  5 06:09:23 PM EDT 2025] PASS: Keycloak-Validation: Vault is accessible
+[Tue Aug  5 06:09:23 PM EDT 2025] WARN: Keycloak-Validation: Vault is sealed
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [7]: Vault Secrets Access
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak database secrets not found in Vault
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Keycloak admin secrets not found in Vault
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [8]: Container Logs Analysis
+[Tue Aug  5 06:09:23 PM EDT 2025] WARN: Keycloak-Validation: Keycloak startup status unclear from logs
+[Tue Aug  5 06:09:23 PM EDT 2025] INFO: Keycloak-Validation: No explicit database connection status in logs
+[Tue Aug  5 06:09:23 PM EDT 2025] INFO: Keycloak-Validation: No explicit Vault integration status in logs
+[Tue Aug  5 06:09:23 PM EDT 2025] WARN: Keycloak-Validation: 11 errors found in recent logs
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [9]: Admin Authentication
+[Tue Aug  5 06:09:23 PM EDT 2025] FAIL: Keycloak-Validation: Admin authentication failed
+[Tue Aug  5 06:09:23 PM EDT 2025] INFO: Keycloak-Validation: Auth response: Unknown error
+[Tue Aug  5 06:09:23 PM EDT 2025] TEST: Keycloak-Validation [10]: Performance Metrics
+[Tue Aug  5 06:09:25 PM EDT 2025] PASS: Keycloak-Validation: Memory usage acceptable: 394.8MiB
+[Tue Aug  5 06:09:27 PM EDT 2025] WARN: Keycloak-Validation: High CPU usage: 561.34%
+[Tue Aug  5 06:09:27 PM EDT 2025] PASS: Keycloak-Validation: Response time acceptable: 12ms
+[Tue Aug  5 06:09:27 PM EDT 2025] TEST: Keycloak-Validation [11]: Configuration Validation
+[Tue Aug  5 06:09:27 PM EDT 2025] PASS: Keycloak-Validation: Environment file exists
+[Tue Aug  5 06:09:27 PM EDT 2025] PASS: Keycloak-Validation: All required environment variables present
+[Tue Aug  5 06:09:27 PM EDT 2025] PASS: Keycloak-Validation: Docker Compose file exists
+[Tue Aug  5 06:09:27 PM EDT 2025] PASS: Keycloak-Validation: Entrypoint script exists and is executable
+[Tue Aug  5 06:09:27 PM EDT 2025] SUMMARY: Keycloak-Validation - Tests: 11, Passed: 9, Failed: 8
+[Tue Aug  5 06:15:19 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:15:19 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 06:15:29 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:15:29 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 06:15:40 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:15:40 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 06:18:56 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:18:56 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 06:19:08 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:19:08 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
+[Tue Aug  5 06:19:20 PM EDT 2025] INFO: Keycloak-Setup: Starting comprehensive Keycloak setup with Vault and PostgreSQL
+[Tue Aug  5 06:19:20 PM EDT 2025] ERROR: Keycloak-Setup: Required command not found: psql
