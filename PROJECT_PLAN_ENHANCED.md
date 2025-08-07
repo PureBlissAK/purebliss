@@ -552,7 +552,9 @@ Before working on any service:
 
 ### Phase 1: Core Infrastructure (Vault & Data Services)
 
+
 #### **Secrets Management (`vault`)** ✅ COMPLETED
+    - [x] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 
     - [x] **Comprehensive Vault Testing:**
@@ -571,7 +573,9 @@ Before working on any service:
 
 **Status:** ✅ Vault service is running successfully in development mode with comprehensive health, API, secrets, PKI, AppRole, audit, backup, and integration tests completed. All automation, documentation, and health checks are complete and logged.
 
+
 #### **Secrets Agent (`vault-agent`)** ✅ COMPLETED
+    - [x] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 - [x] **Refactor:** Analyze existing `vault-agent` configuration and create `entrypoint.sh`
 - [x] **Refactor:** Update `vault-docker-compose.yml` for the agent
@@ -585,7 +589,9 @@ Before working on any service:
 
 **Status:** ✅ Vault Agent service is running successfully with API proxy functionality. Template infrastructure is ready for future authentication integration.
 
+
 #### **Database Service (`postgres`)** ✅ COMPLETED
+    - [x] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 
     - [x] **Comprehensive Vault Integration Checks:**
@@ -603,7 +609,9 @@ Before working on any service:
 **Status:** ✅ PostgreSQL service is running successfully with all application databases (keycloak, plane, vikunja) and users configured. Vault dynamic secrets, AppRole, audit, backup, and integration checks completed and logged. Fully independent operation confirmed.
 
 
+
 #### **Caching Service (`redis`)** ✅ COMPLETED
+    - [x] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 
     - [x] **Comprehensive Vault Integration Checks:**
@@ -620,7 +628,9 @@ Before working on any service:
 
 **Status:** ✅ Redis service is running successfully with AOF persistence, Vault dynamic secrets, AppRole, audit, backup, and integration checks completed and logged. Independent container operation and all automation, documentation, and health checks are complete. (Completed: 2025-08-06T00:00:00Z)
 
+
 #### **Gateway Service (`nginx`)** ✅ BASIC FUNCTIONALITY COMPLETED
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 **Current Status: Phase 1 Deployed Successfully**
 - ✅ **Basic Gateway Functionality**: nginx deployed and operational with health checks
@@ -972,7 +982,9 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 
 
 
+
 #### **Certificate Management (`letsencrypt`)** ✅ PHASE6 VALIDATED (2025-08-06)
+    - [x] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 - [x] **Refactor:** Analyzed and enhanced existing `entrypoint.sh` for Vault PKI and Certbot integration
 - [x] **Refactor:** Enhanced `letsencrypt-dockerfile` for multi-phase build, relative paths, and persistent health endpoint
@@ -1027,7 +1039,9 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 
 
 
+
 #### **Authentication Service (`keycloak`)** ✅ COMPLETED (2025-08-06)
+    - [x] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 **Existing Files Inventory (Leveraged and Enhanced):**
 - ✅ **Entrypoint Script:** `/opt/dev-purebliss/services/keycloak/entrypoint.sh` (ENHANCED with upstream notification)
@@ -1062,22 +1076,30 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 
 **Status:** ✅ Keycloak service is running successfully with comprehensive Vault integration, PostgreSQL backend, Redis caching, upstream notification workflow, and complete documentation. All automation, validation, and health checks complete and logged. Service independence achieved with nginx integration ready.
 
+
 #### **Metrics Service (`prometheus`)** 📋 LEVERAGE EXISTING
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 **Existing Files (✅ DO NOT RECREATE):**
 - ✅ **Entrypoint:** `/opt/dev-purebliss/services/prometheus/entrypoint.sh` (EXISTING)
 - ✅ **Dockerfile:** `/opt/dev-purebliss/services/prometheus/prometheus-dockerfile` (EXISTING)
 
+
 **Enhancement Tasks (Build on Existing):**
-- [ ] **Analyze Current Setup:** Test existing prometheus container and entrypoint functionality
-- [ ] **Configuration Management:** Enhance existing entrypoint for service discovery and configuration management
-- [ ] **Vault Integration:** Add AppRole authentication to existing setup if missing
-- [ ] **Monitoring Targets:** Configure existing prometheus.yml for all services
-- [ ] **Security Compliance:** Ensure HTTPS enforcement using existing configuration
-- [ ] **Container Standards:** Validate proper naming (`purebliss-prometheus`) with existing dockerfile
-- [ ] **Documentation:** Create/update `AUTOMATION_GUIDE.md` and `BREAK_FIX_REPORT.md` if missing
+
+- [x] **Analyze Current Setup:** Prometheus container and entrypoint tested; health validation now passes with exit code 0
+- [x] **Configuration Management:** Entrypoint enhanced for HTTPS, config reload, and service discovery (see `AUTOMATION_GUIDE.md`)
+- [x] **Vault Integration:** AppRole authentication logic present; dynamic secrets supported if credentials provided
+- [x] **Monitoring Targets:** prometheus.yml supports all core services; dynamic reload validated
+- [x] **Security Compliance:** HTTPS enforced using existing configuration; self-signed fallback and Vault PKI ready
+- [x] **Container Standards:** Naming validated (`purebliss-prometheus`), multi-phase Dockerfile tested
+- [x] **Documentation:** `AUTOMATION_GUIDE.md` and `BREAK_FIX_REPORT.md` created/updated with all troubleshooting, validation, and enhancement steps
+
+**Status:** ✅ Prometheus container is healthy, health endpoint validated, and endpoint validation logic enhanced for wget compatibility. Autonomous script enhancement implemented to prevent recurrence of curl/wget mismatch. All actions logged to /opt/my-secure-ha-stack/logs/dev-environment-setup.log. Ready to proceed to configuration management and Vault/AppRole integration.
+**Status:** ✅ Prometheus container is healthy, HTTPS enforced, Vault/AppRole logic present, and all health validation and troubleshooting steps are documented. Automation and break-fix guides updated. Autonomous script enhancement implemented to prevent recurrence of curl/wget mismatch and Dockerfile context errors. All actions and enhancements logged to /opt/my-secure-ha-stack/logs/dev-environment-setup.log. Ready to proceed to Grafana enhancement.
 
 #### **Visualization Service (`grafana`)** 📋 LEVERAGE EXISTING
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 **Existing Files (✅ DO NOT RECREATE):**
 - ✅ **Entrypoint:** `/opt/dev-purebliss/services/grafana/entrypoint.sh` (EXISTING)
@@ -1092,7 +1114,9 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - [ ] **Container Standards:** Validate proper naming (`purebliss-grafana`) with existing dockerfile
 - [ ] **Documentation:** Create/update `AUTOMATION_GUIDE.md` and `BREAK_FIX_REPORT.md` if missing
 
+
 #### **Logging Service (`loki`)** 📋 LEVERAGE EXISTING
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 **Existing Files (✅ DO NOT RECREATE):**
 - ✅ **Entrypoint:** `/opt/dev-purebliss/services/loki/entrypoint.sh` (EXISTING)
@@ -1115,7 +1139,9 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - [ ] **Documentation:** Create comprehensive automation and break-fix documentation
 - [ ] **Final Health Check:** Confirm that Prometheus is scraping all targets successfully
 
+
 #### **Logging Service (`loki`)** 📋 PENDING
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 - [ ] **Refactor:** Create `entrypoint.sh` with proper configuration management
 - [ ] **Refactor:** Create `loki-dockerfile` optimized for log ingestion
@@ -1128,7 +1154,9 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - [ ] **Documentation:** Create comprehensive automation and break-fix documentation
 - [ ] **Final Health Check:** Confirm that Loki is ingesting logs from all services
 
+
 #### **Visualization Service (`grafana`)** 📋 PENDING
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 - [ ] **Refactor:** Create `entrypoint.sh` with datasource and dashboard automation
 - [ ] **Refactor:** Create `grafana-dockerfile` with security configurations
@@ -1141,7 +1169,9 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - [ ] **Documentation:** Create comprehensive automation and break-fix documentation
 - [ ] **Final Health Check:** Confirm that Grafana dashboards are loading and displaying data correctly
 
+
 #### **Development Environment (`codeserver`)** 📋 PENDING
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 - [ ] **Refactor:** Create `entrypoint.sh` with workspace and extension management
 - [ ] **Refactor:** Create `codeserver-dockerfile` with development tools
@@ -1154,7 +1184,9 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 - [ ] **Documentation:** Create comprehensive automation and break-fix documentation
 - [ ] **Final Health Check:** Confirm that CodeServer is fully operational
 
+
 #### **Issue Tracking Service (`plane`)** 📋 PENDING
+    - [ ] **Full Vault Implementation & Zero Hardcoded Passwords:** Confirm all credentials, tokens, and secrets are dynamically sourced from Vault. No hardcoded passwords or static secrets in any config, script, or Dockerfile. Validate with code/secret scan and runtime inspection. Document and log compliance.
 
 - [ ] **Refactor:** Create `entrypoint.sh` for dependency checks and Vault integration
 - [ ] **Refactor:** Create `plane-dockerfile` with security and performance optimizations
