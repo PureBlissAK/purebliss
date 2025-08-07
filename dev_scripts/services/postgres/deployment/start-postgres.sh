@@ -136,7 +136,7 @@ done
 
 # Run health check
 log_info "Running comprehensive health check..."
-if /opt/dev-purebliss/comprehensive-health-check.sh postgres 2>/dev/null; then
+if /opt/dev-purebliss/dev_scripts/health-checks/comprehensive-health-check.sh postgres 2>/dev/null; then
     log_success "PostgreSQL health check passed"
 else
     log_error "PostgreSQL health check failed"

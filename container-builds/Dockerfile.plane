@@ -1,0 +1,59 @@
+# Multi-phase plane container scaffolding - Enhanced from existing Pure Bliss work
+# Based on: /opt/dev-purebliss/services/plane/plane-dockerfile
+ARG BUILD_PHASE=6
+
+# Phase 1: Minimal Container (Base from existing)
+
+
+FROM makeplane/plane-space:latest AS phase1
+RUN apk add --no-cache curl busybox
+
+# Minimal health endpoint for Phase 1
+COPY health-endpoint.sh /health-endpoint.sh
+RUN chmod +x /health-endpoint.sh
+CMD ["/health-endpoint.sh"]
+
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8080/health || exit 1
+EXPOSE 8080
+
+
+# Phase 2: Enhanced Configuration (Existing configs)
+FROM phase1 AS phase2
+RUN apk add --no-cache jq openssl
+COPY /opt/dev-purebliss/services/plane/configs/ /opt/config/
+# If plane.conf exists, copy it. Otherwise, skip or add as needed.
+# COPY /opt/dev-purebliss/services/plane/plane.conf /opt/config/
+
+
+# Phase 3: Service Integration (Vault integration from existing)
+FROM phase2 AS phase3
+COPY /opt/dev-purebliss/services/plane/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+COPY /opt/dev-purebliss/services/plane/scripts/ /opt/scripts/
+
+
+# Phase 4: Advanced Features
+FROM phase3 AS phase4
+COPY /opt/dev-purebliss/services/plane/templates/ /opt/templates/
+# If there are specific .sh files to copy, list them explicitly. Example:
+# COPY /opt/dev-purebliss/services/plane/startup.sh /opt/scripts/
+# RUN chmod +x /opt/scripts/startup.sh
+
+
+# Phase 5: Production Readiness
+FROM phase4 AS phase5
+RUN mkdir -p /opt/my-secure-ha-stack/logs
+# If best-practices directory exists, copy it. Otherwise, skip or add as needed.
+# COPY /opt/dev-purebliss/services/plane/best-practices/ /opt/best-practices/
+USER root
+
+# Phase 6: Elite Features (Full existing functionality)
+FROM phase5 AS phase6
+# If you need to copy the entire directory, ensure it exists and is needed.
+# COPY /opt/dev-purebliss/services/plane/ /opt/plane-config/
+ENV ADVANCED_MONITORING=true
+ENV AUTO_HEALING=true
+
+# Final stage selection based on BUILD_PHASE
+FROM phase${BUILD_PHASE} AS final
+

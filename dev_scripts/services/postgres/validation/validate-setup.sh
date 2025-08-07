@@ -288,6 +288,6 @@ else
     echo "1. Check logs: docker logs purebliss-postgres"
     echo "2. Verify Vault status: vault status"
     echo "3. Re-run setup: /opt/dev-purebliss/services/postgres/start-postgres-vault.sh"
-    echo "4. Check comprehensive health: /opt/dev-purebliss/comprehensive-health-check.sh"
+    echo "4. Check comprehensive health: /opt/dev-purebliss/dev_scripts/health-checks/comprehensive-health-check.sh"
     exit 1
 fi

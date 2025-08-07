@@ -222,7 +222,7 @@ function main() {
     echo "  /opt/dev-purebliss/services/postgres/validate-setup.sh"
     echo ""
     echo "To run comprehensive health check:"
-    echo "  /opt/dev-purebliss/comprehensive-health-check.sh"
+    echo "  /opt/dev-purebliss/dev_scripts/health-checks/comprehensive-health-check.sh"
 }
 
 # Run main function

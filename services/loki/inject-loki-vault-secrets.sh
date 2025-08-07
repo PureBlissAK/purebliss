@@ -30,24 +30,24 @@ if [[ -n "$TOKEN" ]]; then
   echo -n "$TOKEN" > "$TMPDIR/loki_token"
 fi
 
-# Copy secrets into the container (to /tmp/loki-secrets, then move to secure location)
+# Copy secrets into the container (to /tmp/loki-secrets, then move to accessible location)
 docker exec $CONTAINER mkdir -p /tmp/loki-secrets
 for f in "$TMPDIR"/*; do
   docker cp "$f" "$CONTAINER:/tmp/loki-secrets/$(basename "$f")"
 done
 
-# Move to more secure location and set permissions
-docker exec $CONTAINER sh -c 'mkdir -p /etc/loki-secrets 2>/dev/null || mkdir -p /var/lib/loki-secrets'
-docker exec $CONTAINER sh -c 'cp /tmp/loki-secrets/* /etc/loki-secrets/ 2>/dev/null || cp /tmp/loki-secrets/* /var/lib/loki-secrets/'
-docker exec $CONTAINER sh -c 'chmod 600 /etc/loki-secrets/* 2>/dev/null || chmod 600 /var/lib/loki-secrets/*'
+# Try to secure the location (use /tmp if others fail)
+docker exec $CONTAINER sh -c 'mkdir -p /home/loki/.secrets 2>/dev/null || mkdir -p /loki/.secrets 2>/dev/null || mkdir -p /tmp/.secrets'
+docker exec $CONTAINER sh -c 'cp /tmp/loki-secrets/* /home/loki/.secrets/ 2>/dev/null || cp /tmp/loki-secrets/* /loki/.secrets/ 2>/dev/null || cp /tmp/loki-secrets/* /tmp/.secrets/'
+docker exec $CONTAINER sh -c 'chmod 600 /home/loki/.secrets/* 2>/dev/null || chmod 600 /loki/.secrets/* 2>/dev/null || chmod 600 /tmp/.secrets/*'
 docker exec $CONTAINER rm -rf /tmp/loki-secrets
 
 # Clean up temp files
 rm -rf "$TMPDIR"
 
-log "Vault AppRole secrets injected into $CONTAINER (secured location)."
+log "Vault AppRole secrets injected into $CONTAINER (accessible location)."
 
-# Optionally, export env vars for health/validation scripts (try both paths)
-docker exec $CONTAINER sh -c 'SECRETS_DIR="/etc/loki-secrets"; [ ! -d "$SECRETS_DIR" ] && SECRETS_DIR="/var/lib/loki-secrets"; export LOKI_VAULT_ROLE_ID=$(cat $SECRETS_DIR/loki_role_id); export LOKI_VAULT_SECRET_ID=$(cat $SECRETS_DIR/loki_secret_id); [ -f $SECRETS_DIR/loki_token ] && export LOKI_VAULT_TOKEN=$(cat $SECRETS_DIR/loki_token); echo "Secrets exported for validation from $SECRETS_DIR."'
+# Optionally, export env vars for health/validation scripts (try multiple paths)
+docker exec $CONTAINER sh -c 'for dir in /home/loki/.secrets /loki/.secrets /tmp/.secrets; do if [ -d "$dir" ]; then SECRETS_DIR="$dir"; break; fi; done; export LOKI_VAULT_ROLE_ID=$(cat $SECRETS_DIR/loki_role_id); export LOKI_VAULT_SECRET_ID=$(cat $SECRETS_DIR/loki_secret_id); [ -f $SECRETS_DIR/loki_token ] && export LOKI_VAULT_TOKEN=$(cat $SECRETS_DIR/loki_token); echo "Secrets exported for validation from $SECRETS_DIR."'
 
 log "Injection complete. Proceed with validation."

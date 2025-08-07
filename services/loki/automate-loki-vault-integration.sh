@@ -20,7 +20,10 @@ docker exec purebliss-vault sh -c '
 export VAULT_ADDR=http://127.0.0.1:8200
 export VAULT_TOKEN=dev-root-token-purebliss
 vault policy write loki-policy - <<EOF
-path "secret/loki/*" {
+path "secret/data/loki/*" {
+  capabilities = ["read", "list"]
+}
+path "secret/metadata/loki/*" {
   capabilities = ["read", "list"]
 }
 path "auth/approle/login" {
@@ -96,7 +99,7 @@ fi
 
 # 2. Test AppRole authentication using injected secrets
 if docker exec $CONTAINER sh -c '
-SECRETS_DIR="/etc/loki-secrets"; [ ! -d "$SECRETS_DIR" ] && SECRETS_DIR="/var/lib/loki-secrets"
+for dir in /home/loki/.secrets /loki/.secrets /tmp/.secrets; do if [ -d "$dir" ]; then SECRETS_DIR="$dir"; break; fi; done
 ROLE_ID=$(cat $SECRETS_DIR/loki_role_id)
 SECRET_ID=$(cat $SECRETS_DIR/loki_secret_id)
 wget --header="Content-Type: application/json" \
@@ -110,7 +113,7 @@ fi
 
 # 3. Test dynamic secret retrieval using current token
 if docker exec $CONTAINER sh -c '
-SECRETS_DIR="/etc/loki-secrets"; [ ! -d "$SECRETS_DIR" ] && SECRETS_DIR="/var/lib/loki-secrets"
+for dir in /home/loki/.secrets /loki/.secrets /tmp/.secrets; do if [ -d "$dir" ]; then SECRETS_DIR="$dir"; break; fi; done
 TOKEN=$(cat $SECRETS_DIR/loki_token)
 wget --header="X-Vault-Token: $TOKEN" \
      -qO- http://'$VAULT_ADDR':8200/v1/secret/data/loki/storage | grep -q "access_key"
@@ -146,7 +149,7 @@ fi
 
 # 7. Validate secret rotation (get new token)
 if docker exec $CONTAINER sh -c '
-SECRETS_DIR="/etc/loki-secrets"; [ ! -d "$SECRETS_DIR" ] && SECRETS_DIR="/var/lib/loki-secrets"
+for dir in /home/loki/.secrets /loki/.secrets /tmp/.secrets; do if [ -d "$dir" ]; then SECRETS_DIR="$dir"; break; fi; done
 ROLE_ID=$(cat $SECRETS_DIR/loki_role_id)
 SECRET_ID=$(cat $SECRETS_DIR/loki_secret_id)
 NEW_TOKEN=$(wget --header="Content-Type: application/json" \

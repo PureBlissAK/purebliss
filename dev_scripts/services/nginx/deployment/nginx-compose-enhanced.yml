@@ -1,0 +1,78 @@
+# nginx Enhanced Docker Compose with Vault Integration
+# Pure Bliss Elite Standards - Centralized Scripts
+
+version: '3.8'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: purebliss-nginx-enhanced
+    
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8200:8200"  # Vault HTTPS proxy
+    
+    environment:
+      - VAULT_ADDR=https://purebliss-vault:8200
+      - VAULT_SKIP_VERIFY=1
+      - DOMAIN=dev.purebliss.app
+    
+    volumes:
+      # Configuration files
+      - /opt/my-secure-ha-stack/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /opt/my-secure-ha-stack/config.env:/opt/my-secure-ha-stack/config.env:ro
+      
+      # CENTRALIZED SCRIPT PATHS
+      - /opt/dev-purebliss/dev_scripts/services/nginx/entrypoints/vault-entrypoint.sh:/usr/local/bin/vault-entrypoint.sh:ro
+      
+      # Certificate management
+      - nginx_certs:/etc/nginx/certs:rw
+      - /opt/my-secure-ha-stack/vault/certs:/vault/certs:ro
+      
+      # Logging
+      - /opt/my-secure-ha-stack/logs:/opt/logs:rw
+    
+    entrypoint: ["/usr/local/bin/vault-entrypoint.sh"]
+    command: ["nginx", "-g", "daemon off;"]
+    
+    networks:
+      - purebliss-net
+    
+    depends_on:
+      - purebliss-vault
+    
+    external_links:
+      - purebliss-vault:vault
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    restart: unless-stopped
+    
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+volumes:
+  nginx_certs:
+    driver: local
+    name: purebliss_nginx_certs
+
+networks:
+  purebliss-net:
+    external: true
