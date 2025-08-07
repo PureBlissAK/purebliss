@@ -81,7 +81,7 @@ export function kv_test() {
   const writePath = `secret/data/k6-stress/user-${__VU}`;
   const writePayload = JSON.stringify({ data: { value: `stress-secret-${__ITER}` } });
   const writeRes = http.post(`${VAULT_ADDR}/v1/${writePath}`, writePayload, params);
-  
+
   check(writeRes, { 'KV write successful': (r) => r.status === 200 });
   kvWriteLatency.add(writeRes.timings.duration);
   errorRate.add(writeRes.status >= 400);

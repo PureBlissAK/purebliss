@@ -53,7 +53,7 @@ export default function () {
     const writePath = `secret/data/k6-resilience/user-${__VU}`;
     const writePayload = JSON.stringify({ data: { value: `resilience-secret-${__ITER}` } });
     const writeRes = http.post(`${VAULT_ADDR}/v1/${writePath}`, writePayload, params);
-    
+
     const writeSuccess = check(writeRes, { 'KV write successful': (r) => r.status === 200 }, { test_type: 'kv_write' });
     kvWriteLatency.add(writeRes.timings.duration);
     errorRate.add(!writeSuccess);

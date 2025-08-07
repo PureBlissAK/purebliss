@@ -52,7 +52,7 @@ export default function () {
     const writePath = `secret/data/k6-test/user-${__VU}`;
     const writePayload = JSON.stringify({ data: { value: `test-secret-${__ITER}` } });
     const writeRes = http.post(`${VAULT_ADDR}/v1/${writePath}`, writePayload, params);
-    
+
     check(writeRes, { 'KV write successful': (r) => r.status === 200 });
     kvWriteLatency.add(writeRes.timings.duration);
     errorRate.add(writeRes.status >= 400);
@@ -85,13 +85,13 @@ export default function () {
   group('Keycloak OIDC Authentication', function () {
     const oidcLoginPath = 'auth/oidc/login';
     const oidcPayload = JSON.stringify({ role: 'keycloak-role', jwt: 'placeholder-jwt' });
-    
-    const oidcRes = http.post(`${VAULT_ADDR}/v1/${oidcLoginPath}`, oidcPayload, { 
+
+    const oidcRes = http.post(`${VAULT_ADDR}/v1/${oidcLoginPath}`, oidcPayload, {
       headers: { 'Content-Type': 'application/json' },
       tags: { name: 'OIDC Login Attempt' },
       // We expect a 400 response, so we tell k6 this is a valid outcome for this request.
       // This prevents it from being counted in the global `http_req_failed` metric.
-      expectedStatuses: [400], 
+      expectedStatuses: [400],
     });
 
     // Check that we received the expected 400 status.
