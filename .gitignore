@@ -6,3 +6,6 @@ services/vault/vault_keys.txt
 services/vault/vault_dev_user_password.txt
 services/vault-agent/output/vault-token
 services/prometheus/data/
+
+# Ignore large vault binary
+services/postgres/vault-bin/vault
