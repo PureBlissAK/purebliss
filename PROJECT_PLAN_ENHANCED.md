@@ -1423,10 +1423,34 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - NGINX_ENHANCEMENT_SUCCESS: Enhanced nginx c
 #### **Logging Service (`loki`)** 🔄 IN PROGRESS
 **Current Git Commit Status:**
 - Container Build: `build(loki): create enhanced loki container with ENTRYPOINT override`
-- **Next Planned Commits:**
-  - Health Validation: `test(loki): complete health validation and logging functionality`
-  - Vault Integration: `feat(loki): add vault integration for secure log storage`
-  - Documentation: `docs(loki): create comprehensive logging automation guide`
+- Health Validation: `test(loki): complete health validation and logging functionality`
+- Documentation: `docs(loki): update automation guide and break-fix report with loki enhancement`
+
+**Enhancement Progress (2025-08-07):**
+- ✅ **ENTRYPOINT Override:** Dockerfile patched to set ENTRYPOINT for correct config usage
+- ✅ **Container Build:** Multi-phase build system used; all build errors (package manager, permissions, COPY) resolved
+- ✅ **Config Integration:** Loki config file present and copied; healthcheck and CMD set, now using intended config
+- ✅ **Validation:** Container starts, passes health validation with /opt/dev-purebliss/validate-container-health.sh loki enhancement-entrypoint (exit code 0)
+- ✅ **Logging:** All actions, root causes, and fixes logged to /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+- ✅ **Autonomous Enhancement:** Script enhancement workflow updated to prevent ENTRYPOINT/config recurrence
+- ✅ **Documentation:** AUTOMATION_GUIDE.md and BREAK_FIX_REPORT.md updated with root cause, fix, and validation steps
+
+**Validation Results:**
+- Container scaffolding build: ✅ loki enhancement completed successfully
+- Health validation: ✅ HEALTH VALIDATION PASSED: loki is healthy after enhancement-entrypoint
+- All actions logged and version controlled
+
+**Next Steps:**
+- [ ] Vault Integration: Add vault integration for secure log storage and dynamic secrets
+- [ ] Finalize Documentation: Complete comprehensive logging automation guide
+- [ ] Integration Testing: Validate Loki ingestion and log query functionality
+
+**Git Commit Record:**
+- Container Build: `build(loki): create enhanced loki container with ENTRYPOINT override`
+- Health Validation: `test(loki): complete health validation and logging functionality`
+- Documentation: `docs(loki): update automation guide and break-fix report with loki enhancement`
+
+**Status:** ✅ Loki container enhancement and health validation completed. ENTRYPOINT/config issue resolved, container healthy, all actions logged and version controlled. Ready for Vault integration and final documentation.
 
 ---
 
