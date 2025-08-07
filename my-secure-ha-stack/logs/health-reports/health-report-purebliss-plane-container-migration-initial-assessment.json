@@ -1,0 +1,15 @@
+{
+  "service": "purebliss-plane",
+  "task": "container-migration-initial-assessment",
+  "timestamp": "2025-08-07 18:16:24",
+  "container_name": "purebliss-plane",
+  "overall_status": "1",
+  "validation_results": {
+    "container_exists": true,
+    "docker_health": "checked",
+    "service_endpoints": "checked",
+    "dependencies": "checked",
+    "performance": "checked"
+  },
+  "next_action": "remediate_issues"
+}

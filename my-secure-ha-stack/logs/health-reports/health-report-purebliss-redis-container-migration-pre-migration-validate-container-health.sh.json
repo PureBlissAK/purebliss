@@ -1,0 +1,15 @@
+{
+  "service": "purebliss-redis",
+  "task": "container-migration-pre-migration-validate-container-health.sh",
+  "timestamp": "2025-08-07 18:17:16",
+  "container_name": "purebliss-redis",
+  "overall_status": "0",
+  "validation_results": {
+    "container_exists": true,
+    "docker_health": "checked",
+    "service_endpoints": "checked",
+    "dependencies": "checked",
+    "performance": "checked"
+  },
+  "next_action": "proceed_to_next_task"
+}
