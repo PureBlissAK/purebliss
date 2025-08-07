@@ -142,34 +142,34 @@ notify_upstream_when_ready() {
     local health_path="/realms/master"
     local max_attempts=30
     local attempt=1
-    
+
     log_msg "INFO: Starting upstream notification workflow for $service"
-    
+
     # Start Keycloak in background to enable health monitoring
     /opt/keycloak/bin/kc.sh start-dev &
     local keycloak_pid=$!
-    
+
     # Wait for Keycloak to become healthy
     while [ $attempt -le $max_attempts ]; do
         if curl -f -s --connect-timeout 5 --max-time 10 "http://localhost:${port}${health_path}" > /dev/null 2>&1; then
             log_msg "INFO: Keycloak is healthy, notifying nginx upstream"
-            
+
             # Call upstream validation tool as specified in project plan
             if [ -f "/opt/dev-purebliss/upstream-validation.sh" ]; then
                 /opt/dev-purebliss/upstream-validation.sh "$service" "$port" "$health_path" || log_msg "WARN: Upstream notification failed"
             else
                 log_msg "WARN: Upstream validation tool not found at /opt/dev-purebliss/upstream-validation.sh"
             fi
-            
+
             log_msg "INFO: Keycloak upstream notification completed"
             break
         fi
-        
+
         log_msg "INFO: Waiting for Keycloak health, attempt $attempt/$max_attempts"
         sleep 10
         attempt=$((attempt + 1))
     done
-    
+
     # Wait for Keycloak process to complete
     wait $keycloak_pid
 }

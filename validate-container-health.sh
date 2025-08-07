@@ -436,8 +436,9 @@ validate_codeserver_endpoints() {
 validate_prometheus_endpoints() {
     local errors=0
 
-    # Test Prometheus health endpoint
-    if docker exec "$CONTAINER_NAME" curl -f -s -m 10 "http://localhost:9090/-/healthy" >/dev/null 2>&1; then
+
+    # Test Prometheus health endpoint using wget (curl not present in prom/prometheus)
+    if docker exec "$CONTAINER_NAME" wget -q --spider "http://localhost:9090/-/healthy"; then
         log_health "SUCCESS" "Prometheus health endpoint responding"
     else
         log_health "ERROR" "Prometheus health endpoint not responding"

@@ -1025,6 +1025,9 @@ function main() {
             vault_redis_integration_fix
             ;;
         "keycloak_integration"|"keycloak")
+        "grafana_integration"|"grafana")
+            vault_grafana_integration_fix
+            ;;
             vault_keycloak_integration_fix
             ;;
         "nginx_integration"|"nginx")
@@ -1131,4 +1134,38 @@ function vault_nginx_integration_fix() {
     fi
 
     log_success "nginx Vault integration validation completed"
+}
+
+function vault_grafana_integration_fix() {
+    log_action "Fixing grafana Vault integration..."
+
+    # Check if grafana container is running
+    if ! docker ps | grep -q purebliss-grafana; then
+        log_error "grafana container not running - cannot validate integration"
+        return 1
+    fi
+
+    # Ensure Vault is ready
+    if ! curl -sk https://127.0.0.1:8200/v1/sys/health | grep -q '"sealed":false'; then
+        log_error "Vault is sealed - cannot validate grafana integration"
+        return 1
+    fi
+
+    # Restart grafana integration
+    if [[ -x "/opt/dev-purebliss/services/grafana/start-grafana-with-vault.sh" ]]; then
+        log_action "Restarting grafana with Vault integration..."
+        /opt/dev-purebliss/services/grafana/start-grafana-with-vault.sh
+    else
+        log_warning "grafana Vault integration script not found"
+    fi
+
+    # Validate integration
+    if [[ -x "/opt/dev-purebliss/services/grafana/validate-grafana-vault-integration.sh" ]]; then
+        log_action "Validating grafana Vault integration..."
+        /opt/dev-purebliss/services/grafana/validate-grafana-vault-integration.sh
+    else
+        log_warning "grafana validation script not found"
+    fi
+
+    log_success "grafana Vault integration validation completed"
 }

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  grafana:
+    image: ${GRAFANA_IMAGE:-grafana:latest}
+    container_name: purebliss-grafana
+    restart: unless-stopped
+    environment:
+      # Dynamic database credentials will be injected by vault-entrypoint.sh
+      VAULT_ADDR: https://purebliss-vault:8200
+      VAULT_SKIP_VERIFY: "true"
+      DATABASE_HOST: purebliss-postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: grafana
+    volumes:
+      - ./vault-database-entrypoint.sh:/docker-entrypoint.d/00-vault-db-secrets.sh:ro
+      - grafana_data:/data
+    networks:
+      - purebliss-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # depends_on removed for standalone startup; orchestrate dependencies externally
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  grafana_data:
+
+networks:
+  purebliss-net:
+    external: true
+

@@ -1,21 +1,27 @@
 -- PostgreSQL Initialization Script for Fresh Database
 -- This script creates additional databases and users for Vault integration
 
--- Create databases for different services
 CREATE DATABASE vikunja;
 CREATE DATABASE keycloak;
 CREATE DATABASE plane;
 CREATE DATABASE vault_managed;
 
--- Create service-specific users with limited privileges
+# Create database for Grafana
+CREATE DATABASE grafana;
+
 CREATE USER vikunja WITH ENCRYPTED PASSWORD 'vikunja_password_123';
 CREATE USER keycloak WITH ENCRYPTED PASSWORD 'keycloak_password_123';
 CREATE USER plane WITH ENCRYPTED PASSWORD 'plane_password_123';
 
--- Grant privileges to service users on their respective databases
+# Create grafana user (no password, Vault will manage credentials)
+CREATE USER grafana;
+
 GRANT ALL PRIVILEGES ON DATABASE vikunja TO vikunja;
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
 GRANT ALL PRIVILEGES ON DATABASE plane TO plane;
+
+# Grant privileges to grafana user on grafana database
+GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
 
 -- Grant schema permissions to keycloak user
 GRANT USAGE, CREATE ON SCHEMA public TO keycloak;

@@ -1,1 +1,17 @@
 FROM prom/prometheus:v2.48.1
+
+
+# Add Docker healthcheck for Prometheus using wget (curl not present in prom/prometheus)
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 CMD wget -q --spider https://localhost:9091/-/healthy --no-check-certificate || exit 1
+
+# Copy enhanced HTTPS entrypoint and cert config
+COPY entrypoint-https.sh /entrypoint.sh
+COPY certs/web-config.yml /etc/prometheus/certs/web-config.yml
+RUN chmod +x /entrypoint.sh
+
+# Expose HTTPS port
+EXPOSE 9091
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,0 +1,17 @@
+{
+	"ulid": "01K223063VB08AHK5GSAJCPYN6",
+	"minTime": 1754553600953,
+	"maxTime": 1754560800000,
+	"stats": {
+		"numSamples": 352315,
+		"numSeries": 734,
+		"numChunks": 2936
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01K223063VB08AHK5GSAJCPYN6"
+		]
+	},
+	"version": 1
+}

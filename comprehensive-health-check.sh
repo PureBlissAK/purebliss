@@ -656,6 +656,7 @@ function main() {
     echo ""
 
     echo "=== Deep Keycloak Checks ==="
+    echo "=== grafana Vault Integration ==="    test_grafana_vault_integration    echo ""
     echo "=== nginx Vault Integration ==="    test_nginx_vault_integration    echo ""
     echo "=== redis Vault Integration ==="    test_redis_vault_integration    echo ""
     test_keycloak_deep
@@ -1307,6 +1308,7 @@ function test_prometheus_vault_integration() {
 
 function test_redis_vault_integration() {    log_check "Testing redis Vault integration..."    # Container health check    if test_container_health "purebliss-redis"; then        log_success "redis container healthy"    else        log_error "redis container not healthy"        return 1    fi    # Vault integration validation    if [[ -x "/opt/dev-purebliss/services/redis/validate-redis-vault-integration.sh" ]]; then        if /opt/dev-purebliss/services/redis/validate-redis-vault-integration.sh; then            log_success "redis Vault integration validated"        else            log_error "redis Vault integration validation failed"            return 1        fi    else        log_warning "redis validation script not found"    fi}
 function test_nginx_vault_integration() {    log_check "Testing nginx Vault integration..."    # Container health check    if test_container_health "purebliss-nginx"; then        log_success "nginx container healthy"    else        log_error "nginx container not healthy"        return 1    fi    # Vault integration validation    if [[ -x "/opt/dev-purebliss/services/nginx/validate-nginx-vault-integration.sh" ]]; then        if /opt/dev-purebliss/services/nginx/validate-nginx-vault-integration.sh; then            log_success "nginx Vault integration validated"        else            log_error "nginx Vault integration validation failed"            return 1        fi    else        log_warning "nginx validation script not found"    fi}
+function test_grafana_vault_integration() {    log_check "Testing grafana Vault integration..."    # Container health check    if test_container_health "purebliss-grafana"; then        log_success "grafana container healthy"    else        log_error "grafana container not healthy"        return 1    fi    # Vault integration validation    if [[ -x "/opt/dev-purebliss/services/grafana/validate-grafana-vault-integration.sh" ]]; then        if /opt/dev-purebliss/services/grafana/validate-grafana-vault-integration.sh; then            log_success "grafana Vault integration validated"        else            log_error "grafana Vault integration validation failed"            return 1        fi    else        log_warning "grafana validation script not found"    fi}
 # Main execution
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Redirect output to capture errors and warnings for summary
@@ -1488,6 +1490,7 @@ function main() {
     test_redis_deep || overall_status=1
     echo ""
     echo "=== Deep Keycloak Checks ==="
+    echo "=== grafana Vault Integration ==="    test_grafana_vault_integration    echo ""
     echo "=== nginx Vault Integration ==="    test_nginx_vault_integration    echo ""
     echo "=== redis Vault Integration ==="    test_redis_vault_integration    echo ""
     test_keycloak_deep || overall_status=1

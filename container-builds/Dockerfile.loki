@@ -1,0 +1,59 @@
+# Multi-phase loki container scaffolding - Enhanced from existing Pure Bliss work
+# Based on: /opt/dev-purebliss/services/loki/loki-dockerfile
+ARG BUILD_PHASE=6
+
+# Phase 1: Minimal Container (Base from existing)
+
+
+FROM grafana/loki:2.9.0 AS phase1
+USER root
+RUN apk add --no-cache curl \
+    && mkdir -p /loki/chunks /loki/rules \
+    && chown -R nobody:nobody /loki
+USER nobody
+
+
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:3100/ready || exit 1
+EXPOSE 3100
+COPY local-config.yaml /etc/loki/local-config.yaml
+ENTRYPOINT ["/usr/bin/loki", "-config.file=/etc/loki/local-config.yaml"]
+
+# Phase 2: Enhanced Configuration (Existing configs)
+FROM phase1 AS phase2
+USER root
+RUN apk add --no-cache jq openssl
+USER nobody
+COPY configs/ /opt/config/
+# If any .conf files exist, copy them; otherwise, skip (handled by build context)
+COPY *.conf /opt/config/
+
+
+# Phase 3: Service Integration (Vault integration from existing)
+FROM phase2 AS phase3
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+COPY scripts/ /opt/scripts/
+
+
+# Phase 4: Advanced Features
+FROM phase3 AS phase4
+COPY templates/ /opt/templates/
+COPY *.sh /opt/scripts/
+RUN chmod +x /opt/scripts/*.sh 2>/dev/null || true
+
+
+# Phase 5: Production Readiness
+FROM phase4 AS phase5
+RUN mkdir -p /opt/my-secure-ha-stack/logs
+COPY best-practices/ /opt/best-practices/
+
+
+# Phase 6: Elite Features (Full existing functionality)
+FROM phase5 AS phase6
+COPY . /opt/loki-config/
+ENV ADVANCED_MONITORING=true
+ENV AUTO_HEALING=true
+
+# Final stage selection based on BUILD_PHASE
+FROM phase${BUILD_PHASE} AS final
+

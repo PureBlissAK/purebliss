@@ -1,0 +1,45 @@
+# Multi-phase prometheus container scaffolding - Enhanced from existing Pure Bliss work
+# Based on: /opt/dev-purebliss/services/prometheus/prometheus-dockerfile
+ARG BUILD_PHASE=6
+
+# Phase 1: Minimal Container (Base from existing)
+FROM prom/prometheus:v2.48.1 AS phase1
+COPY certs/web-config.yml /etc/prometheus/certs/web-config.yml
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 CMD wget -q --spider http://localhost:9090/-/healthy || exit 1
+EXPOSE 9091
+
+
+# Phase 2: Enhanced Configuration (Existing configs)
+FROM phase1 AS phase2
+# COPY /opt/dev-purebliss/services/prometheus/configs/ /opt/config/
+# COPY /opt/dev-purebliss/services/prometheus/*.conf /opt/config/
+
+
+# Phase 3: Service Integration (Vault integration from existing)
+FROM phase2 AS phase3
+# COPY entrypoint-https.sh /entrypoint.sh
+# COPY /opt/dev-purebliss/services/prometheus/scripts/ /opt/scripts/
+
+
+# Phase 4: Advanced Features
+FROM phase3 AS phase4
+# COPY /opt/dev-purebliss/services/prometheus/templates/ /opt/templates/
+# COPY /opt/dev-purebliss/services/prometheus/*.sh /opt/scripts/
+# RUN chmod +x /opt/scripts/*.sh 2>/dev/null || true
+
+
+# Phase 5: Production Readiness
+FROM phase4 AS phase5
+# RUN mkdir -p /opt/my-secure-ha-stack/logs
+# COPY /opt/dev-purebliss/services/prometheus/best-practices/ /opt/best-practices/
+
+
+# Phase 6: Elite Features (Full existing functionality)
+FROM phase5 AS phase6
+# COPY /opt/dev-purebliss/services/prometheus/ /opt/prometheus-config/
+ENV ADVANCED_MONITORING=true
+ENV AUTO_HEALING=true
+
+# Final stage selection based on BUILD_PHASE
+FROM phase${BUILD_PHASE} AS final
+ENTRYPOINT ["/entrypoint.sh"]
