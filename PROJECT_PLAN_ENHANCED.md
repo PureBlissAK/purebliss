@@ -50,12 +50,14 @@
 
 1. **🔄 Complete Automation**: Every manual process replaced with automated scripts
 2. **📁 Script Centralization**: All scripts organized in `/opt/dev-purebliss/dev_scripts/` with proper references
-3. **🏥 Health Validation**: Comprehensive health checks at every step
-4. **🔧 Self-Healing**: Automatic problem detection and resolution
-5. **📋 Issue Tracking**: Automated PROJECT_PLAN updates for all problems
-6. **🚀 One-Command Deploy**: Complete stack deployment from git repository
-7. **🛡️ Safe Migration**: Zero data loss, reversible changes, continuous validation
-8. **⭐ Elite Standards**: Enhanced config.env, stateless design, RAID data preservation
+3. **🧹 Script Consolidation & Cleanup**: Eliminate duplicate scripts, standardize implementations, automated cleanup
+4. **🏥 Health Validation**: Comprehensive health checks at every step
+5. **🔧 Self-Healing**: Automatic problem detection and resolution
+6. **📋 Issue Tracking**: Automated PROJECT_PLAN updates for all problems
+7. **🚀 One-Command Deploy**: Complete stack deployment from git repository
+8. **🛡️ Safe Migration**: Zero data loss, reversible changes, continuous validation
+9. **⭐ Elite Standards**: Enhanced config.env, stateless design, RAID data preservation
+10. **🎯 Centralized Management**: All scripts reference centralized utilities, unified management framework
 
 ---
 
@@ -353,14 +355,43 @@ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
 
 ### Phase 2: Script Centralization (Days 4-6)
 
-#### 2.1 Script Migration Framework
-- [ ] **2.1.1** Create complete centralized directory structure
-- [ ] **2.1.2** Enhance automated migration tools with PROJECT_PLAN integration
-- [ ] **2.1.3** Implement reference update automation
-- [ ] **2.1.4** Create script validation and testing framework
-- [ ] **2.1.5** Establish rollback procedures for failed migrations
+#### 2.1 Script Consolidation & Cleanup Mandate
 
-#### 2.2 Systematic Script Migration
+**🧹 MANDATORY SCRIPT CONSOLIDATION REQUIREMENTS**:
+
+- [ ] **2.1.1** Audit all existing scripts for duplicate functionality
+- [ ] **2.1.2** Identify and eliminate redundant script implementations
+- [ ] **2.1.3** Consolidate similar scripts into unified, parameterized versions
+- [ ] **2.1.4** Implement automated script cleanup and optimization
+- [ ] **2.1.5** Create centralized script management framework
+
+**Script Consolidation Strategy**:
+
+```bash
+# Automated script analysis and consolidation
+/opt/dev-purebliss/dev_scripts/utilities/analyze-script-duplicates.sh
+/opt/dev-purebliss/dev_scripts/utilities/consolidate-duplicate-scripts.sh
+/opt/dev-purebliss/dev_scripts/utilities/optimize-script-performance.sh
+/opt/dev-purebliss/dev_scripts/utilities/validate-script-consolidation.sh
+```
+
+**Cleanup Automation Requirements**:
+
+- **Duplicate Detection**: Automated identification of duplicate script functionality
+- **Merge Operations**: Safe consolidation of similar scripts with parameter support
+- **Reference Updates**: Automatic updating of all script references to consolidated versions
+- **Performance Optimization**: Script execution time and resource usage optimization
+- **Validation Testing**: Comprehensive testing of consolidated scripts before deployment
+
+#### 2.2 Script Migration Framework
+
+- [ ] **2.2.1** Create complete centralized directory structure
+- [ ] **2.2.2** Enhance automated migration tools with PROJECT_PLAN integration
+- [ ] **2.2.3** Implement reference update automation
+- [ ] **2.2.4** Create script validation and testing framework
+- [ ] **2.2.5** Establish rollback procedures for failed migrations
+
+#### 2.3 Systematic Script Migration
 - [ ] **2.2.1** Migrate core infrastructure scripts (validate-container-health.sh, etc.)
 - [ ] **2.2.2** Migrate service-specific scripts by dependency order
 - [ ] **2.2.3** Migrate utility and helper scripts
@@ -563,17 +594,21 @@ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
 
 ### Centralized Directory Structure
 
+**🎯 CENTRALIZED SCRIPT MANAGEMENT FRAMEWORK**:
+
 ```
 /opt/dev-purebliss/dev_scripts/
 ├── automation/           # Master deployment and orchestration scripts
 │   ├── deploy-purebliss-complete.sh
 │   ├── enhanced-startup-sequencer.sh
-│   └── quick-start-orchestrator.sh
+│   ├── quick-start-orchestrator.sh
+│   └── script-consolidation-manager.sh
 ├── core/                # Essential infrastructure scripts
 │   ├── validate-container-health.sh
 │   ├── comprehensive-health-check.sh
 │   ├── container-scaffold.sh
-│   └── auto-executable-manager.sh
+│   ├── auto-executable-manager.sh
+│   └── centralized-script-controller.sh
 ├── services/            # Service-specific deployment and configuration
 │   ├── keycloak/
 │   ├── nginx/
@@ -583,17 +618,61 @@ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
 ├── utilities/           # Helper scripts and tools
 │   ├── retry-utils.sh   # ✅ MIGRATED
 │   ├── service-entrypoint-template.sh
-│   └── validate-script-references.sh
+│   ├── validate-script-references.sh
+│   ├── analyze-script-duplicates.sh
+│   ├── consolidate-duplicate-scripts.sh
+│   ├── optimize-script-performance.sh
+│   └── automated-cleanup-manager.sh
 ├── health-checks/       # Validation and testing scripts
 │   ├── https-sanity-check.sh
 │   ├── health-validation-integration-example.sh
-│   └── independent-service-testing.sh
+│   ├── independent-service-testing.sh
+│   └── consolidated-health-validator.sh
 ├── deployment/          # Deployment-specific scripts
 │   ├── container-config-generator.sh
 │   ├── scaffold-build.sh
-│   └── reboot-sanity.sh
+│   ├── reboot-sanity.sh
+│   └── deployment-automation-suite.sh
+├── management/          # Script management and maintenance
+│   ├── script-inventory-manager.sh
+│   ├── duplicate-detection-engine.sh
+│   ├── performance-optimization-suite.sh
+│   ├── reference-update-automation.sh
+│   └── cleanup-validation-framework.sh
 └── legacy/             # Deprecated scripts (backup only)
     └── [old-scripts-backup]/
+```
+
+**Centralized Management Mandates**:
+
+1. **🔍 Automated Duplicate Detection**: All scripts analyzed for overlapping functionality
+2. **🧹 Intelligent Consolidation**: Similar scripts merged with parameter-based functionality
+3. **⚡ Performance Optimization**: Script execution time and resource usage optimization
+4. **🔄 Reference Automation**: All script references automatically updated to centralized paths
+5. **✅ Continuous Validation**: All consolidated scripts tested after every change
+6. **📋 Inventory Management**: Real-time tracking of all scripts and their dependencies
+7. **🛡️ Rollback Safety**: Every consolidation includes tested rollback procedures
+
+**Script Consolidation Workflow**:
+
+```bash
+# 1. Analyze existing scripts for duplicates and optimization opportunities
+/opt/dev-purebliss/dev_scripts/management/script-inventory-manager.sh --analyze-all
+
+# 2. Detect and catalog duplicate functionality
+/opt/dev-purebliss/dev_scripts/management/duplicate-detection-engine.sh --scan-workspace
+
+# 3. Consolidate identified duplicates with safety validation
+/opt/dev-purebliss/dev_scripts/utilities/consolidate-duplicate-scripts.sh --safe-merge
+
+# 4. Optimize consolidated scripts for performance
+/opt/dev-purebliss/dev_scripts/management/performance-optimization-suite.sh --optimize-all
+
+# 5. Update all references to point to consolidated scripts
+/opt/dev-purebliss/dev_scripts/management/reference-update-automation.sh --update-all
+
+# 6. Validate consolidated scripts work properly
+/opt/dev-purebliss/dev_scripts/management/cleanup-validation-framework.sh --validate-consolidation
 ```
 
 ---
@@ -729,11 +808,16 @@ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
 
 **Phase 2 Progress**: 0% complete
 - Script Centralization: 1/36 scripts migrated (2.8%)
+- **Script Consolidation & Cleanup**: 0/15 consolidation tasks complete
+- **Automated Duplicate Detection**: 0/5 analysis tasks complete  
+- **Performance Optimization**: 0/10 optimization tasks complete
 - Reference Standardization: 0/25 tasks complete
 - Automation Framework: 0/20 tasks complete
 
 **Phase 3 Progress**: 0% complete
 - Master Automation: 0/15 tasks complete
+- **Centralized Management Framework**: 0/20 management tasks complete
+- **Script Inventory & Cleanup**: 0/10 inventory tasks complete
 - Service Integration: 0/15 tasks complete
 - Configuration Management: 0/15 tasks complete
 
@@ -754,13 +838,19 @@ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
 **✅ Project Success Definition**:
 1. Single command deployment: `./deploy-purebliss-complete.sh` works from clean environment
 2. All 36 scripts centralized with proper references
-3. All containers healthy and stable
-4. Complete automation with error handling and rollback
-5. Comprehensive documentation and testing framework
+3. **Script consolidation complete**: All duplicate scripts eliminated and consolidated
+4. **Automated cleanup framework**: All scripts optimized for performance and maintainability
+5. **Centralized management**: All scripts reference unified management framework
+6. All containers healthy and stable
+7. Complete automation with error handling and rollback
+8. Comprehensive documentation and testing framework
 
 **📊 Quality Gates**:
 - Container health validation: 100% pass rate
 - Script migration validation: 100% success rate
+- **Script consolidation validation**: 100% duplicate elimination rate
+- **Performance optimization**: 90% improvement in script execution time
+- **Reference standardization**: 100% centralized reference compliance
 - End-to-end testing: 100% pass rate
 - Performance benchmarks: Meet or exceed baseline
 - Security validation: Pass all security checks
