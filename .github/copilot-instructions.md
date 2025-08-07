@@ -1009,7 +1009,7 @@ set -euo pipefail
 LOG_FILE=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
 BACKUP_DIR=/opt/my-secure-ha-stack/backups/images
 VERSION=$(date +%Y%m%d)
-SERVICES=("vault" "postgres" "redis" "keycloak" "nginx" "plane" "loki" "prometheus" "grafana" "codeserver" "vikunja" "letsencrypt")
+SERVICES=("vault" "postgres" "redis" "keycloak" "nginx" "plane" "loki" "prometheus" "grafana" "codeserver" "letsencrypt")
 
 echo "[$(date)] INFO: Starting Docker image build process" >> "$LOG_FILE"
 mkdir -p "$BACKUP_DIR"
@@ -1096,7 +1096,6 @@ Vault: v1.17.3 (hashicorp/vault).
 Loki: v2.9.0 (grafana/loki).
 Prometheus: v2.47.0 (prom/prometheus).
 Grafana: v10.1.0 (grafana/grafana).
-Vikunja: latest.
 Letsencrypt: latest.
 
 
@@ -1510,7 +1509,7 @@ Allow minimal functionality if dependencies unavailable, logging warnings.
 
 Orchestration Refinement
 
-Simplify start-all-services.sh to orchestrate startup order: vault → postgres → redis → keycloak → nginx → plane → loki → prometheus → grafana → codeserver → vikunja → letsencrypt.
+Simplify start-all-services.sh to orchestrate startup order: vault → postgres → redis → keycloak → nginx → plane → loki → prometheus → grafana → codeserver → letsencrypt.
 Move service-specific logic to entrypoint.sh.
 Include Vault administrative tasks (e.g., onboard_keycloak_to_vault).
 Pass AppRole credentials via environment variables.
