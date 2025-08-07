@@ -1,0 +1,1 @@
+services/postgres/vault-bin/vault filter=lfs diff=lfs merge=lfs -text
