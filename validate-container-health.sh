@@ -72,6 +72,7 @@ validate_dependency_independent() {
 #!/bin/bash
 # validate-container-health.sh - Comprehensive container health validation script
 # MANDATORY: This script must be executed after EVERY task before proceeding to the next task
+# ENHANCED DIRECTIVE: ALWAYS FURTHER TROUBLESHOOT HEALTH - Never proceed with ANY health issues unresolved
 
 set -euo pipefail
 
@@ -79,6 +80,15 @@ set -euo pipefail
 SERVICE_NAME="${1:-}"
 TASK_NAME="${2:-unknown-task}"
 LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
+
+# DEEP HEALTH TROUBLESHOOTING DIRECTIVE
+# If ANY health check fails, warnings appear, or performance degrades:
+# 1. STOP immediately - no exceptions
+# 2. Perform comprehensive troubleshooting 
+# 3. Identify and fix root cause
+# 4. Run additional validation cycles
+# 5. Document all issues and resolutions
+# 6. Only proceed when 100% healthy
 HEALTH_LOG="/opt/my-secure-ha-stack/logs/container-health-validation.log"
 # Normalize service name to avoid double prefix
 if [[ "$SERVICE_NAME" == purebliss-* ]]; then
@@ -116,6 +126,42 @@ log_health() {
     esac
 }
 
+# --- Autonomous Enhancement: Port Conflict Detection ---
+# Detects and resolves port conflicts before container health validation
+check_port_conflicts() {
+    local service=$1
+    local required_ports=""
+
+    # Define service-specific ports
+    case $service in
+        "loki") required_ports="3100" ;;
+        "grafana") required_ports="3000" ;;
+        "prometheus") required_ports="9090" ;;
+        "keycloak") required_ports="8080" ;;
+        "nginx") required_ports="80 443" ;;
+        "vault") required_ports="8200" ;;
+        "postgres") required_ports="5432" ;;
+        "redis") required_ports="6379" ;;
+        *) return 0 ;; # Skip port check for services without specific ports
+    esac
+
+    for port in $required_ports; do
+        local conflicting_container=$(docker ps --format "table {{.Names}}\t{{.Ports}}" | grep ":${port}->" | grep -v "purebliss-${service}" | awk '{print $1}' | head -1)
+        if [[ -n "$conflicting_container" ]]; then
+            log_health "WARNING" "Port conflict detected: $conflicting_container is using port $port needed by $service"
+            log_health "INFO" "Attempting to resolve port conflict by stopping conflicting container: $conflicting_container"
+            if docker stop "$conflicting_container" && docker rm "$conflicting_container"; then
+                log_health "SUCCESS" "Resolved port conflict: removed $conflicting_container to free port $port for $service"
+                echo "$(date '+%Y-%m-%d %H:%M:%S') - AUTONOMOUS_ENHANCEMENT: Resolved port conflict for $service by removing $conflicting_container from port $port" >> "$LOG_FILE"
+            else
+                log_health "ERROR" "Failed to resolve port conflict: could not remove $conflicting_container"
+                return 1
+            fi
+        fi
+    done
+    return 0
+}
+
 # Usage information
 show_usage() {
     echo "Usage: $0 <service_name> [task_name]"
@@ -129,7 +175,114 @@ show_usage() {
     echo "  0 = Container is healthy, proceed to next task"
     echo "  1 = Container is unhealthy, STOP and remediate"
     echo "  2 = Critical failure, immediate intervention required"
+    echo ""
+    echo "ENHANCED DIRECTIVE: ALWAYS FURTHER TROUBLESHOOT HEALTH"
+    echo "- ANY health issue triggers comprehensive troubleshooting"
+    echo "- NO shortcuts or bypassing of health problems"
+    echo "- ALL issues must be resolved before proceeding"
     exit 1
+}
+
+# DEEP HEALTH TROUBLESHOOTING FUNCTION
+# Called whenever ANY health issue is detected
+perform_deep_health_troubleshooting() {
+    local issue_type="$1"
+    local issue_details="$2"
+    
+    log_health "CRITICAL" "DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: $issue_type"
+    log_health "INFO" "Issue Details: $issue_details"
+    log_health "INFO" "Performing comprehensive health analysis..."
+    
+    # 1. Container State Analysis
+    log_health "INFO" "=== CONTAINER STATE ANALYSIS ==="
+    if docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep "$CONTAINER_NAME"; then
+        local container_status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+        local exit_code=$(docker inspect --format='{{.State.ExitCode}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+        log_health "INFO" "Container Status: $container_status, Exit Code: $exit_code"
+    else
+        log_health "ERROR" "Container $CONTAINER_NAME not found in docker ps output"
+    fi
+    
+    # 2. Resource Usage Analysis
+    log_health "INFO" "=== RESOURCE USAGE ANALYSIS ==="
+    if docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}" | grep "$CONTAINER_NAME"; then
+        log_health "INFO" "Resource usage captured above"
+    else
+        log_health "WARN" "Cannot capture resource usage - container may not be running"
+    fi
+    
+    # 3. Log Analysis - Last 50 lines
+    log_health "INFO" "=== CONTAINER LOG ANALYSIS ==="
+    docker logs --tail 50 "$CONTAINER_NAME" 2>&1 | while read line; do
+        if echo "$line" | grep -qiE "(error|fail|critical|exception|fatal)"; then
+            log_health "ERROR" "Critical log entry: $line"
+        elif echo "$line" | grep -qiE "(warn|warning)"; then
+            log_health "WARN" "Warning log entry: $line"
+        else
+            log_health "INFO" "Log: $line"
+        fi
+    done
+    
+    # 4. Network Connectivity Analysis
+    log_health "INFO" "=== NETWORK CONNECTIVITY ANALYSIS ==="
+    docker network ls | grep purebliss-net && log_health "SUCCESS" "Pure Bliss network exists" || log_health "ERROR" "Pure Bliss network missing"
+    if docker inspect "$CONTAINER_NAME" --format='{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}' 2>/dev/null | grep -q .; then
+        log_health "SUCCESS" "Container is connected to networks"
+    else
+        log_health "ERROR" "Container network connectivity issues"
+    fi
+    
+    # 5. Dependency Health Check
+    log_health "INFO" "=== DEPENDENCY HEALTH CHECK ==="
+    local dependencies=""
+    case "$SERVICE_NAME" in
+        "keycloak") dependencies="postgres redis vault" ;;
+        "grafana") dependencies="postgres prometheus vault" ;;
+        "loki") dependencies="vault" ;;
+        "prometheus") dependencies="vault" ;;
+        "plane") dependencies="postgres redis vault" ;;
+        *) log_health "INFO" "No specific dependencies defined for $SERVICE_NAME" ;;
+    esac
+    
+    for dep in $dependencies; do
+        if docker ps --format "{{.Names}}" | grep -q "purebliss-$dep"; then
+            log_health "SUCCESS" "Dependency $dep is running"
+        else
+            log_health "ERROR" "Critical dependency $dep is not running"
+        fi
+    done
+    
+    # 6. Port and Process Analysis
+    log_health "INFO" "=== PORT AND PROCESS ANALYSIS ==="
+    netstat -tlnp 2>/dev/null | grep -E ":80:|:443:|:8080:|:3000:|:3100:|:5432:|:6379:|:8200:|:9090:" | while read line; do
+        log_health "INFO" "Port usage: $line"
+    done
+    
+    # 7. Generate Remediation Recommendations
+    log_health "INFO" "=== REMEDIATION RECOMMENDATIONS ==="
+    case "$issue_type" in
+        "container_not_running")
+            log_health "INFO" "RECOMMENDATION: Check container logs, restart container, verify dependencies"
+            log_health "INFO" "COMMAND: docker start $CONTAINER_NAME"
+            log_health "INFO" "COMMAND: docker logs $CONTAINER_NAME"
+            ;;
+        "health_check_failed")
+            log_health "INFO" "RECOMMENDATION: Check service endpoints, verify configuration, restart if needed"
+            log_health "INFO" "COMMAND: docker exec $CONTAINER_NAME curl -f http://localhost:8080/health || true"
+            ;;
+        "dependency_failure")
+            log_health "INFO" "RECOMMENDATION: Start dependencies first, check network connectivity"
+            log_health "INFO" "COMMAND: Check dependency containers are running and healthy"
+            ;;
+        *)
+            log_health "INFO" "RECOMMENDATION: Review logs, check configuration, verify resources"
+            ;;
+    esac
+    
+    log_health "CRITICAL" "DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above"
+    log_health "CRITICAL" "RESOLUTION REQUIRED: All identified issues must be fixed before proceeding"
+    
+    return 1 # Always return failure to ensure troubleshooting stops progression
 }
 
 # Validate container exists and is running
@@ -152,6 +305,9 @@ validate_container_exists() {
         else
             log_health "ERROR" "Container $CONTAINER_NAME does not exist"
         fi
+        
+        # TRIGGER DEEP HEALTH TROUBLESHOOTING
+        perform_deep_health_troubleshooting "container_not_running" "Container $CONTAINER_NAME is not in running state"
 
         return $EXIT_UNHEALTHY
     fi
@@ -178,6 +334,8 @@ validate_docker_health() {
             local health_log=$(docker inspect --format='{{range .State.Health.Log}}{{.Output}}{{end}}' "$CONTAINER_NAME" 2>/dev/null || echo "No health log available")
             log_health "ERROR" "Health check output: $health_log"
 
+            # TRIGGER DEEP HEALTH TROUBLESHOOTING
+            perform_deep_health_troubleshooting "health_check_failed" "Docker health check reports unhealthy status"
             return $EXIT_UNHEALTHY
             ;;
         "starting")
@@ -196,6 +354,8 @@ validate_docker_health() {
                     return $EXIT_HEALTHY
                 elif [[ "$health_status" == "unhealthy" ]]; then
                     log_health "ERROR" "Health check failed after ${attempt} attempts"
+                    # TRIGGER DEEP HEALTH TROUBLESHOOTING
+                    perform_deep_health_troubleshooting "health_check_failed" "Health check failed after ${attempt} attempts during startup"
                     return $EXIT_UNHEALTHY
                 fi
 
@@ -203,14 +363,19 @@ validate_docker_health() {
             done
 
             log_health "ERROR" "Health check timeout after $max_attempts attempts"
+            # TRIGGER DEEP HEALTH TROUBLESHOOTING
+            perform_deep_health_troubleshooting "health_check_timeout" "Health check timed out after $max_attempts attempts"
             return $EXIT_UNHEALTHY
             ;;
         "no-healthcheck")
             log_health "WARN" "No Docker health check configured for $CONTAINER_NAME"
+            log_health "INFO" "RECOMMENDATION: Add HEALTHCHECK to Dockerfile for better monitoring"
             return $EXIT_HEALTHY
             ;;
         *)
             log_health "ERROR" "Unknown health status: $health_status"
+            # TRIGGER DEEP HEALTH TROUBLESHOOTING
+            perform_deep_health_troubleshooting "unknown_health_status" "Unknown health status: $health_status"
             return $EXIT_UNHEALTHY
             ;;
     esac
@@ -491,6 +656,8 @@ validate_dependencies() {
             if [[ $POSTGRES_STATUS -ne 0 ]]; then
                 echo "❌ Keycloak: PostgreSQL dependency validation failed. Redis will NOT be tested."
                 echo "$(date '+%Y-%m-%d %H:%M:%S') - KEYCLOAK_DEPENDENCY_FAIL: Postgres not healthy, skipping Redis validation" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+                # TRIGGER DEEP HEALTH TROUBLESHOOTING
+                perform_deep_health_troubleshooting "dependency_failure" "Keycloak PostgreSQL dependency validation failed"
                 exit 1
             fi
             # Step 2: Only if Postgres is healthy, validate Redis
@@ -499,6 +666,8 @@ validate_dependencies() {
             if [[ $REDIS_STATUS -ne 0 ]]; then
                 echo "❌ Keycloak: Redis dependency validation failed."
                 echo "$(date '+%Y-%m-%d %H:%M:%S') - KEYCLOAK_DEPENDENCY_FAIL: Redis not healthy after Postgres validated" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+                # TRIGGER DEEP HEALTH TROUBLESHOOTING
+                perform_deep_health_troubleshooting "dependency_failure" "Keycloak Redis dependency validation failed"
                 exit 1
             fi
             echo "✅ Keycloak: All dependencies validated sequentially."
@@ -625,6 +794,15 @@ main() {
 
     local overall_result=$EXIT_HEALTHY
 
+    # Step 0: Check for port conflicts (Autonomous Enhancement)
+    log_health "INFO" "Checking for port conflicts before validation"
+    if ! check_port_conflicts "$SERVICE_NAME"; then
+        overall_result=$EXIT_UNHEALTHY
+        log_health "ERROR" "Port conflict detected and could not be resolved automatically"
+        generate_health_report $overall_result
+        exit $overall_result
+    fi
+
     # Step 1: Validate container exists and is running
     if ! validate_container_exists; then
         overall_result=$EXIT_CRITICAL
@@ -637,22 +815,47 @@ main() {
     if ! validate_docker_health; then
         overall_result=$EXIT_UNHEALTHY
         log_health "ERROR" "Docker health check failed"
+        log_health "CRITICAL" "STOPPING: Health issue detected - performing comprehensive troubleshooting"
+        # Deep troubleshooting already triggered in validate_docker_health
     fi
 
-    # Step 3: Validate service endpoints
-    if ! validate_service_endpoints; then
-        overall_result=$EXIT_UNHEALTHY
-        log_health "ERROR" "Service endpoint validation failed"
+    # Step 3: Validate service endpoints (only if previous steps passed)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        if ! validate_service_endpoints; then
+            overall_result=$EXIT_UNHEALTHY
+            log_health "ERROR" "Service endpoint validation failed"
+            log_health "CRITICAL" "STOPPING: Endpoint issue detected - performing comprehensive troubleshooting"
+            perform_deep_health_troubleshooting "endpoint_failure" "Service endpoint validation failed for $SERVICE_NAME"
+        fi
+    else
+        log_health "WARN" "Skipping endpoint validation due to previous health failures"
     fi
 
-    # Step 4: Validate dependencies
-    if ! validate_dependencies; then
-        overall_result=$EXIT_UNHEALTHY
-        log_health "ERROR" "Dependency validation failed"
+    # Step 4: Validate dependencies (only if previous steps passed)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        if ! validate_dependencies; then
+            overall_result=$EXIT_UNHEALTHY
+            log_health "ERROR" "Dependency validation failed"
+            log_health "CRITICAL" "STOPPING: Dependency issue detected - comprehensive troubleshooting already performed"
+            # Deep troubleshooting already triggered in validate_dependencies
+        fi
+    else
+        log_health "WARN" "Skipping dependency validation due to previous health failures"
     fi
 
-    # Step 5: Performance baseline check
-    validate_performance
+    # Step 5: Performance baseline check (only if all other checks passed)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        validate_performance
+        performance_result=$?
+        if [[ $performance_result -ne 0 ]]; then
+            log_health "WARN" "Performance baseline check showed concerns"
+            log_health "INFO" "Performing performance troubleshooting..."
+            perform_deep_health_troubleshooting "performance_degradation" "Performance baseline check failed for $SERVICE_NAME"
+            overall_result=$EXIT_UNHEALTHY
+        fi
+    else
+        log_health "WARN" "Skipping performance validation due to previous health failures"
+    fi
 
     # Step 6: Generate final report
     generate_health_report $overall_result

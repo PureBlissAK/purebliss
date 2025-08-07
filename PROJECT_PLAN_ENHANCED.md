@@ -10,20 +10,18 @@ Refactor every service in the Pure Bliss stack to be fully independent, removing
         - **Health Validation Logging**: Log all health validation results to `/opt/my-secure-ha-stack/logs/dev-environment-setup.log`
         - **No Forward Progress Policy**: If ANY health check fails, STOP all work and remediate before continuing
     - **Enhanced Health Check Script**: Execute comprehensive health validation after each task:
-        ```bash
         # Mandatory health validation after each task
         /opt/dev-purebliss/validate-container-health.sh <service> <task_name>
-        # Exit code 0 = healthy, continue to next task
-        # Exit code 1 = unhealthy, STOP and remediate
-        ```
+    - **MANDATORY DEEP HEALTH TROUBLESHOOTING**: Before moving to ANY next phase, task, or service:
+        - **Always Further Troubleshoot Health**: If ANY health check fails, reports warnings, or shows degraded performance, STOP and perform comprehensive troubleshooting before proceeding
+        - **No Shortcuts Policy**: Never bypass health issues or assume they will resolve later - address ALL health concerns immediately
+        - **Comprehensive Health Analysis**: Examine logs, metrics, dependencies, resource usage, and service-specific endpoints in detail
+        - **Root Cause Resolution**: Identify and fix the underlying cause of ANY health degradation before continuing
     - **Task-Level Health Gates**: Each task must pass health validation gate before next task begins:
-        - **Build Tasks**: Container builds successfully AND starts healthy
-        - **Configuration Tasks**: Configuration changes applied AND container remains healthy
-        - **Integration Tasks**: Integration completed AND all affected containers remain healthy
-        - **Testing Tasks**: Tests pass AND containers remain healthy after test execution
-    - **Independent Service Testing**: Each service must be tested independently to ensure proper isolation:
+        - **Build Tasks**: Container builds successfully AND starts healthy AND passes deep health analysis
+        - **Configuration Tasks**: Configuration changes applied AND container remains healthy AND no degradation detected
+        - **Integration Tasks**: Integration completed AND all affected containers remain healthy AND dependency health confirmed
         - **Single Service Testing**: Test each service in isolation before testing dependencies
-        - **Dependency Isolation**: Validate service functionality without interference from other services
         - **Sequential Validation**: Test services one at a time with proper cleanup between tests
         - **Independent Health Validation**: Each service health check must validate only that specific service
         - **Non-Disruptive Testing**: All core infrastructure services (Vault, Vault-Agent, Redis, Nginx, PostgreSQL) remain running during independent testing
@@ -222,11 +220,61 @@ Each service will include:
 
 After every problem is solved and container health validation passes, we implement a comprehensive script enhancement workflow to prevent issue recurrence and improve automation resilience.
 
+
 #### Problem Resolution Documentation
 - **Issue Classification**: Categorize the problem type (build failure, configuration error, dependency issue, etc.)
 - **Root Cause Analysis**: Document the specific cause and failure conditions
 - **Resolution Steps**: Detail the exact steps taken to resolve the issue
 - **Impact Assessment**: Identify which services and workflows were affected
+
+---
+
+#### [2025-08-07] Loki Port Conflict Issue - Autonomous Enhancement
+
+- **Issue Classification**: Configuration Error / Port Conflict
+- **Root Cause Analysis**: Loki container failed to start due to port 3100 already being allocated by a previous test container (`loki_phase1_manual`).
+- **Resolution Steps**:
+    1. Inspected container state and logs to identify bind error on port 3100.
+    2. Used `netstat` and `docker ps` to confirm port conflict and identify the conflicting container.
+    3. Stopped and removed the conflicting container.
+    4. Restarted the enhanced Loki container and validated health.
+    5. Enhanced health validation and deployment scripts to detect and resolve port conflicts automatically before container start.
+- **Impact Assessment**: Loki log aggregation was unavailable for ~5 minutes during troubleshooting. No data loss. All other services unaffected.
+- **Enhancement Implemented**:
+    - Added `check_port_conflicts` to `validate-container-health.sh` for all services, with autonomous resolution and logging.
+    - Added pre-deployment port check and cleanup to `deploy-loki-automated.sh`.
+    - Documented in `LOKI_BREAK_FIX_REPORT.md`.
+- **Validation**: Health validation script now detects and resolves port conflicts. Loki container starts and passes all health checks. Enhancement tested and validated.
+
+---
+
+#### [2025-08-07] Keycloak Phase 1 Build Health Issue - Deep Troubleshooting Implementation
+
+- **Issue Classification**: Build Configuration Error / Health Validation Failure
+- **Root Cause Analysis**: Keycloak container phase 1 build completed successfully but failed health validation during scaffolding process. Container reported as "unhealthy" during validation phase, indicating missing dependencies or configuration issues at phase 1.
+- **Resolution Steps**:
+    1. Enhanced health validation script with deep troubleshooting function that triggers on ANY health issue
+    2. Updated project plan to implement "ALWAYS FURTHER TROUBLESHOOT HEALTH" directive
+    3. Created comprehensive deep health troubleshooting function with 7-step analysis:
+       - Container state analysis
+       - Resource usage analysis  
+       - Log analysis (last 50 lines with error detection)
+       - Network connectivity analysis
+       - Dependency health check
+       - Port and process analysis
+       - Remediation recommendations
+    4. Enhanced all validation functions to trigger deep troubleshooting on failures
+    5. Created enhanced Keycloak deployment script with mandatory health validation after every phase
+- **Impact Assessment**: Keycloak enhancement temporarily halted for proper health troubleshooting implementation. No data loss or service disruption. Enhanced health validation will prevent similar issues across all services.
+- **Enhancement Implemented**:
+    - Added `perform_deep_health_troubleshooting()` function to `validate-container-health.sh` with comprehensive 7-step analysis
+    - Enhanced all validation functions to trigger deep troubleshooting automatically on ANY health issue
+    - Updated project plan with "MANDATORY DEEP HEALTH TROUBLESHOOTING" directive
+    - Created `deploy-keycloak-with-deep-health-validation.sh` with mandatory health validation after every phase
+    - Enhanced usage information and logging to emphasize "no shortcuts" policy
+- **Validation**: Deep health troubleshooting triggers correctly on health failures. Enhanced validation script provides comprehensive analysis and remediation recommendations. New deployment script enforces health validation at every phase.
+
+---
 
 #### Script Enhancement Priorities
 

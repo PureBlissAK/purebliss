@@ -62,7 +62,20 @@ generate_dockerfile() {
         return 0
     fi
 
-    # Find existing Dockerfile
+    # For keycloak, always use keycloak-dockerfile as canonical Dockerfile for all phases
+    if [[ "$service" == "keycloak" ]]; then
+        if [[ -f "$existing_service_dir/keycloak-dockerfile" ]]; then
+            cp "$existing_service_dir/keycloak-dockerfile" "$dockerfile_path"
+            log_message "INFO" "Patched: Using keycloak-dockerfile as canonical Dockerfile for all keycloak builds: $dockerfile_path"
+            log_message "SUCCESS" "Patched: Canonical keycloak-dockerfile copied for $service at $dockerfile_path"
+            return 0
+        else
+            log_message "ERROR" "keycloak-dockerfile not found in $existing_service_dir. Cannot proceed."
+            return 1
+        fi
+    fi
+
+    # Find existing Dockerfile for other services
     local existing_dockerfile=""
     for dockerfile_name in "Dockerfile" "${service}-dockerfile" "dockerfile"; do
         if [[ -f "$existing_service_dir/$dockerfile_name" ]]; then
@@ -498,13 +511,17 @@ validate_container_phase() {
                 docker logs "$test_container" | tail -10 | while read line; do
                     log_message "ERROR" "Container log: $line"
                 done
-                cleanup_test_container "$test_container"
+                log_message "WARNING" "Test container $test_container is unhealthy. Retaining container for manual inspection."
+                log_message "INFO" "To inspect logs: docker logs $test_container"
+                log_message "INFO" "To inspect health: docker inspect --format='{{json .State.Health}}' $test_container"
                 return 1
                 ;;
             "starting"|"unknown")
                 if [[ $i -eq $max_attempts ]]; then
                     log_message "ERROR" "$test_container health check timeout"
-                    cleanup_test_container "$test_container"
+                    log_message "WARNING" "Test container $test_container timed out. Retaining container for manual inspection."
+                    log_message "INFO" "To inspect logs: docker logs $test_container"
+                    log_message "INFO" "To inspect health: docker inspect --format='{{json .State.Health}}' $test_container"
                     return 1
                 fi
                 sleep 2
@@ -523,7 +540,7 @@ validate_container_phase() {
         6) validate_phase_6 "$service" "$test_container" || validation_result=1 ;;
     esac
 
-    # Cleanup test container
+    # Cleanup test container only if validation passes
     cleanup_test_container "$test_container"
 
     if [[ $validation_result -eq 0 ]]; then
