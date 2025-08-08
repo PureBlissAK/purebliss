@@ -53,23 +53,184 @@ To ensure Copilot remains focused, efficient, and avoids redundant or off-topic 
 
 All restrictions below are in addition to, and must be interpreted in harmony with, the policies and workflows defined in the `.github` directory. Where there is overlap, `.github` standards take precedence for contribution, security, and community conduct.
 
-MANDATORY CONTAINER SCAFFOLDING INTEGRATION:
+MANDATORY CENTRALIZED SCRIPT MANAGEMENT:
 
-ELITE CONTAINER SCAFFOLDING FRAMEWORK: Use /opt/dev-purebliss/container-scaffold.sh for all container enhancement work
-PROGRESSIVE ENHANCEMENT: Follow 6-phase container enhancement methodology (Phase1→Phase6) with incremental validation
-EXISTING WORK PRESERVATION: Never replace existing containers - enhance them through scaffolding framework
-RUNNING CONTAINER VALIDATION: Test enhanced containers alongside existing ones before replacement
-ZERO-DOWNTIME DEPLOYMENT: Use graceful container replacement with rollback procedures
-CONTAINER CLEANUP INTEGRATION: Use /opt/dev-purebliss/container-cleanup.sh for container optimization
+🎯 CENTRALIZED SCRIPT LOCATION: All scripts must be developed, maintained, and executed from /opt/dev-purebliss/dev_scripts/ using organized directory structure
+📚 CENTRALIZED DOCUMENTATION: All documentation must be created and maintained in /opt/dev-purebliss/Documentation/ with cross-referencing integration
+🔄 DON'T REINVENT THE WHEEL: Always scan existing scripts and functions before creating new functionality - enhance existing rather than duplicate
+🤝 SCRIPT INTER-DEPENDENCY: Every script must leverage shared utilities and common functions from centralized libraries
+📋 PROJECT PLAN AUTO-UPDATE: All verified scripts must automatically update PROJECT_PLAN_ENHANCED.md with status and references
+🚀 SINGLE-COMMAND DEPLOYMENT: Ultimate goal is deploying entire application from scratch with one master script after git pull
 
-MANDATORY CONTAINER CLEANUP WORKFLOW:
+MANDATORY SCRIPT DISCOVERY AND REUSE:
 
-STALE FILE MANAGEMENT: Before final testing, move unused files to service-specific backup folders
-BACKUP FOLDER CREATION: Create /opt/dev-purebliss/services/<service>/backup/ structure for each service
-FILE CLASSIFICATION: Categorize files as active (keep), deprecated (backup), test artifacts (backup)
-AUTOMATED CLEANUP: Use container-cleanup.sh for systematic file organization and container optimization
-VALIDATION AFTER CLEANUP: Rebuild and validate containers after cleanup to ensure continued functionality
-ROLLBACK CAPABILITY: Ensure all moved files can be restored if needed for troubleshooting
+PRE-DEVELOPMENT SCAN: Before creating any script, ALWAYS scan /opt/dev-purebliss/ and /opt/dev-purebliss/services/ for existing functionality
+EXISTING SCRIPT INTEGRATION: If similar functionality exists, enhance existing scripts with parameters rather than creating duplicates
+SHARED FUNCTION USAGE: All scripts MUST source and use /opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh
+DOCUMENTATION LEVERAGE: Reference and build upon existing documentation patterns in /opt/dev-purebliss/Documentation/
+MIGRATION METHODOLOGY: Systematically migrate existing scripts to centralized structure with health validation at each step
+
+CENTRALIZED SCRIPT STRUCTURE REQUIREMENTS:
+
+ALL SCRIPTS MUST USE:
+- SCRIPT_DIR="/opt/dev-purebliss/dev_scripts" for script references
+- DOC_DIR="/opt/dev-purebliss/Documentation" for documentation references
+- source "$SCRIPT_DIR/utilities/common-functions-library.sh" for shared functions
+- source "$SCRIPT_DIR/utilities/retry-utils.sh" for retry functionality
+- source "$SCRIPT_DIR/utilities/script-communication-bridge.sh" for inter-script communication
+
+ORGANIZED DIRECTORY STRUCTURE:
+- /opt/dev-purebliss/dev_scripts/automation/ - Master deployment and orchestration
+- /opt/dev-purebliss/dev_scripts/core/ - Essential infrastructure scripts
+- /opt/dev-purebliss/dev_scripts/services/ - Service-specific automation
+- /opt/dev-purebliss/dev_scripts/utilities/ - Shared helper scripts and libraries
+- /opt/dev-purebliss/dev_scripts/health-checks/ - Health validation and testing
+- /opt/dev-purebliss/dev_scripts/deployment/ - Deployment-specific scripts
+- /opt/dev-purebliss/dev_scripts/management/ - Script management and maintenance
+
+SYSTEMATIC SCRIPT MIGRATION PROTOCOL:
+
+MIGRATION VALIDATION: Test each migrated script through complete container lifecycle (build, health, troubleshoot, reboot)
+HEALTH CONFIRMATION: Achieve 100% health validation success before considering migration complete
+REFERENCE UPDATES: Automatically update all script references to use centralized paths
+BACKUP PRESERVATION: Maintain backups of original scripts during migration for rollback capability
+INTEGRATION TESTING: Validate script integration with existing automation workflows
+DOCUMENTATION SYNC: Update documentation to reflect new centralized structure
+
+CONTAINER SELF-HEALING INTEGRATION:
+
+EMBEDDED TROUBLESHOOTING: Containers must have direct access to troubleshooting scripts via centralized structure
+AUTONOMOUS PROBLEM RESOLUTION: Containers can call centralized diagnostic and repair scripts when issues arise
+HEALTH SCRIPT ACCESS: All containers have access to /opt/dev-purebliss/dev_scripts/health-checks/ for self-diagnosis
+RECOVERY AUTOMATION: Failed containers can trigger recovery workflows using centralized automation scripts
+ESCALATION PROCEDURES: Self-healing failures automatically escalate to centralized management scripts
+
+SCAFFOLD-BASED DEVELOPMENT APPROACH:
+
+PROGRESSIVE ENHANCEMENT: Use 6-phase container scaffolding (Phase1→Phase6) with centralized script integration
+DEPENDENCY TOLERANCE: Scripts designed to function when some dependency services are unavailable, moving forward when possible
+GRACEFUL DEGRADATION: Containers continue operating with reduced functionality until dependencies become available
+DYNAMIC DEPENDENCY RESOLUTION: Scripts automatically detect and integrate with services as they become available
+PHASE-BASED VALIDATION: Health validation required at each scaffolding phase before progression
+
+MANDATORY SCRIPT DEVELOPMENT STANDARDS:
+
+SCRIPT HEADER REQUIREMENTS (ALL SCRIPTS MUST INCLUDE):
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# CENTRALIZED SCRIPT REFERENCE SYSTEM
+SCRIPT_DIR="/opt/dev-purebliss/dev_scripts"
+DOC_DIR="/opt/dev-purebliss/Documentation"
+
+# MANDATORY UTILITY IMPORTS (DON'T REINVENT THE WHEEL)
+source "$SCRIPT_DIR/utilities/common-functions-library.sh"
+source "$SCRIPT_DIR/utilities/retry-utils.sh"
+source "$SCRIPT_DIR/utilities/script-communication-bridge.sh"
+
+# SCRIPT METADATA
+SCRIPT_NAME="$(basename "$0")"
+SCRIPT_VERSION="1.0"
+SCRIPT_PURPOSE="[Brief description of script purpose]"
+```
+
+MANDATORY FUNCTION INTEGRATION (ALL SCRIPTS MUST USE):
+- log_info() / log_error() / log_success() for centralized logging
+- health_check_service() for service validation
+- retry_with_backoff() for resilient operations
+- validate_env_vars() for environment validation
+- backup_file() for configuration safety
+- Auto-update PROJECT_PLAN_ENHANCED.md with script status and references
+
+INTER-SCRIPT COMMUNICATION REQUIREMENTS:
+- Use script-communication-bridge.sh for coordinating with other scripts
+- Implement dependency resolution through script-dependency-resolver.sh
+- Leverage shared functions instead of duplicating common operations
+- Reference centralized documentation for consistent patterns
+- Auto-commit successful script enhancements and migrations
+
+MANDATORY DOCUMENTATION DEVELOPMENT STANDARDS:
+
+DOCUMENTATION HEADER REQUIREMENTS (ALL DOCS MUST INCLUDE):
+```markdown
+# [Document Title]
+
+**Generated/Updated**: [YYYY-MM-DD HH:MM:SS]
+**Purpose**: [Brief description of document purpose]
+**Consolidation Type**: [automation|troubleshooting|best-practices|integration|guides]
+**Services Covered**: [List of relevant services]
+
+## Overview
+
+[Document overview with consolidation context]
+
+## Service-Specific Information
+
+[Service-specific sections within consolidated framework]
+```
+
+MANDATORY DOCUMENTATION INTEGRATION (ALL DOCS MUST USE):
+- Cross-reference consolidated documentation categories
+- Include service-specific sections within consolidated documents
+- Reference centralized script locations from /opt/dev-purebliss/dev_scripts/
+- Maintain backward compatibility through legacy wrapper documents
+- Auto-update service documentation indexes with consolidation references
+
+INTER-DOCUMENTATION COMMUNICATION REQUIREMENTS:
+- Use consistent cross-referencing between consolidated documents
+- Implement service-specific indexes that reference consolidated sections
+- Leverage consolidated documentation instead of duplicating information
+- Reference centralized scripts for automation procedures
+- Auto-commit successful documentation enhancements and migrations
+
+SCRIPT ENHANCEMENT AND MIGRATION WORKFLOW:
+
+DISCOVERY PHASE:
+1. Scan /opt/dev-purebliss/ for existing scripts using: find /opt/dev-purebliss -name "*.sh" -type f
+2. Analyze existing functionality to avoid duplication using grep and function analysis
+3. Check Documentation/ for existing patterns and templates
+4. Review PROJECT_PLAN_ENHANCED.md for current script status and dependencies
+
+MIGRATION PHASE:
+1. Create target location in appropriate dev_scripts/ subdirectory
+2. Enhance script with centralized utilities and standard header
+3. Update all references to use new centralized location
+4. Test script integration with existing workflows
+5. Validate health checks and error handling
+
+VALIDATION PHASE:
+1. Execute /opt/dev-purebliss/dev_scripts/core/validate-container-health.sh after script migration
+2. Test container lifecycle: build → run → health → troubleshoot → reboot → validate
+3. Confirm 100% success rate before considering migration complete
+4. Update PROJECT_PLAN_ENHANCED.md with migration status
+5. Auto-commit verified migration with comprehensive documentation
+
+DOCUMENTATION INTEGRATION REQUIREMENTS:
+
+AUTOMATIC DOC GENERATION: Scripts must auto-update relevant documentation files
+DOC TEMPLATE USAGE: Use templates from /opt/dev-purebliss/Documentation/templates/
+CROSS-REFERENCE UPDATES: Maintain links between scripts, docs, and project plan
+BREAK-FIX INTEGRATION: Auto-update troubleshooting guides based on resolved issues
+AUTOMATION GUIDE SYNC: Keep automation procedures current with script enhancements
+
+CONSOLIDATED DOCUMENTATION INTEGRATION REQUIREMENTS:
+
+DOCUMENTATION CONSOLIDATION METHODOLOGY: All documentation development must leverage the consolidated documentation system
+CENTRALIZED DOCUMENTATION REFERENCE: Use /opt/dev-purebliss/Documentation/ for all documentation needs
+SERVICE-SPECIFIC INDEXING: Reference service documentation indexes for quick access to consolidated content
+LEGACY WRAPPER MAINTENANCE: Maintain backward compatibility through legacy documentation wrappers
+UNIFIED CONSOLIDATION APPROACH: Apply same intelligent consolidation approach to new documentation as used for existing
+
+"DON'T REINVENT THE WHEEL" METHODOLOGY COMPLETE:
+
+DUAL CONSOLIDATION SYSTEM: Both scripts and documentation now operate under unified consolidation methodology
+SCRIPT CONSOLIDATION ACHIEVEMENTS: 39 scripts consolidated into 3 enhanced scripts with 39 legacy wrappers
+DOCUMENTATION CONSOLIDATION ACHIEVEMENTS: 31 documents consolidated into 5 categories with 9 service indexes and 31 legacy wrappers
+BACKWARD COMPATIBILITY GUARANTEE: All existing integrations continue working seamlessly through wrapper systems
+ENHANCED FUNCTIONALITY DELIVERY: Consolidated versions provide enhanced features beyond original capabilities
+CONTINUOUS CONSOLIDATION MONITORING: Ongoing detection and consolidation of new duplication opportunities
+UNIFIED MAINTENANCE APPROACH: Single point of enhancement for both scripts and documentation
 
 MANDATORY VAULT INTEGRATION REQUIREMENTS:
 
@@ -80,13 +241,81 @@ DYNAMIC SECRETS: Validate dynamic secret issuance and revocation for database us
 AUDIT LOGGING: Confirm audit logging of all Vault actions per service
 VAULT DOCUMENTATION: Review service-specific Vault automation guides and break-fix reports
 
-MANDATORY HEALTH VALIDATION ENFORCEMENT:
+DOCKER INTEGRATION AND BUILD AUTOMATION REQUIREMENTS:
 
-NEVER proceed to the next task without executing mandatory health validation: `/opt/dev-purebliss/validate-container-health.sh <service> <task_name>`
-Exit code 0 = healthy (proceed), Exit code 1 = unhealthy (STOP and remediate), Exit code 2 = critical (immediate intervention)
-All health validation results must be logged to both development log and health validation log
-Include health validation in ALL code suggestions involving container operations
-NO EXCEPTIONS: Health validation is mandatory after build, config, integration, testing, and cleanup tasks
+CONTAINERIZED SCRIPT INTEGRATION: All centralized scripts and documentation are directly integrated into Docker containers through Dockerfiles and entrypoint scripts
+ENTRYPOINT AUTOMATION: Service entrypoint scripts leverage centralized scripts from /opt/dev-purebliss/dev_scripts/ for container initialization, health validation, and automation
+DOCKERFILE ENHANCEMENT: Container builds incorporate consolidated scripts for enhanced functionality, vault integration, and self-healing capabilities
+CONFIG.ENV INTEGRATION: All Docker containers reference config.env for environment-specific settings, paths, and automation parameters
+BUILD PROCESS AUTOMATION: Docker build process includes script consolidation, documentation reference, and health validation integration
+CONTAINER SCAFFOLDING: All containers follow Elite Container Scaffolding Framework with progressive enhancement (Phase1→Phase6)
+HEALTH VALIDATION GATES: Mandatory health validation integrated into Docker container lifecycle through centralized validation scripts
+VAULT CONTAINER INTEGRATION: All service containers include Vault AppRole authentication and dynamic secret retrieval capabilities
+
+DOCKER BUILD AUTOMATION STANDARDS:
+
+SCRIPT EMBEDDING: Dockerfiles MUST copy and integrate centralized scripts from /opt/dev-purebliss/dev_scripts/ into container filesystem
+DOCUMENTATION INTEGRATION: Containers include access to consolidated documentation for runtime automation and troubleshooting
+ENTRYPOINT ENHANCEMENT: Service entrypoint scripts source centralized utilities and implement standardized logging, health checks, and error handling
+BUILD VALIDATION: Each Docker build includes mandatory health validation, script integration testing, and functionality verification
+CONFIG AUTOMATION: Container startup processes reference config.env for dynamic configuration and environment-specific automation
+SELF-HEALING INTEGRATION: Containers include autonomous troubleshooting and self-healing capabilities through integrated scripts
+
+ADVANCED SCRIPT CONSOLIDATION INTEGRATION:
+
+INTELLIGENT SIMILARITY DETECTION: Automatic analysis of script functionality and identification of consolidation opportunities
+CONSOLIDATION CANDIDATES: Scripts with 30%+ similarity are flagged for potential consolidation
+ENHANCED FUNCTIONALITY: Consolidated scripts combine best features from all merged scripts
+BACKWARD COMPATIBILITY: Legacy wrapper scripts ensure existing integrations continue working seamlessly
+CONTINUOUS OPTIMIZATION: Ongoing monitoring for new consolidation opportunities
+
+CONSOLIDATED SCRIPT ARCHITECTURE:
+
+VAULT INTEGRATION CONSOLIDATION: consolidated-vault-integration.sh - Universal vault operations including AppRole auth, dynamic secrets, health checks
+DEPLOYMENT WORKFLOW CONSOLIDATION: consolidated-deployment.sh - Universal deployment with pre/post validation, dependency checking
+VALIDATION FRAMEWORK CONSOLIDATION: consolidated-validation.sh - Comprehensive validation including health checks, endpoint validation, container monitoring
+
+CONSOLIDATION ENFORCEMENT REQUIREMENTS:
+
+MANDATORY CONSOLIDATION SCANNING: Before creating new scripts, check for similar existing functionality
+CONSOLIDATION FIRST APPROACH: Enhance existing consolidated scripts rather than creating new similar scripts
+LEGACY WRAPPER CREATION: Always create backward-compatible wrappers when consolidating existing scripts
+ENHANCED FUNCTIONALITY: Ensure consolidated scripts include best practices from all merged sources
+DOCUMENTATION UPDATES: Update all references and documentation when consolidation occurs
+
+SCRIPT DEVELOPMENT WITH CONSOLIDATION AWARENESS:
+
+PRE-DEVELOPMENT CONSOLIDATION CHECK: Scan for similar scripts using similarity analysis before creating new functionality
+ENHANCE CONSOLIDATED SCRIPTS: Add new features to existing consolidated scripts when functionality overlaps
+WRAPPER MAINTENANCE: Maintain legacy wrappers for deprecated functionality until transition is complete
+CONSOLIDATION VALIDATION: Test consolidated scripts against all original script use cases
+PROJECT PLAN UPDATES: Automatically update project plan with consolidation results and metrics
+
+ADVANCED DOCUMENTATION CONSOLIDATION INTEGRATION:
+
+DOCUMENTATION CONSOLIDATION METHODOLOGY: Apply same intelligent consolidation approach to documentation that was used for scripts
+SIMILARITY ANALYSIS FOR DOCS: Use heading structure analysis and keyword-based consolidation scoring (40%+ threshold) for documentation
+DOCUMENTATION CATEGORY CONSOLIDATION: Group similar documents by type (automation, troubleshooting, best-practices, integration, guides)
+SERVICE-SPECIFIC PRESERVATION: Create service documentation indexes that cross-reference consolidated documents
+LEGACY DOCUMENTATION WRAPPERS: Create backward-compatible documentation wrappers ensuring existing links continue working
+UNIFIED CONSOLIDATION APPROACH: Maintain consistency between script consolidation and documentation consolidation methodologies
+
+CONSOLIDATED SCRIPT USAGE PATTERNS:
+
+VAULT OPERATIONS: Use consolidated-vault-integration.sh for all vault-related operations
+DEPLOYMENT TASKS: Use consolidated-deployment.sh for all deployment workflows
+VALIDATION REQUIREMENTS: Use consolidated-validation.sh for all health and validation tasks
+LEGACY COMPATIBILITY: Legacy scripts automatically route to appropriate consolidated functionality
+ENHANCED CAPABILITIES: Consolidated scripts provide enhanced features beyond original script capabilities
+
+CONSOLIDATED DOCUMENTATION USAGE PATTERNS:
+
+AUTOMATION PROCEDURES: Use CONSOLIDATED_AUTOMATION.md for all automation-related documentation
+TROUBLESHOOTING GUIDES: Use CONSOLIDATED_TROUBLESHOOTING.md for all break-fix and diagnostic procedures
+BEST PRACTICES: Use CONSOLIDATED_BEST_PRACTICES.md for all security, performance, and deployment standards
+INTEGRATION GUIDES: Use CONSOLIDATED_INTEGRATION.md for all vault integration and service connectivity
+SERVICE REFERENCES: Use service-specific documentation indexes for quick access to consolidated content
+LEGACY DOCUMENTATION: Legacy documentation wrappers automatically redirect to consolidated versions
 
 AUTONOMOUS SELF-HEALING DIRECTIVE:
 
@@ -238,6 +467,8 @@ Key Directories:
 /opt/my-secure-ha-stack/logs/health-reports/: Archived health validation reports.
 /opt/my-secure-ha-stack/backups: Service-specific backups.
 /opt/dev-purebliss/: Enhanced container development directory.
+/opt/dev-purebliss/dev_scripts/: 🎯 CENTRALIZED SCRIPT LOCATION - All automation and utility scripts.
+/opt/dev-purebliss/Documentation/: 📚 CENTRALIZED DOCUMENTATION LOCATION - All guides and procedures.
 /opt/dev-purebliss/services/: Container enhancement and smart upstream solutions.
 /opt/dev-purebliss/services/<service>/backup/: Service-specific backup folders for stale files.
 
@@ -248,11 +479,15 @@ Key Files:
 /opt/my-secure-ha-stack/prometheus.yml: Prometheus configuration.
 /opt/my-secure-ha-stack/GoogleIDPMetadata.xml: Google Workspace SSO metadata.
 /opt/my-secure-ha-stack/config.env: Environment variables (e.g., LOCAL_HOSTNAME=dev.purebliss.app).
-/opt/dev-purebliss/validate-container-health.sh: MANDATORY health validation script.
-/opt/dev-purebliss/upstream-validation.sh: Smart upstream service notification tool.
-/opt/dev-purebliss/container-cleanup.sh: Container cleanup and optimization script.
+/opt/dev-purebliss/dev_scripts/core/validate-container-health.sh: 🏥 MANDATORY health validation script.
+/opt/dev-purebliss/dev_scripts/utilities/upstream-validation.sh: Smart upstream service notification tool.
+/opt/dev-purebliss/dev_scripts/utilities/container-cleanup.sh: Container cleanup and optimization script.
 /opt/dev-purebliss/PROJECT_PLAN_ENHANCED.md: Enhanced project plan with health validation requirements.
-/opt/dev-purebliss/container-scaffold.sh: Elite Container Scaffolding Framework.
+/opt/dev-purebliss/dev_scripts/core/container-scaffold.sh: Elite Container Scaffolding Framework.
+/opt/dev-purebliss/dev_scripts/automation/deploy-purebliss-complete.sh: 🚀 MASTER SINGLE-COMMAND DEPLOYMENT.
+/opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh: 📚 SHARED FUNCTION LIBRARY.
+/opt/dev-purebliss/Documentation/automation/SCRIPT_REFERENCE_GUIDE.md: Centralized script reference guide.
+/opt/dev-purebliss/Documentation/automation/DONT_REINVENT_THE_WHEEL.md: Reusability guidelines.
 
 
 Endpoints:

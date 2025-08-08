@@ -6,12 +6,12 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    
+
     environment:
       - VAULT_ADDR=https://purebliss-vault:8200
       - VAULT_SKIP_VERIFY=1
       - DOMAIN=dev.purebliss.app
-    
+
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/certs:/etc/nginx/certs:ro
@@ -21,22 +21,25 @@ services:
       - /opt/dev-purebliss/dev_scripts/services/nginx/entrypoints/vault-entrypoint.sh:/usr/local/bin/vault-entrypoint.sh:ro
       # Logging
       - /opt/my-secure-ha-stack/logs:/opt/logs:rw
-    
+
+      # Mount Vault token for PKI integration
+      - ./secrets/vault_token:/vault-token:ro
+
     entrypoint: ["/usr/local/bin/vault-entrypoint.sh"]
     command: ["nginx", "-g", "daemon off;"]
-    
+
     networks:
       - purebliss-net
     depends_on:
       - vault
-    
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/health", "||", "exit", "1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    
+
     restart: unless-stopped
   vault:
     image: vault:1.13.3
