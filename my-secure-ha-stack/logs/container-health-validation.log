@@ -6846,3 +6846,867 @@ HA Enabled         false
 2025-08-07 23:00:12 - HEALTH_VALIDATION [CRITICAL]: RESOLUTION REQUIRED: All identified issues must be fixed before proceeding
 2025-08-07 23:00:12 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
 2025-08-07 23:00:12 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-purebliss-redis-remediation.json
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for all after task: infrastructure-stabilization
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: Container name: purebliss-all
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-all exists and is running
+2025-08-07 23:05:35 - HEALTH_VALIDATION [ERROR]: Container purebliss-all is not running
+2025-08-07 23:05:35 - HEALTH_VALIDATION [ERROR]: Container purebliss-all does not exist
+2025-08-07 23:05:35 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: container_not_running
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: Issue Details: Container purebliss-all is not in running state
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:05:35 - HEALTH_VALIDATION [ERROR]: Container purebliss-all not found in docker ps output
+2025-08-07 23:05:35 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:05:37 - HEALTH_VALIDATION [WARN]: Cannot capture resource usage - container may not be running
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:05:37 - HEALTH_VALIDATION [ERROR]: Critical log entry: Error response from daemon: No such container: purebliss-all
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:05:37 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:05:37 - HEALTH_VALIDATION [ERROR]: Container network connectivity issues
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for all
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: === REMEDIATION RECOMMENDATIONS ===
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: RECOMMENDATION: Check container logs, restart container, verify dependencies
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: COMMAND: docker start purebliss-all
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: COMMAND: docker logs purebliss-all
+2025-08-07 23:05:37 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above
+2025-08-07 23:05:37 - HEALTH_VALIDATION [CRITICAL]: RESOLUTION REQUIRED: All identified issues must be fixed before proceeding
+2025-08-07 23:05:37 - HEALTH_VALIDATION [ERROR]: CRITICAL: Container validation failed - cannot proceed
+2025-08-07 23:05:37 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-all-infrastructure-stabilization.json
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for vault after task: autonomous-health-check
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Container name: purebliss-vault
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-vault exists and is running
+2025-08-07 23:07:51 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-vault is running
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-vault
+2025-08-07 23:07:51 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-07 23:07:51 - HEALTH_VALIDATION [ERROR]: Health check output: Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+2025-08-07 23:07:51 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: health_check_failed
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Issue Details: Docker health check reports unhealthy status
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: Container Status: running, Exit Code: 0
+2025-08-07 23:07:51 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:07:53 - HEALTH_VALIDATION [INFO]: Resource usage captured above
+2025-08-07 23:07:53 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:07:53 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [INFO]  expiration: lease restore complete
+2025-08-07 23:07:53 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] identity: identity loading OIDC clients
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: request forwarding setup function
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: request forwarding not setup
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: leaving request forwarding setup function
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [INFO]  core: usage gauge collection is disabled
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.509Z [INFO]  core: post-unseal setup complete
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.509Z [INFO]  core: vault is unsealed
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] would have sent systemd notification (systemd not present): notification=STOPPING=1
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: shutdown called
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: ==> Vault shutdown triggered
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: marked as sealed
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: pre-seal teardown starting
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] expiration: stop triggered
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] expiration: finished stopping
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  rollback: stopping rollback manager
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: pre-seal teardown complete
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: stopping cluster listeners
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core.cluster-listener: forwarding rpc listeners stopped
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core.cluster-listener: rpc listeners successfully shut down
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core: cluster listeners successfully shut down
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [DEBUG] core: sealing barrier
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core: vault is sealed
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server configuration:
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Api Address: http://0.0.0.0:8200
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Cgo: disabled
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Cluster Address: https://0.0.0.0:8201
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Environment Variables: GODEBUG, HOME, HOSTNAME, PATH, VAULT_ADDR, VAULT_SKIP_VERIFY
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Go Version: go1.20.4
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Listener 1: tcp (addr: "0.0.0.0:8200", cluster address: "0.0.0.0:8201", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled")
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Log Level: debug
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Mlock: supported: true, enabled: false
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Recovery Mode: false
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Storage: file
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Version: Vault v1.13.3, built 2023-06-06T18:12:37Z
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: Version Sha: 3bedf816cbf851656ae9e6bd65dd4a67a9ddff5e
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server started! Log data will stream in below:
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [INFO]  proxy environment: http_proxy="" https_proxy="" no_proxy=""
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] core: set config: sanitized config="{"api_addr":"http://0.0.0.0:8200","cache_size":0,"cluster_addr":"","cluster_cipher_suites":"","cluster_name":"","default_lease_ttl":0,"default_max_request_duration":0,"detect_deadlocks":"","disable_cache":false,"disable_clustering":false,"disable_indexing":false,"disable_mlock":true,"disable_performance_standby":false,"disable_printable_check":false,"disable_sealwrap":false,"disable_sentinel_trace":false,"enable_response_header_hostname":false,"enable_response_header_raft_node_id":false,"enable_ui":true,"experiments":null,"introspection_endpoint":false,"listeners":[{"config":{"address":"0.0.0.0:8200","tls_disable":1},"type":"tcp"}],"log_format":"","log_level":"debug","log_requests_level":"","max_lease_ttl":0,"pid_file":"","plugin_directory":"","plugin_file_permissions":0,"plugin_file_uid":0,"raw_storage_endpoint":false,"seals":[{"disabled":false,"type":"shamir"}],"storage":{"cluster_addr":"","disable_clustering":false,"redirect_addr":"http://0.0.0.0:8200","type":"file"}}"
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] storage.cache: creating LRU cache: size=0
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [INFO]  core: Initializing version history cache for core
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] cluster listener addresses synthesized: cluster_addresses=[0.0.0.0:8201]
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] would have sent systemd notification (systemd not present): notification=READY=1
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:07:54 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:07:54 - HEALTH_VALIDATION [SUCCESS]: Container is connected to networks
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for vault
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: === REMEDIATION RECOMMENDATIONS ===
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: RECOMMENDATION: Check service endpoints, verify configuration, restart if needed
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: COMMAND: docker exec purebliss-vault curl -f http://localhost:8080/health || true
+2025-08-07 23:07:54 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above
+2025-08-07 23:07:54 - HEALTH_VALIDATION [CRITICAL]: RESOLUTION REQUIRED: All identified issues must be fixed before proceeding
+2025-08-07 23:07:54 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-07 23:07:54 - HEALTH_VALIDATION [CRITICAL]: STOPPING: Health issue detected - performing comprehensive troubleshooting
+2025-08-07 23:07:54 - HEALTH_VALIDATION [WARN]: Skipping endpoint validation due to previous health failures
+2025-08-07 23:07:54 - HEALTH_VALIDATION [WARN]: Skipping dependency validation due to previous health failures
+2025-08-07 23:07:54 - HEALTH_VALIDATION [WARN]: Skipping performance validation due to previous health failures
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-vault-autonomous-health-check.json
+2025-08-07 23:07:54 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: vault is unhealthy after autonomous-health-check
+2025-08-07 23:07:54 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for postgres after task: autonomous-health-check
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Container name: purebliss-postgres
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-postgres exists and is running
+2025-08-07 23:07:54 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-postgres is running
+2025-08-07 23:07:54 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-postgres
+2025-08-07 23:07:54 - HEALTH_VALIDATION [WARN]: Docker health check reports: starting (waiting for completion)
+2025-08-07 23:08:55 - HEALTH_VALIDATION [ERROR]: Health check timeout after 30 attempts
+2025-08-07 23:08:55 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: health_check_timeout
+2025-08-07 23:08:55 - HEALTH_VALIDATION [INFO]: Issue Details: Health check timed out after 30 attempts
+2025-08-07 23:08:55 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:08:55 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:08:55 - HEALTH_VALIDATION [INFO]: Container Status: running, Exit Code: 0
+2025-08-07 23:08:55 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:08:56 - HEALTH_VALIDATION [INFO]: Resource usage captured above
+2025-08-07 23:08:56 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:08:57 - HEALTH_VALIDATION [ERROR]: Critical log entry: [Fri Aug  8 03:07:50 AM UTC 2025] POSTGRES_VAULT: ERROR: Vault is not ready - cannot start PostgreSQL with secure credentials
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: ❌ POSTGRES: Vault is not ready - cannot start PostgreSQL with secure credentials
+2025-08-07 23:08:57 - HEALTH_VALIDATION [ERROR]: Critical log entry: [Fri Aug  8 03:07:50 AM UTC 2025] POSTGRES_VAULT: ERROR: This violates Pure Bliss Elite Zero-Trust principles
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: ❌ POSTGRES: This violates Pure Bliss Elite Zero-Trust principles
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:50 AM UTC 2025] POSTGRES_VAULT: Starting PostgreSQL with Vault integration (Pure Bliss Elite Standards)...
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:50 AM UTC 2025] POSTGRES_VAULT: Waiting for Vault to be ready and unsealed...
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:50 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:50 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 1/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:53 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:53 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 2/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:56 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:56 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 3/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:59 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:07:59 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 4/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:02 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:02 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 5/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:05 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:05 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 6/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:08 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:08 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 7/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:11 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:11 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 8/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:14 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:14 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 9/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:17 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:17 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 10/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:20 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:20 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 11/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:23 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:23 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 12/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:26 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:27 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 13/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:30 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:30 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 14/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:33 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:33 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 15/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:36 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:36 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 16/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:39 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:39 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 17/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:42 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:42 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 18/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:45 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:45 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 19/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:48 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:48 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 20/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:51 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:51 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 21/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:54 AM UTC 2025] POSTGRES_VAULT: Vault accessible via hostname
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Log: [Fri Aug  8 03:08:54 AM UTC 2025] POSTGRES_VAULT: Vault is sealed, waiting for auto-unseal (attempt 22/60)
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:08:57 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:08:57 - HEALTH_VALIDATION [SUCCESS]: Container is connected to networks
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for postgres
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: === REMEDIATION RECOMMENDATIONS ===
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: RECOMMENDATION: Review logs, check configuration, verify resources
+2025-08-07 23:08:57 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above
+2025-08-07 23:08:57 - HEALTH_VALIDATION [CRITICAL]: RESOLUTION REQUIRED: All identified issues must be fixed before proceeding
+2025-08-07 23:08:57 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-07 23:08:57 - HEALTH_VALIDATION [CRITICAL]: STOPPING: Health issue detected - performing comprehensive troubleshooting
+2025-08-07 23:08:57 - HEALTH_VALIDATION [WARN]: Skipping endpoint validation due to previous health failures
+2025-08-07 23:08:57 - HEALTH_VALIDATION [WARN]: Skipping dependency validation due to previous health failures
+2025-08-07 23:08:57 - HEALTH_VALIDATION [WARN]: Skipping performance validation due to previous health failures
+2025-08-07 23:08:57 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-postgres-autonomous-health-check.json
+2025-08-07 23:08:57 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: postgres is unhealthy after autonomous-health-check
+2025-08-07 23:08:57 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for vault after task: autonomous-remediation
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Container name: purebliss-vault
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-vault exists and is running
+2025-08-07 23:09:18 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-vault is running
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-vault
+2025-08-07 23:09:18 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-07 23:09:18 - HEALTH_VALIDATION [ERROR]: Health check output: Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+2025-08-07 23:09:18 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: health_check_failed
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Issue Details: Docker health check reports unhealthy status
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: Container Status: running, Exit Code: 0
+2025-08-07 23:09:18 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Resource usage captured above
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [INFO]  expiration: lease restore complete
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] identity: identity loading OIDC clients
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: request forwarding setup function
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: request forwarding not setup
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: leaving request forwarding setup function
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [INFO]  core: usage gauge collection is disabled
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.509Z [INFO]  core: post-unseal setup complete
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.509Z [INFO]  core: vault is unsealed
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] would have sent systemd notification (systemd not present): notification=STOPPING=1
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: shutdown called
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: ==> Vault shutdown triggered
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: marked as sealed
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: pre-seal teardown starting
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] expiration: stop triggered
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] expiration: finished stopping
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  rollback: stopping rollback manager
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: pre-seal teardown complete
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: stopping cluster listeners
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core.cluster-listener: forwarding rpc listeners stopped
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core.cluster-listener: rpc listeners successfully shut down
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core: cluster listeners successfully shut down
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [DEBUG] core: sealing barrier
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core: vault is sealed
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server configuration:
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Api Address: http://0.0.0.0:8200
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Cgo: disabled
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Cluster Address: https://0.0.0.0:8201
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Environment Variables: GODEBUG, HOME, HOSTNAME, PATH, VAULT_ADDR, VAULT_SKIP_VERIFY
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Go Version: go1.20.4
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Listener 1: tcp (addr: "0.0.0.0:8200", cluster address: "0.0.0.0:8201", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled")
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Log Level: debug
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Mlock: supported: true, enabled: false
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Recovery Mode: false
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Storage: file
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Version: Vault v1.13.3, built 2023-06-06T18:12:37Z
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: Version Sha: 3bedf816cbf851656ae9e6bd65dd4a67a9ddff5e
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server started! Log data will stream in below:
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [INFO]  proxy environment: http_proxy="" https_proxy="" no_proxy=""
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] core: set config: sanitized config="{"api_addr":"http://0.0.0.0:8200","cache_size":0,"cluster_addr":"","cluster_cipher_suites":"","cluster_name":"","default_lease_ttl":0,"default_max_request_duration":0,"detect_deadlocks":"","disable_cache":false,"disable_clustering":false,"disable_indexing":false,"disable_mlock":true,"disable_performance_standby":false,"disable_printable_check":false,"disable_sealwrap":false,"disable_sentinel_trace":false,"enable_response_header_hostname":false,"enable_response_header_raft_node_id":false,"enable_ui":true,"experiments":null,"introspection_endpoint":false,"listeners":[{"config":{"address":"0.0.0.0:8200","tls_disable":1},"type":"tcp"}],"log_format":"","log_level":"debug","log_requests_level":"","max_lease_ttl":0,"pid_file":"","plugin_directory":"","plugin_file_permissions":0,"plugin_file_uid":0,"raw_storage_endpoint":false,"seals":[{"disabled":false,"type":"shamir"}],"storage":{"cluster_addr":"","disable_clustering":false,"redirect_addr":"http://0.0.0.0:8200","type":"file"}}"
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] storage.cache: creating LRU cache: size=0
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [INFO]  core: Initializing version history cache for core
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] cluster listener addresses synthesized: cluster_addresses=[0.0.0.0:8201]
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] would have sent systemd notification (systemd not present): notification=READY=1
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:09:20 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:09:20 - HEALTH_VALIDATION [SUCCESS]: Container is connected to networks
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for vault
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: === REMEDIATION RECOMMENDATIONS ===
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: RECOMMENDATION: Check service endpoints, verify configuration, restart if needed
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: COMMAND: docker exec purebliss-vault curl -f http://localhost:8080/health || true
+2025-08-07 23:09:20 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above
+2025-08-07 23:09:20 - HEALTH_VALIDATION [CRITICAL]: RESOLUTION REQUIRED: All identified issues must be fixed before proceeding
+2025-08-07 23:09:20 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-07 23:09:20 - HEALTH_VALIDATION [CRITICAL]: STOPPING: Health issue detected - performing comprehensive troubleshooting
+2025-08-07 23:09:20 - HEALTH_VALIDATION [WARN]: Skipping endpoint validation due to previous health failures
+2025-08-07 23:09:20 - HEALTH_VALIDATION [WARN]: Skipping dependency validation due to previous health failures
+2025-08-07 23:09:20 - HEALTH_VALIDATION [WARN]: Skipping performance validation due to previous health failures
+2025-08-07 23:09:20 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-vault-autonomous-remediation.json
+2025-08-07 23:09:20 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: vault is unhealthy after autonomous-remediation
+2025-08-07 23:09:20 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for vault after task: deep-troubleshooting
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Container name: purebliss-vault
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-vault exists and is running
+2025-08-07 23:10:20 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-vault is running
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-vault
+2025-08-07 23:10:20 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-07 23:10:20 - HEALTH_VALIDATION [ERROR]: Health check output: Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+2025-08-07 23:10:20 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: health_check_failed
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Issue Details: Docker health check reports unhealthy status
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: Container Status: running, Exit Code: 0
+2025-08-07 23:10:20 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Resource usage captured above
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [INFO]  expiration: lease restore complete
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] identity: identity loading OIDC clients
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: request forwarding setup function
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: request forwarding not setup
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [DEBUG] core: leaving request forwarding setup function
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.508Z [INFO]  core: usage gauge collection is disabled
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.509Z [INFO]  core: post-unseal setup complete
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:22:07.509Z [INFO]  core: vault is unsealed
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] would have sent systemd notification (systemd not present): notification=STOPPING=1
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: shutdown called
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: ==> Vault shutdown triggered
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: marked as sealed
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: pre-seal teardown starting
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] expiration: stop triggered
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [DEBUG] expiration: finished stopping
+2025-08-07 23:10:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  rollback: stopping rollback manager
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: pre-seal teardown complete
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core: stopping cluster listeners
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.109Z [INFO]  core.cluster-listener: forwarding rpc listeners stopped
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core.cluster-listener: rpc listeners successfully shut down
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core: cluster listeners successfully shut down
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [DEBUG] core: sealing barrier
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:49:39.557Z [INFO]  core: vault is sealed
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server configuration:
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Api Address: http://0.0.0.0:8200
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Cgo: disabled
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Cluster Address: https://0.0.0.0:8201
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Environment Variables: GODEBUG, HOME, HOSTNAME, PATH, VAULT_ADDR, VAULT_SKIP_VERIFY
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Go Version: go1.20.4
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Listener 1: tcp (addr: "0.0.0.0:8200", cluster address: "0.0.0.0:8201", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled")
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Log Level: debug
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Mlock: supported: true, enabled: false
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Recovery Mode: false
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Storage: file
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Version: Vault v1.13.3, built 2023-06-06T18:12:37Z
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: Version Sha: 3bedf816cbf851656ae9e6bd65dd4a67a9ddff5e
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server started! Log data will stream in below:
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [INFO]  proxy environment: http_proxy="" https_proxy="" no_proxy=""
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] core: set config: sanitized config="{"api_addr":"http://0.0.0.0:8200","cache_size":0,"cluster_addr":"","cluster_cipher_suites":"","cluster_name":"","default_lease_ttl":0,"default_max_request_duration":0,"detect_deadlocks":"","disable_cache":false,"disable_clustering":false,"disable_indexing":false,"disable_mlock":true,"disable_performance_standby":false,"disable_printable_check":false,"disable_sealwrap":false,"disable_sentinel_trace":false,"enable_response_header_hostname":false,"enable_response_header_raft_node_id":false,"enable_ui":true,"experiments":null,"introspection_endpoint":false,"listeners":[{"config":{"address":"0.0.0.0:8200","tls_disable":1},"type":"tcp"}],"log_format":"","log_level":"debug","log_requests_level":"","max_lease_ttl":0,"pid_file":"","plugin_directory":"","plugin_file_permissions":0,"plugin_file_uid":0,"raw_storage_endpoint":false,"seals":[{"disabled":false,"type":"shamir"}],"storage":{"cluster_addr":"","disable_clustering":false,"redirect_addr":"http://0.0.0.0:8200","type":"file"}}"
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] storage.cache: creating LRU cache: size=0
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [INFO]  core: Initializing version history cache for core
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] cluster listener addresses synthesized: cluster_addresses=[0.0.0.0:8201]
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] would have sent systemd notification (systemd not present): notification=READY=1
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:10:23 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:10:23 - HEALTH_VALIDATION [SUCCESS]: Container is connected to networks
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for vault
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: === REMEDIATION RECOMMENDATIONS ===
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: RECOMMENDATION: Check service endpoints, verify configuration, restart if needed
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: COMMAND: docker exec purebliss-vault curl -f http://localhost:8080/health || true
+2025-08-07 23:10:23 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above
+2025-08-07 23:10:23 - HEALTH_VALIDATION [CRITICAL]: RESOLUTION REQUIRED: All identified issues must be fixed before proceeding
+2025-08-07 23:10:23 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-07 23:10:23 - HEALTH_VALIDATION [CRITICAL]: STOPPING: Health issue detected - performing comprehensive troubleshooting
+2025-08-07 23:10:23 - HEALTH_VALIDATION [WARN]: Skipping endpoint validation due to previous health failures
+2025-08-07 23:10:23 - HEALTH_VALIDATION [WARN]: Skipping dependency validation due to previous health failures
+2025-08-07 23:10:23 - HEALTH_VALIDATION [WARN]: Skipping performance validation due to previous health failures
+2025-08-07 23:10:23 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-vault-deep-troubleshooting.json
+2025-08-07 23:10:23 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: vault is unhealthy after deep-troubleshooting
+2025-08-07 23:10:23 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for vault after task: post-unseal-validation
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Container name: purebliss-vault
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-vault exists and is running
+2025-08-07 23:13:19 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-vault is running
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-vault
+2025-08-07 23:13:19 - HEALTH_VALIDATION [ERROR]: Docker health check reports: unhealthy
+2025-08-07 23:13:19 - HEALTH_VALIDATION [ERROR]: Health check output: Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+Key                Value
+---                -----
+Seal Type          shamir
+Initialized        true
+Sealed             true
+Total Shares       1
+Threshold          1
+Unseal Progress    0/1
+Unseal Nonce       n/a
+Version            1.13.3
+Build Date         2023-06-06T18:12:37Z
+Storage Type       file
+HA Enabled         false
+2025-08-07 23:13:19 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: health_check_failed
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Issue Details: Docker health check reports unhealthy status
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: Container Status: running, Exit Code: 0
+2025-08-07 23:13:19 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Resource usage captured above
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: Listener 1: tcp (addr: "0.0.0.0:8200", cluster address: "0.0.0.0:8201", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled")
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: Log Level: debug
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: Mlock: supported: true, enabled: false
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: Recovery Mode: false
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: Storage: file
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: Version: Vault v1.13.3, built 2023-06-06T18:12:37Z
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: Version Sha: 3bedf816cbf851656ae9e6bd65dd4a67a9ddff5e
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server started! Log data will stream in below:
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [INFO]  proxy environment: http_proxy="" https_proxy="" no_proxy=""
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] core: set config: sanitized config="{"api_addr":"http://0.0.0.0:8200","cache_size":0,"cluster_addr":"","cluster_cipher_suites":"","cluster_name":"","default_lease_ttl":0,"default_max_request_duration":0,"detect_deadlocks":"","disable_cache":false,"disable_clustering":false,"disable_indexing":false,"disable_mlock":true,"disable_performance_standby":false,"disable_printable_check":false,"disable_sealwrap":false,"disable_sentinel_trace":false,"enable_response_header_hostname":false,"enable_response_header_raft_node_id":false,"enable_ui":true,"experiments":null,"introspection_endpoint":false,"listeners":[{"config":{"address":"0.0.0.0:8200","tls_disable":1},"type":"tcp"}],"log_format":"","log_level":"debug","log_requests_level":"","max_lease_ttl":0,"pid_file":"","plugin_directory":"","plugin_file_permissions":0,"plugin_file_uid":0,"raw_storage_endpoint":false,"seals":[{"disabled":false,"type":"shamir"}],"storage":{"cluster_addr":"","disable_clustering":false,"redirect_addr":"http://0.0.0.0:8200","type":"file"}}"
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] storage.cache: creating LRU cache: size=0
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [INFO]  core: Initializing version history cache for core
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] cluster listener addresses synthesized: cluster_addresses=[0.0.0.0:8201]
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] would have sent systemd notification (systemd not present): notification=READY=1
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [DEBUG] core: unseal key supplied: migrate=false
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [DEBUG] core: starting cluster listeners
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core.cluster-listener.tcp: starting listener: listener_address=0.0.0.0:8201
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core.cluster-listener: serving cluster requests: cluster_listen_address=[::]:8201
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core: post-unseal setup starting
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: persisting feature flags
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [INFO]  core: loaded wrapping token key
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [INFO]  core: successfully setup plugin catalog: plugin-directory=""
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=system version="v1.13.3+builtin.vault" path=sys/ namespace="ID: root. Path: "
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=identity version="v1.13.3+builtin.vault" path=identity/ namespace="ID: root. Path: "
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=cubbyhole version="v1.13.3+builtin.vault" path=cubbyhole/ namespace="ID: root. Path: "
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  core: successfully mounted: type=token version="v1.13.3+builtin.vault" path=token/ namespace="ID: root. Path: "
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  rollback: starting rollback manager
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  core: restoring leases
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] expiration: collecting leases
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] expiration: leases collected: num_existing=0
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  expiration: lease restore complete
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: loading entities
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: entities collected: num_existing=0
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  identity: entities restored
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: identity loading groups
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: groups collected: num_existing=0
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  identity: groups restored
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: identity loading OIDC clients
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: request forwarding setup function
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:13:21 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: request forwarding not setup
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: leaving request forwarding setup function
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [INFO]  core: usage gauge collection is disabled
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.603Z [INFO]  core: post-unseal setup complete
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.603Z [INFO]  core: vault is unsealed
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:13:22 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:13:22 - HEALTH_VALIDATION [SUCCESS]: Container is connected to networks
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for vault
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: === REMEDIATION RECOMMENDATIONS ===
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: RECOMMENDATION: Check service endpoints, verify configuration, restart if needed
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: COMMAND: docker exec purebliss-vault curl -f http://localhost:8080/health || true
+2025-08-07 23:13:22 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above
+2025-08-07 23:13:22 - HEALTH_VALIDATION [CRITICAL]: RESOLUTION REQUIRED: All identified issues must be fixed before proceeding
+2025-08-07 23:13:22 - HEALTH_VALIDATION [ERROR]: Docker health check failed
+2025-08-07 23:13:22 - HEALTH_VALIDATION [CRITICAL]: STOPPING: Health issue detected - performing comprehensive troubleshooting
+2025-08-07 23:13:22 - HEALTH_VALIDATION [WARN]: Skipping endpoint validation due to previous health failures
+2025-08-07 23:13:22 - HEALTH_VALIDATION [WARN]: Skipping dependency validation due to previous health failures
+2025-08-07 23:13:22 - HEALTH_VALIDATION [WARN]: Skipping performance validation due to previous health failures
+2025-08-07 23:13:22 - HEALTH_VALIDATION [INFO]: Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-vault-post-unseal-validation.json
+2025-08-07 23:13:22 - HEALTH_VALIDATION [ERROR]: ❌ HEALTH VALIDATION FAILED: vault is unhealthy after post-unseal-validation
+2025-08-07 23:13:22 - HEALTH_VALIDATION [ERROR]: ❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for vault after task: post-unseal-validation
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Container name: purebliss-vault
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-vault exists and is running
+2025-08-07 23:13:41 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-vault is running
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-vault
+2025-08-07 23:13:41 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Validating service endpoints for vault
+2025-08-07 23:13:41 - HEALTH_VALIDATION [ERROR]: Vault health endpoint not responding
+2025-08-07 23:13:41 - HEALTH_VALIDATION [SUCCESS]: Vault is initialized
+2025-08-07 23:13:41 - HEALTH_VALIDATION [WARN]: Vault is sealed (may be expected for development mode)
+2025-08-07 23:13:41 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-07 23:13:41 - HEALTH_VALIDATION [CRITICAL]: STOPPING: Endpoint issue detected - performing comprehensive troubleshooting
+2025-08-07 23:13:41 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: endpoint_failure
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Issue Details: Service endpoint validation failed for vault
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: Container Status: running, Exit Code: 0
+2025-08-07 23:13:41 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Resource usage captured above
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: Listener 1: tcp (addr: "0.0.0.0:8200", cluster address: "0.0.0.0:8201", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled")
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: Log Level: debug
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: Mlock: supported: true, enabled: false
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: Recovery Mode: false
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: Storage: file
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: Version: Vault v1.13.3, built 2023-06-06T18:12:37Z
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: Version Sha: 3bedf816cbf851656ae9e6bd65dd4a67a9ddff5e
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server started! Log data will stream in below:
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [INFO]  proxy environment: http_proxy="" https_proxy="" no_proxy=""
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] core: set config: sanitized config="{"api_addr":"http://0.0.0.0:8200","cache_size":0,"cluster_addr":"","cluster_cipher_suites":"","cluster_name":"","default_lease_ttl":0,"default_max_request_duration":0,"detect_deadlocks":"","disable_cache":false,"disable_clustering":false,"disable_indexing":false,"disable_mlock":true,"disable_performance_standby":false,"disable_printable_check":false,"disable_sealwrap":false,"disable_sentinel_trace":false,"enable_response_header_hostname":false,"enable_response_header_raft_node_id":false,"enable_ui":true,"experiments":null,"introspection_endpoint":false,"listeners":[{"config":{"address":"0.0.0.0:8200","tls_disable":1},"type":"tcp"}],"log_format":"","log_level":"debug","log_requests_level":"","max_lease_ttl":0,"pid_file":"","plugin_directory":"","plugin_file_permissions":0,"plugin_file_uid":0,"raw_storage_endpoint":false,"seals":[{"disabled":false,"type":"shamir"}],"storage":{"cluster_addr":"","disable_clustering":false,"redirect_addr":"http://0.0.0.0:8200","type":"file"}}"
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] storage.cache: creating LRU cache: size=0
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [INFO]  core: Initializing version history cache for core
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] cluster listener addresses synthesized: cluster_addresses=[0.0.0.0:8201]
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] would have sent systemd notification (systemd not present): notification=READY=1
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [DEBUG] core: unseal key supplied: migrate=false
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [DEBUG] core: starting cluster listeners
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core.cluster-listener.tcp: starting listener: listener_address=0.0.0.0:8201
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core.cluster-listener: serving cluster requests: cluster_listen_address=[::]:8201
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core: post-unseal setup starting
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: persisting feature flags
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [INFO]  core: loaded wrapping token key
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [INFO]  core: successfully setup plugin catalog: plugin-directory=""
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=system version="v1.13.3+builtin.vault" path=sys/ namespace="ID: root. Path: "
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=identity version="v1.13.3+builtin.vault" path=identity/ namespace="ID: root. Path: "
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=cubbyhole version="v1.13.3+builtin.vault" path=cubbyhole/ namespace="ID: root. Path: "
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  core: successfully mounted: type=token version="v1.13.3+builtin.vault" path=token/ namespace="ID: root. Path: "
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  rollback: starting rollback manager
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  core: restoring leases
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] expiration: collecting leases
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] expiration: leases collected: num_existing=0
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  expiration: lease restore complete
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: loading entities
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: entities collected: num_existing=0
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  identity: entities restored
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: identity loading groups
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: groups collected: num_existing=0
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  identity: groups restored
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: identity loading OIDC clients
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: request forwarding setup function
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: request forwarding not setup
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: leaving request forwarding setup function
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [INFO]  core: usage gauge collection is disabled
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.603Z [INFO]  core: post-unseal setup complete
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.603Z [INFO]  core: vault is unsealed
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:13:44 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:13:44 - HEALTH_VALIDATION [SUCCESS]: Container is connected to networks
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for vault
+2025-08-07 23:13:44 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Starting comprehensive health validation for vault after task: endpoint-enhancement-validation
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Container name: purebliss-vault
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Checking for port conflicts before validation
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Checking if container purebliss-vault exists and is running
+2025-08-07 23:15:51 - HEALTH_VALIDATION [SUCCESS]: Container purebliss-vault is running
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Checking Docker health status for purebliss-vault
+2025-08-07 23:15:51 - HEALTH_VALIDATION [SUCCESS]: Docker health check reports: healthy
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Validating service endpoints for vault
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Vault /v1/sys/health response code: wn, body: 
+2025-08-07 23:15:51 - HEALTH_VALIDATION [ERROR]: Vault health endpoint not responding as expected (code wn)
+2025-08-07 23:15:51 - HEALTH_VALIDATION [SUCCESS]: Vault is initialized
+2025-08-07 23:15:51 - HEALTH_VALIDATION [WARN]: Vault is sealed (may be expected for development mode)
+2025-08-07 23:15:51 - HEALTH_VALIDATION [ERROR]: Service endpoint validation failed
+2025-08-07 23:15:51 - HEALTH_VALIDATION [CRITICAL]: STOPPING: Endpoint issue detected - performing comprehensive troubleshooting
+2025-08-07 23:15:51 - HEALTH_VALIDATION [CRITICAL]: DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: endpoint_failure
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Issue Details: Service endpoint validation failed for vault
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Performing comprehensive health analysis...
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: === CONTAINER STATE ANALYSIS ===
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: Container Status: running, Exit Code: 0
+2025-08-07 23:15:51 - HEALTH_VALIDATION [INFO]: === RESOURCE USAGE ANALYSIS ===
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Resource usage captured above
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: === CONTAINER LOG ANALYSIS ===
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: Listener 1: tcp (addr: "0.0.0.0:8200", cluster address: "0.0.0.0:8201", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled")
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: Log Level: debug
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: Mlock: supported: true, enabled: false
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: Recovery Mode: false
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: Storage: file
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: Version: Vault v1.13.3, built 2023-06-06T18:12:37Z
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: Version Sha: 3bedf816cbf851656ae9e6bd65dd4a67a9ddff5e
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: ==> Vault server started! Log data will stream in below:
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [INFO]  proxy environment: http_proxy="" https_proxy="" no_proxy=""
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] core: set config: sanitized config="{"api_addr":"http://0.0.0.0:8200","cache_size":0,"cluster_addr":"","cluster_cipher_suites":"","cluster_name":"","default_lease_ttl":0,"default_max_request_duration":0,"detect_deadlocks":"","disable_cache":false,"disable_clustering":false,"disable_indexing":false,"disable_mlock":true,"disable_performance_standby":false,"disable_printable_check":false,"disable_sealwrap":false,"disable_sentinel_trace":false,"enable_response_header_hostname":false,"enable_response_header_raft_node_id":false,"enable_ui":true,"experiments":null,"introspection_endpoint":false,"listeners":[{"config":{"address":"0.0.0.0:8200","tls_disable":1},"type":"tcp"}],"log_format":"","log_level":"debug","log_requests_level":"","max_lease_ttl":0,"pid_file":"","plugin_directory":"","plugin_file_permissions":0,"plugin_file_uid":0,"raw_storage_endpoint":false,"seals":[{"disabled":false,"type":"shamir"}],"storage":{"cluster_addr":"","disable_clustering":false,"redirect_addr":"http://0.0.0.0:8200","type":"file"}}"
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.196Z [DEBUG] storage.cache: creating LRU cache: size=0
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [INFO]  core: Initializing version history cache for core
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] cluster listener addresses synthesized: cluster_addresses=[0.0.0.0:8201]
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T02:58:33.197Z [DEBUG] would have sent systemd notification (systemd not present): notification=READY=1
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [DEBUG] core: unseal key supplied: migrate=false
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [DEBUG] core: starting cluster listeners
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core.cluster-listener.tcp: starting listener: listener_address=0.0.0.0:8201
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core.cluster-listener: serving cluster requests: cluster_listen_address=[::]:8201
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.597Z [INFO]  core: post-unseal setup starting
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [DEBUG] core: persisting feature flags
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [INFO]  core: loaded wrapping token key
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.598Z [INFO]  core: successfully setup plugin catalog: plugin-directory=""
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=system version="v1.13.3+builtin.vault" path=sys/ namespace="ID: root. Path: "
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=identity version="v1.13.3+builtin.vault" path=identity/ namespace="ID: root. Path: "
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.599Z [INFO]  core: successfully mounted: type=cubbyhole version="v1.13.3+builtin.vault" path=cubbyhole/ namespace="ID: root. Path: "
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  core: successfully mounted: type=token version="v1.13.3+builtin.vault" path=token/ namespace="ID: root. Path: "
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  rollback: starting rollback manager
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.600Z [INFO]  core: restoring leases
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] expiration: collecting leases
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] expiration: leases collected: num_existing=0
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  expiration: lease restore complete
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: loading entities
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: entities collected: num_existing=0
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  identity: entities restored
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: identity loading groups
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: groups collected: num_existing=0
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [INFO]  identity: groups restored
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.601Z [DEBUG] identity: identity loading OIDC clients
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: request forwarding setup function
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: clearing forwarding clients
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: done clearing forwarding clients
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: request forwarding not setup
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [DEBUG] core: leaving request forwarding setup function
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.602Z [INFO]  core: usage gauge collection is disabled
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.603Z [INFO]  core: post-unseal setup complete
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: Log: 2025-08-08T03:13:11.603Z [INFO]  core: vault is unsealed
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: === NETWORK CONNECTIVITY ANALYSIS ===
+2025-08-07 23:15:54 - HEALTH_VALIDATION [SUCCESS]: Pure Bliss network exists
+2025-08-07 23:15:54 - HEALTH_VALIDATION [SUCCESS]: Container is connected to networks
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: === DEPENDENCY HEALTH CHECK ===
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: No specific dependencies defined for vault
+2025-08-07 23:15:54 - HEALTH_VALIDATION [INFO]: === PORT AND PROCESS ANALYSIS ===

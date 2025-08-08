@@ -1,0 +1,1 @@
+2025-08-07: Vault endpoint validation logic enhanced, auto-unseal attempted, Vault unavailable after 30 attempts. Root cause: Vault sealed after restart, endpoint returns non-200. Next: Enhance auto-unseal detection and alerting.
