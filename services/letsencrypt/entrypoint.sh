@@ -89,12 +89,12 @@ wait $HTTP_PID $RENEW_PID
 # Auto-detect Vault mode and configure accordingly
 detect_vault_mode() {
   # First try Docker service name (when running in container)
-  if curl -s "http://purebliss-vault:8200/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "http://purebliss-vault:8200/v1/sys/health" >/dev/null 2>&1; then
     export VAULT_ADDR="http://purebliss-vault:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     VAULT_MODE="dev"
     echo "[$(date)] INFO: Detected Vault in development mode via Docker network" | tee -a "$LOG_FILE"
-  elif curl -sk "https://purebliss-vault:8200/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "https://purebliss-vault:8200/v1/sys/health" >/dev/null 2>&1; then
     export VAULT_ADDR="https://purebliss-vault:8200"
     export VAULT_SKIP_VERIFY=1
     if [ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]; then
@@ -106,12 +106,12 @@ detect_vault_mode() {
     VAULT_MODE="production"
     echo "[$(date)] INFO: Detected Vault in production mode via Docker network" | tee -a "$LOG_FILE"
   # Fallback to localhost (when running outside container)
-  elif curl -s "http://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
-    export VAULT_ADDR="http://127.0.0.1:8200"
+  elif curl -sk "https://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
+    export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     VAULT_MODE="dev"
     echo "[$(date)] INFO: Detected Vault in development mode via localhost" | tee -a "$LOG_FILE"
-  elif curl -sk "https://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "https://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
     export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_SKIP_VERIFY=1
     if [ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]; then

@@ -18,12 +18,12 @@ cd "$SERVICES_DIR/letsencrypt"
 
 # Auto-detect Vault mode and configure
 detect_vault_mode() {
-  if curl -s "http://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
-    export VAULT_ADDR="http://127.0.0.1:8200"
+  if curl -sk "https://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
+    export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     VAULT_MODE="dev"
     echo "[$(date)] INFO: Detected Vault in development mode" | tee -a "$LOG_FILE"
-  elif curl -sk "https://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "https://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
     export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_SKIP_VERIFY=1
     if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then

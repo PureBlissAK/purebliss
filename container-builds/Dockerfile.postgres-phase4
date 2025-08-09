@@ -1,0 +1,54 @@
+# Multi-phase PostgreSQL container scaffolding - Phase 4 Enhanced
+# Based on: /opt/dev-purebliss/services/postgres/postgres-dockerfile
+ARG BUILD_PHASE=4
+
+# Phase 1: Minimal PostgreSQL (Base from existing)
+FROM postgres:16 AS phase1
+RUN apt-get update && apt-get install -y curl jq && rm -rf /var/lib/apt/lists/*
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD pg_isready -U postgres || exit 1
+EXPOSE 5432
+CMD ["postgres"]
+
+# Phase 2: Enhanced Configuration (SSL/TLS, configs)
+FROM phase1 AS phase2
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+COPY postgresql.conf /docker-entrypoint-initdb.d/
+COPY pg_hba.conf /docker-entrypoint-initdb.d/
+ENV POSTGRES_LOGGING=on
+
+# Phase 3: Service Integration (Vault integration, entrypoint)
+FROM phase2 AS phase3
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY vault-entrypoint.sh /usr/local/bin/vault-entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/vault-entrypoint.sh 2>/dev/null || true
+ENV VAULT_ADDR=https://127.0.0.1:8200
+ENV VAULT_INTEGRATION=enabled
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["postgres"]
+
+# Phase 4: Vault Dynamic Credentials (Enhanced database roles and permissions)
+FROM phase3 AS phase4
+# Install additional tools for dynamic credential management
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
+# Copy enhanced entrypoint for Vault dynamic credentials
+COPY vault-entrypoint-enhanced.sh /usr/local/bin/vault-entrypoint-enhanced.sh
+RUN chmod +x /usr/local/bin/vault-entrypoint-enhanced.sh 2>/dev/null || true
+
+# Enhanced environment variables for dynamic credentials
+ENV VAULT_ROLE=postgres-db-role
+ENV VAULT_PATH=database/creds/postgres-db-role
+ENV POSTGRES_DYNAMIC_CREDS=enabled
+ENV POSTGRES_DB_INIT=enabled
+
+# Enhanced health check for database connectivity
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=5 \
+    CMD pg_isready -U postgres && psql -U postgres -c "SELECT 1;" > /dev/null 2>&1 || exit 1
+
+# Use enhanced entrypoint for phase 4
+ENTRYPOINT ["/usr/local/bin/vault-entrypoint-enhanced.sh"]
+CMD ["postgres"]
+
+# Final stage selection based on BUILD_PHASE
+FROM phase${BUILD_PHASE} AS final

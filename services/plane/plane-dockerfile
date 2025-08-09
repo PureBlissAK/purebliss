@@ -1,4 +1,21 @@
 FROM makeplane/plane-space:latest
 USER root
-RUN apk add --no-cache curl
+# PURE BLISS CONTAINER METADATA
+# Container: purebliss-plane
+# Purpose: Issue tracking and project management service for Pure Bliss
+# Scaffolding Phase: Phase 4 - Application Service Integration
+# Description: This container runs the Plane app, which depends on postgres, redis, and vault. It must be attached to purebliss-net and use dynamic secrets from Vault.
+# DO NOT use for scaffolding or development-only tasks.
+# END METADATA
+RUN apk add --no-cache curl wget busybox-extras
+
+# Ensure the app binds to all interfaces inside the container
+ENV HOST=0.0.0.0 \
+	PORT=3000
+
+# Dynamic healthcheck that resolves the container's IP at runtime
+# This avoids hardcoding the container IP which may change on restart
+HEALTHCHECK --interval=30s --timeout=10s --retries=5 \
+	CMD sh -c 'IP=$(hostname -i | awk '{print $1}'); wget -q --spider "http://$IP:${PORT:-3000}/" || exit 1'
+
 #USER plane

@@ -1,0 +1,7 @@
+=== Pure Bliss Script Discovery Report ===
+Scan Date: 2025-08-09T08:57:04-04:00
+
+Found: generate_unseal_key.sh at /opt/my-secure-ha-stack/backups/vault/agent/generate_unseal_key.sh
+  Purpose: Set Vault address to HTTP
+  Category: utility
+

@@ -28,7 +28,7 @@ setup_vault_env() {
     if getent hosts purebliss-vault > /dev/null 2>&1; then
         export VAULT_ADDR="http://purebliss-vault:8200"
     else
-        export VAULT_ADDR="http://localhost:8200"
+        export VAULT_ADDR="https://localhost:8200"
     fi
 
     # Get Vault token
@@ -104,7 +104,7 @@ EOF
     if [ -n "${VAULT_TOKEN:-}" ]; then
         log_info "Storing database credentials in Vault"
 
-        curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
+        curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
             -d "{\"data\": {
                 \"username\": \"$keycloak_user\",
                 \"password\": \"$keycloak_password\",
@@ -132,7 +132,7 @@ setup_keycloak_admin() {
     local admin_user="${KEYCLOAK_ADMIN:-admin}"
     local admin_password="${KEYCLOAK_ADMIN_PASSWORD:-admin_secure_$(date +%s)}"
 
-    curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
+    curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
         -d "{\"data\": {
             \"username\": \"$admin_user\",
             \"password\": \"$admin_password\",
@@ -171,7 +171,7 @@ path "auth/token/lookup-self" {
 }
 '
 
-    curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X PUT \
+    curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X PUT \
         -d "{\"policy\": \"$policy\"}" \
         "$VAULT_ADDR/v1/sys/policies/acl/keycloak-policy" > /dev/null
 
@@ -188,12 +188,12 @@ setup_vault_approle() {
     log_info "Setting up Vault AppRole for Keycloak"
 
     # Enable AppRole auth method
-    curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
+    curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
         -d '{"type":"approle"}' \
         "$VAULT_ADDR/v1/sys/auth/approle" > /dev/null 2>&1 || true
 
     # Create AppRole
-    curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
+    curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
         -d '{
             "policies": ["keycloak-policy"],
             "secret_id_ttl": "24h",
@@ -204,10 +204,10 @@ setup_vault_approle() {
 
     # Get role-id and create secret-id
     local role_id
-    role_id=$(curl -s -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/auth/approle/role/keycloak/role-id" | jq -r '.data.role_id')
+    role_id=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/auth/approle/role/keycloak/role-id" | jq -r '.data.role_id')
 
     local secret_id
-    secret_id=$(curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST "$VAULT_ADDR/v1/auth/approle/role/keycloak/secret-id" | jq -r '.data.secret_id')
+    secret_id=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST "$VAULT_ADDR/v1/auth/approle/role/keycloak/secret-id" | jq -r '.data.secret_id')
 
     # Save AppRole credentials
     mkdir -p "$SCRIPT_DIR/vault"
@@ -340,7 +340,7 @@ else
 fi
 
 # Health check
-if curl -s -f http://localhost:8080/auth/health/ready > /dev/null 2>&1; then
+if curl -sk -f http://localhost:8080/auth/health/ready > /dev/null 2>&1; then
     echo "✅ Health: Ready"
 else
     echo "❌ Health: Not ready"

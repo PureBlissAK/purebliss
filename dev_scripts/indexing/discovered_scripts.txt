@@ -1,0 +1,14 @@
+PATH: /opt/my-secure-ha-stack/orchestrator/scripts/start-environment.sh
+NAME: start-environment.sh
+VERSION: Unknown
+PURPOSE: No description
+CATEGORY: utility
+SERVICE_TAGS: general
+DEPENDENCIES: none
+ENVIRONMENT: all
+HAS_METADATA: false
+STATUS: needs-enhancement
+AGE_DAYS: 4
+LAST_MODIFIED: 1754359117
+SCAN_DATE: 2025-08-09T08:55:59-04:00
+---

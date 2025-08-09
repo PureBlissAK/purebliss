@@ -1,5 +1,21 @@
 #!/bin/bash
-set -euo pipefail
+
+
+# Set RAID_STORAGE default if not set to prevent unbound variable error
+if [[ -z "${RAID_STORAGE:-}" ]]; then
+    export RAID_STORAGE="/raid-storage"
+fi
+
+set -eo pipefail  # Don't set -u yet
+
+# Source environment variables with -u disabled to avoid unbound errors
+if [[ -f /opt/my-secure-ha-stack/config.env ]]; then
+    set -a
+    source /opt/my-secure-ha-stack/config.env
+    set +a
+fi
+
+set -u  # Now enable -u after all env vars are loaded
 
 # Logging functions
 log_info() { echo "[$(date)] INFO: $1" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log; }
@@ -7,6 +23,12 @@ log_error() { echo "[$(date)] ERROR: $1" | tee -a /opt/my-secure-ha-stack/logs/d
 log_success() { echo "[$(date)] SUCCESS: $1" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log; }
 log_warn() { echo "[$(date)] WARN: $1" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log; }
 
+
+
+# Set RAID_STORAGE default if not set to prevent unbound variable error
+if [[ -z "${RAID_STORAGE:-}" ]]; then
+    export RAID_STORAGE="/raid-storage"
+fi
 
 log_info "Nginx entrypoint.sh started"
 
@@ -69,27 +91,14 @@ server {
     add_header X-XSS-Protection "1; mode=block";
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-    location /keycloak/ {
-        proxy_pass http://keycloak:8080/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_buffer_size 128k;
-        proxy_buffers 4 256k;
-        proxy_busy_buffers_size 256k;
-    }
-
-    location /loki/ { proxy_pass http://loki:3100/; }
-    location /plane/ { proxy_pass http://plane:3000/; }
-    location /code-server/ {
-        proxy_pass http://code-server:8080/;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
     }
 
     location / {
-        return 200 "Pure Bliss Development Environment - HTTPS Active";
+        return 200 "Pure Bliss Development Environment - HTTPS Active\nDomain: DOMAIN_PLACEHOLDER\nStatus: Container operational with config.env enhancements";
         add_header Content-Type text/plain;
     }
 }
@@ -166,7 +175,7 @@ server {
         add_header Content-Type text/plain;
     }
     location / {
-        return 200 "Pure Bliss Development Environment - HTTPS Active";
+        return 200 "Pure Bliss Development Environment - HTTPS Active\nDomain: $DOMAIN\nStatus: Container operational with config.env enhancements";
         add_header Content-Type text/plain;
     }
 }

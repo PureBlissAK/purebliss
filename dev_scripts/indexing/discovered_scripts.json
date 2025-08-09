@@ -1,0 +1,16 @@
+[
+{
+  "path": "/opt/cleanup-purebliss.sh",
+  "name": "cleanup-purebliss.sh",
+  "version": "Unknown",
+  "purpose": "No description",
+  "category": "utility",
+  "service_tags": "general",
+  "dependencies": "none",
+  "environment": "all",
+  "has_metadata": false,
+  "status": "needs-enhancement",
+  "age_days": 4,
+  "last_modified": "1754359117",
+  "scan_date": "2025-08-09T08:52:46-04:00"
+},

@@ -14,51 +14,30 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      # Configuration files
+      # Configuration file
       - "/opt/dev-purebliss/services/loki/local-config.yaml:/etc/loki/local-config.yaml:ro"
-      - "/opt/dev-purebliss/services/loki/vault-config.yaml:/etc/loki/vault-config.yaml:ro"
-
-      # Enhanced entrypoint with Vault integration
-      - "/opt/dev-purebliss/services/loki/entrypoint.sh:/entrypoint.sh:ro"
-
       # Log storage (persistent volume)
       - "loki_data:/loki"
-
       # Shared log directory for cross-service access
       - "/opt/my-secure-ha-stack/logs:/shared-logs:ro"
+      # Writable RAID storage for Loki
+      - "/opt/my-secure-ha-stack/loki/raid-storage:/raid-storage:rw"
 
     environment:
-      # Vault Connection
-      - VAULT_ADDR=https://purebliss-vault:8200
-      - VAULT_SKIP_VERIFY=false
-
-      # AppRole Credentials (load from credentials file)
-      - LOKI_VAULT_ROLE_ID=${LOKI_VAULT_ROLE_ID}
-      - LOKI_VAULT_SECRET_ID=${LOKI_VAULT_SECRET_ID}
-
       # Loki Configuration
       - LOKI_CONFIG_FILE=/etc/loki/local-config.yaml
-      - LOKI_VAULT_CONFIG_FILE=/etc/loki/vault-config.yaml
-
       # Security Settings
       - LOKI_LOG_LEVEL=info
       - LOKI_ENABLE_METRICS=true
       - LOKI_ENABLE_TRACING=false
-
       # Performance Tuning
       - GOGC=100
       - GOMEMLIMIT=512MiB
 
-    entrypoint: ["/entrypoint.sh"]
 
-    depends_on:
-      vault:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:3100/ready || exit 1"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -79,7 +58,6 @@ services:
       - "traefik.http.routers.loki.tls=true"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
       - "com.purebliss.service=loki"
-      - "com.purebliss.vault.integrated=true"
       - "com.purebliss.environment=development"
 
 # Add this to the volumes section of your docker-compose.yml

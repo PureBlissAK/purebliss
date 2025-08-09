@@ -15,6 +15,14 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Vault CLI (latest stable)
+RUN VAULT_VERSION="1.13.3" && \
+    wget -q https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
+    unzip vault_${VAULT_VERSION}_linux_amd64.zip && \
+    mv vault /usr/local/bin/ && \
+    chmod +x /usr/local/bin/vault && \
+    rm vault_${VAULT_VERSION}_linux_amd64.zip
+
 # Create nginx user and group if they don't exist
 RUN groupadd -r nginx || true && \
     useradd -r -g nginx nginx || true

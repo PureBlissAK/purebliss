@@ -1,0 +1,1 @@
+Error writing data to pki/issue/letsencrypt-role: configured Vault token contains non-printable characters and cannot be used

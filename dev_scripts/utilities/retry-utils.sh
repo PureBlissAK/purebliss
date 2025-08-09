@@ -9,39 +9,39 @@ retry_with_backoff() {
     local delay=${2:-1}
     local max_delay=${3:-60}
     local command="${@:4}"
-    
+
     local attempt=1
     local current_delay=$delay
-    
+
     echo "Executing with retry: $command"
-    
+
     while [ $attempt -le $max_attempts ]; do
         echo "Attempt $attempt/$max_attempts..."
-        
+
         if eval "$command"; then
             echo "Command succeeded on attempt $attempt"
             return 0
         fi
-        
+
         if [ $attempt -eq $max_attempts ]; then
             echo "Command failed after $max_attempts attempts"
             return 1
         fi
-        
+
         echo "Command failed, waiting ${current_delay}s before retry..."
         sleep $current_delay
-        
+
         # Exponential backoff with jitter
         current_delay=$(( current_delay * 2 ))
         if [ $current_delay -gt $max_delay ]; then
             current_delay=$max_delay
         fi
-        
+
         # Add jitter (±25%)
         local jitter=$(( current_delay / 4 ))
         local random_jitter=$(( (RANDOM % (jitter * 2)) - jitter ))
         current_delay=$(( current_delay + random_jitter ))
-        
+
         ((attempt++))
     done
 }
@@ -52,22 +52,22 @@ wait_for_port() {
     local port=$2
     local timeout=${3:-60}
     local check_interval=${4:-2}
-    
+
     echo "Waiting for $host:$port to be available (timeout: ${timeout}s)..."
-    
+
     local elapsed=0
-    
+
     while [ $elapsed -lt $timeout ]; do
         if nc -z "$host" "$port" 2>/dev/null; then
             echo "$host:$port is available"
             return 0
         fi
-        
+
         sleep $check_interval
         elapsed=$((elapsed + check_interval))
         echo "Waiting for $host:$port... (${elapsed}s/${timeout}s)"
     done
-    
+
     echo "Timeout waiting for $host:$port after ${timeout}s"
     return 1
 }
@@ -78,24 +78,24 @@ wait_for_http_endpoint() {
     local timeout=${2:-60}
     local check_interval=${3:-5}
     local expected_status=${4:-200}
-    
+
     echo "Waiting for HTTP endpoint $url (timeout: ${timeout}s, expected: $expected_status)..."
-    
+
     local elapsed=0
-    
+
     while [ $elapsed -lt $timeout ]; do
         local status=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 3 --max-time 5 "$url" 2>/dev/null || echo "000")
-        
+
         if [ "$status" = "$expected_status" ]; then
             echo "HTTP endpoint $url is available (status: $status)"
             return 0
         fi
-        
+
         sleep $check_interval
         elapsed=$((elapsed + check_interval))
         echo "Waiting for $url... (${elapsed}s/${timeout}s, status: $status)"
     done
-    
+
     echo "Timeout waiting for HTTP endpoint $url after ${timeout}s"
     return 1
 }
@@ -105,14 +105,14 @@ wait_for_container_health() {
     local container_name=$1
     local timeout=${2:-120}
     local check_interval=${3:-5}
-    
+
     echo "Waiting for container $container_name to be healthy (timeout: ${timeout}s)..."
-    
+
     local elapsed=0
-    
+
     while [ $elapsed -lt $timeout ]; do
         local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "no-container")
-        
+
         case $health_status in
             "healthy")
                 echo "Container $container_name is healthy"
@@ -131,12 +131,12 @@ wait_for_container_health() {
                 fi
                 ;;
         esac
-        
+
         sleep $check_interval
         elapsed=$((elapsed + check_interval))
         echo "Waiting for $container_name health... (${elapsed}s/${timeout}s, status: $health_status)"
     done
-    
+
     echo "Timeout waiting for container $container_name health after ${timeout}s"
     return 1
 }

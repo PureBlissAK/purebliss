@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  purebliss-grafana:
+    image: grafana/grafana:10.1.0
+    container_name: purebliss-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres:5432
+      - GF_DATABASE_NAME=grafana
+      - GF_DATABASE_USER=admin
+      - GF_DATABASE_PASSWORD=admin
+    volumes:
+      - ./grafana.ini:/etc/grafana/grafana.ini:ro
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo 'GET /api/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' | nc localhost 3000 | head -n 1 | grep -q '200 OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - purebliss-net
+networks:
+  purebliss-net:
+    external: true

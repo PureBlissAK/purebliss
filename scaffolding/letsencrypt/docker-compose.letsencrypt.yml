@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  purebliss-letsencrypt:
+    image: certbot/certbot:latest
+    container_name: purebliss-letsencrypt
+    restart: unless-stopped
+    volumes:
+      - /opt/my-secure-ha-stack/nginx/certs:/etc/letsencrypt
+      - ./letsencrypt-data:/var/lib/letsencrypt
+    entrypoint: ["/bin/sh", "-c", "sleep infinity"]
+    healthcheck:
+      test: ["CMD", "certbot", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - purebliss-net
+networks:
+  purebliss-net:
+    external: true

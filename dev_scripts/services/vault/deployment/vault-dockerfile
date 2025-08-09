@@ -1,0 +1,15 @@
+FROM hashicorp/vault:1.17.3
+
+# Install dependencies
+RUN apk add --no-cache curl jq
+
+# Copy entrypoint script
+COPY entrypoint.sh /vault/entrypoint.sh
+RUN chmod +x /vault/entrypoint.sh
+
+# Copy vault configuration
+COPY vault.hcl /vault/config/vault.hcl
+COPY vault-auto-unseal.sh /vault/config/vault-auto-unseal.sh
+RUN chmod +x /vault/config/vault-auto-unseal.sh
+
+ENTRYPOINT ["/vault/entrypoint.sh"]

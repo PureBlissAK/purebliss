@@ -1,7 +1,25 @@
 
+# PURE BLISS CONTAINER METADATA
+# Container: purebliss-grafana
+# Purpose: Monitoring dashboards and visualization for Pure Bliss metrics
+# Scaffolding Phase: Phase4 - Monitoring Integration
+# Description: Grafana 10.1.0 with HTTPS support and Vault PKI integration for SSL certificates
+# Production Status: production-ready
+# Dependencies: postgres,prometheus,vault
+# Network: purebliss-net
+# Vault Integration: yes
+# Last Enhanced: 2025-08-08
+# Enhancement Notes: Added comprehensive metadata and HTTPS configuration with Vault PKI
+# END METADATA
+
 FROM grafana/grafana:10.1.0
 
-# Copy HTTPS certs (Vault PKI or self-signed)
+# Add Docker healthcheck for correct endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+
+# Copy HTTPS certs (Vault PKI/Let's Encrypt only; self-signed not allowed)
 COPY certs/tls.crt /etc/grafana/certs/tls.crt
 COPY certs/tls.key /etc/grafana/certs/tls.key
 
@@ -11,7 +29,6 @@ ENV GF_SERVER_PROTOCOL=https \
     GF_SERVER_CERT_FILE=/etc/grafana/certs/tls.crt \
     GF_SERVER_CERT_KEY=/etc/grafana/certs/tls.key
 
-# Use custom entrypoint for Vault PKI or self-signed cert logic (if present)
+# Use custom entrypoint for Vault PKI cert logic
 COPY vault-entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

@@ -30,7 +30,7 @@ function configure_vault_integration() {
 
 
     # Auto-detect Vault protocol (HTTP/HTTPS) and validate endpoint
-    VAULT_ADDR_CANDIDATES=("https://127.0.0.1:8200" "http://127.0.0.1:8200")
+    VAULT_ADDR_CANDIDATES=("https://127.0.0.1:8200" "https://127.0.0.1:8200")
     export VAULT_SKIP_VERIFY=1
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
     for addr in "${VAULT_ADDR_CANDIDATES[@]}"; do

@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_NAME="nginx"
 LOG_FILE="/opt/logs/dev-environment-setup.log"
 COMPOSE_FILE="${SCRIPT_DIR}/nginx-docker-compose-vault-enhanced.yml"
-VAULT_ADDR="${VAULT_ADDR:-http://127.0.0.1:8200}"
+VAULT_ADDR="${VAULT_ADDR:-https://127.0.0.1:8200}"
 VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
 
 # Colors for output
@@ -94,7 +94,7 @@ wait_for_vault() {
     local attempt=1
 
     while [[ $attempt -le $max_attempts ]]; do
-        if curl -sf "${VAULT_ADDR}/v1/sys/health" >/dev/null 2>&1; then
+        if curl -skf "${VAULT_ADDR}/v1/sys/health" >/dev/null 2>&1; then
             log_success "Vault is available"
             return 0
         fi
@@ -267,7 +267,7 @@ wait_for_service() {
     # Wait for HTTP response
     attempt=1
     while [[ $attempt -le $max_attempts ]]; do
-        if curl -sf http://localhost:80 >/dev/null 2>&1; then
+        if curl -skf http://localhost:80 >/dev/null 2>&1; then
             log_success "Nginx HTTP endpoint is responding"
             break
         fi
@@ -284,7 +284,7 @@ wait_for_service() {
     # Wait for HTTPS response
     attempt=1
     while [[ $attempt -le $max_attempts ]]; do
-        if curl -sfk https://localhost:443 >/dev/null 2>&1; then
+        if curl -skfk https://localhost:443 >/dev/null 2>&1; then
             log_success "Nginx HTTPS endpoint is responding"
             break
         fi
@@ -325,8 +325,8 @@ validate_service() {
     fi
 
     # Check basic connectivity
-    local http_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80 2>/dev/null || echo "000")
-    local https_status=$(curl -sk -o /dev/null -w "%{http_code}" https://localhost:443 2>/dev/null || echo "000")
+    local http_status=$(curl -sk -o /dev/null -w "%{http_code}" http://localhost:80 2>/dev/null || echo "000")
+    local https_status=$(curl -skk -o /dev/null -w "%{http_code}" https://localhost:443 2>/dev/null || echo "000")
 
     if [[ $http_status -eq 200 ]] || [[ $http_status -eq 301 ]] || [[ $http_status -eq 302 ]]; then
         log_success "HTTP endpoint responding (status: ${http_status})"

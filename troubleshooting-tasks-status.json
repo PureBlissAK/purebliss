@@ -1,0 +1,185 @@
+{
+  "troubleshooting_framework": {
+    "version": "1.0",
+    "last_updated": "2025-08-07 22:18:24",
+    "phases": {
+      "phase1": {
+        "name": "Foundation Container Validation",
+        "status": "completed",
+        "services": [
+          "vault",
+          "postgres"
+        ],
+        "tasks": {
+          "TASK-001": {
+            "name": "Vault Health Check Validation",
+            "service": "vault",
+            "status": "completed",
+            "script": "consolidated-validation.sh vault health-check-phase1",
+            "documentation": "CONSOLIDATED_TROUBLESHOOTING.md#vault-service",
+            "success_criteria": "Vault health endpoint responds with 200 status",
+            "enhancement": "Update health validation script based on findings"
+          },
+          "TASK-002": {
+            "name": "PostgreSQL RAID Validation",
+            "service": "postgres",
+            "status": "completed",
+            "script": "consolidated-validation.sh postgres raid-validation-phase1",
+            "documentation": "CONSOLIDATED_TROUBLESHOOTING.md#postgres-service",
+            "success_criteria": "PostgreSQL accepts connections on RAID storage",
+            "enhancement": "Enhance database validation for RAID compliance"
+          }
+        }
+      },
+      "phase2": {
+        "name": "Core Services Validation",
+        "status": "failed",
+        "services": [
+          "redis",
+          "vault-agent"
+        ],
+        "tasks": {
+          "TASK-003": {
+            "name": "Redis Container Initialization",
+            "service": "redis",
+            "status": "completed",
+            "script": "consolidated-deployment.sh redis initialize-phase2",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#redis-service",
+            "success_criteria": "Redis running with AOF persistence enabled",
+            "enhancement": "Add Redis cluster readiness validation"
+          },
+          "TASK-004": {
+            "name": "Vault-Agent AppRole Setup",
+            "service": "vault-agent",
+            "status": "completed",
+            "script": "consolidated-vault-integration.sh vault-agent setup-phase2",
+            "documentation": "CONSOLIDATED_INTEGRATION.md#vault-agent-service",
+            "success_criteria": "Vault-Agent proxying requests successfully",
+            "enhancement": "Automate AppRole credential distribution"
+          }
+        }
+      },
+      "phase3": {
+        "name": "Authentication Services",
+        "status": "pending",
+        "services": [
+          "keycloak"
+        ],
+        "tasks": {
+          "TASK-005": {
+            "name": "Keycloak Database Setup",
+            "status": "pending",
+            "script": "consolidated-deployment.sh keycloak database-init-phase3",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#keycloak-service",
+            "success_criteria": "Keycloak database schema created and migrations completed",
+            "enhancement": "Add database migration validation scripts",
+            "service": "keycloak"
+          },
+          "TASK-006": {
+            "name": "Keycloak Vault Integration",
+            "status": "pending",
+            "script": "consolidated-vault-integration.sh keycloak credentials-phase3",
+            "documentation": "CONSOLIDATED_INTEGRATION.md#keycloak-service",
+            "success_criteria": "Keycloak using Vault for admin credentials",
+            "enhancement": "Automate realm configuration from Vault",
+            "service": "keycloak"
+          }
+        }
+      },
+      "phase4": {
+        "name": "Gateway Services",
+        "status": "pending",
+        "services": [
+          "nginx",
+          "letsencrypt"
+        ],
+        "tasks": {
+          "TASK-007": {
+            "name": "Nginx Smart Upstream Configuration",
+            "status": "pending",
+            "script": "consolidated-deployment.sh nginx smart-upstream-phase4",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#nginx-service",
+            "success_criteria": "Nginx starts with graceful upstream handling",
+            "enhancement": "Implement dynamic upstream reconfiguration",
+            "service": "nginx"
+          },
+          "TASK-008": {
+            "name": "SSL Certificate Automation",
+            "status": "pending",
+            "script": "consolidated-vault-integration.sh letsencrypt pki-phase4",
+            "documentation": "CONSOLIDATED_INTEGRATION.md#letsencrypt-service",
+            "success_criteria": "Valid SSL certificates issued and automated renewal configured",
+            "enhancement": "Integrate with Vault PKI engine",
+            "service": "letsencrypt"
+          }
+        }
+      },
+      "phase5": {
+        "name": "Application Services",
+        "status": "pending",
+        "services": [
+          "plane",
+          "codeserver"
+        ],
+        "tasks": {
+          "TASK-009": {
+            "name": "Plane Application Setup",
+            "status": "pending",
+            "script": "consolidated-deployment.sh plane application-init-phase5",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#plane-service",
+            "success_criteria": "Plane accessible with database backend",
+            "enhancement": "Automate project template setup",
+            "service": "plane"
+          },
+          "TASK-010": {
+            "name": "CodeServer Workspace Configuration",
+            "status": "pending",
+            "script": "consolidated-deployment.sh codeserver workspace-phase5",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#codeserver-service",
+            "success_criteria": "CodeServer accessible with development workspace",
+            "enhancement": "Integrate with consolidated script access",
+            "service": "codeserver"
+          }
+        }
+      },
+      "phase6": {
+        "name": "Monitoring Services",
+        "status": "pending",
+        "services": [
+          "loki",
+          "prometheus",
+          "grafana"
+        ],
+        "tasks": {
+          "TASK-011": {
+            "name": "Loki Log Aggregation Setup",
+            "status": "pending",
+            "script": "consolidated-deployment.sh loki aggregation-phase6",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#loki-service",
+            "success_criteria": "Loki collecting logs from all services",
+            "enhancement": "Add log parsing and alerting rules",
+            "service": "loki"
+          },
+          "TASK-012": {
+            "name": "Prometheus Monitoring Setup",
+            "status": "pending",
+            "script": "consolidated-deployment.sh prometheus monitoring-phase6",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#prometheus-service",
+            "success_criteria": "Prometheus scraping metrics from all services",
+            "enhancement": "Add service discovery automation",
+            "service": "prometheus"
+          },
+          "TASK-013": {
+            "name": "Grafana Dashboard Configuration",
+            "status": "pending",
+            "script": "consolidated-deployment.sh grafana dashboards-phase6",
+            "documentation": "CONSOLIDATED_AUTOMATION.md#grafana-service",
+            "success_criteria": "Grafana displaying comprehensive monitoring dashboards",
+            "enhancement": "Automate dashboard provisioning from templates",
+            "service": "grafana"
+          }
+        }
+      }
+    }
+  }
+}

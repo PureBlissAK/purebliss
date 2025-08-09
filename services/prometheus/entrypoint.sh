@@ -10,19 +10,6 @@ log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') [$SERVICE] $1" | tee -a "$LOG_FILE"
 }
 
-# 1. Vault AppRole Authentication (if VAULT_ROLE_ID and VAULT_SECRET_ID are set)
-if [[ -n "${VAULT_ROLE_ID:-}" && -n "${VAULT_SECRET_ID:-}" ]]; then
-    log "Attempting Vault AppRole authentication..."
-    VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID" || true)
-    if [[ -n "$VAULT_TOKEN" ]]; then
-        export VAULT_TOKEN
-        log "Vault AppRole authentication successful."
-    else
-        log "Vault AppRole authentication failed. Running in degraded mode."
-    fi
-else
-    log "Vault AppRole credentials not set. Skipping Vault authentication."
-fi
 
 # 2. Dynamic Prometheus config management (reload if config changes)
 CONFIG_FILE="/etc/prometheus/prometheus.yml"

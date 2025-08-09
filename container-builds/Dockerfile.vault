@@ -1,0 +1,49 @@
+# Multi-phase vault container scaffolding
+ARG BUILD_PHASE=1
+
+# Phase 1: Minimal Container
+FROM alpine:3.18 AS phase1
+RUN apk add --no-cache ca-certificates curl
+WORKDIR /app
+COPY vault-binary /app/
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+EXPOSE 8080
+CMD ["/app/vault-binary"]
+
+# Phase 2: Enhanced Configuration
+FROM phase1 AS phase2
+RUN apk add --no-cache jq
+COPY config/ /app/config/
+ENV LOG_LEVEL=info
+ENV METRICS_PORT=9090
+EXPOSE 9090
+
+# Phase 3: Service Integration
+FROM phase2 AS phase3
+RUN apk add --no-cache postgresql-client redis-tools
+COPY integrations/ /app/integrations/
+ENV DATABASE_TIMEOUT=30s
+
+# Phase 4: Advanced Features
+FROM phase3 AS phase4
+RUN apk add --no-cache openssl
+COPY security/ /app/security/
+COPY monitoring/ /app/monitoring/
+ENV SECURITY_ENABLED=true
+
+# Phase 5: Production Readiness
+FROM phase4 AS phase5
+COPY compliance/ /app/compliance/
+RUN adduser -D -s /bin/sh app-user
+USER app-user
+ENV COMPLIANCE_ENABLED=true
+
+# Phase 6: Elite Features
+FROM phase5 AS phase6
+COPY ai/ /app/ai/
+COPY chaos/ /app/chaos/
+ENV AI_FEATURES=true
+
+# Final stage selection based on BUILD_PHASE
+FROM phase${BUILD_PHASE} AS final

@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  purebliss-nginx:
+    image: nginx:latest
+    container_name: purebliss-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /opt/my-secure-ha-stack/nginx/certs:/etc/nginx/certs:ro
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - purebliss-net
+networks:
+  purebliss-net:
+    external: true

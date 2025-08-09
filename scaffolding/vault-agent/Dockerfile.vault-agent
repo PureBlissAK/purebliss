@@ -1,0 +1,12 @@
+# Vault Agent container for LetsEncrypt PKI integration (AppRole pattern)
+FROM hashicorp/vault:1.17.3
+
+LABEL maintainer="Pure Bliss DevOps"
+LABEL description="Vault Agent for LetsEncrypt PKI integration using AppRole authentication."
+
+# Copy Vault Agent config and entrypoint
+COPY vault-agent-config.hcl /etc/vault-agent-config.hcl
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

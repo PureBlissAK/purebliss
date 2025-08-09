@@ -40,18 +40,18 @@ wait_for_service_health() {
     local service=$1
     local timeout=${STARTUP_TIMEOUTS[$service]:-60}
     local container_name="purebliss-${service}"
-    
+
     echo "Waiting for $service to become healthy (timeout: ${timeout}s)..."
-    
+
     local elapsed=0
     local check_interval=5
-    
+
     while [ $elapsed -lt $timeout ]; do
         # Check if container exists and is running
         if docker ps -q -f name="$container_name" | grep -q .; then
             # Check health status
             local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "no-healthcheck")
-            
+
             if [ "$health_status" = "healthy" ]; then
                 echo "$service is healthy"
                 return 0
@@ -63,12 +63,12 @@ wait_for_service_health() {
                 fi
             fi
         fi
-        
+
         sleep $check_interval
         elapsed=$((elapsed + check_interval))
         echo "Waiting for $service... (${elapsed}s/${timeout}s)"
     done
-    
+
     echo "ERROR: $service failed to become healthy within ${timeout}s"
     return 1
 }
@@ -77,9 +77,9 @@ wait_for_service_health() {
 start_service_with_deps() {
     local service=$1
     local deps="${DEPENDENCIES[$service]}"
-    
+
     echo "Starting $service..."
-    
+
     # First, validate all dependencies are healthy
     if [ -n "$deps" ]; then
         echo "Validating dependencies for $service: $deps"
@@ -90,7 +90,7 @@ start_service_with_deps() {
             fi
         done
     fi
-    
+
     # Start the service using appropriate method
     case $service in
         "keycloak")
@@ -104,7 +104,7 @@ start_service_with_deps() {
             docker-compose -f /opt/my-secure-ha-stack/docker-compose.yml up -d "purebliss-$service" 2>/dev/null || echo "Service definition not found in main compose"
             ;;
     esac
-    
+
     # Wait for the service to become healthy
     if wait_for_service_health "$service"; then
         echo "Successfully started $service"
@@ -118,9 +118,9 @@ start_service_with_deps() {
 # Function to start services in dependency order
 start_services_ordered() {
     local services=("$@")
-    
+
     echo "Starting services in dependency order: ${services[*]}"
-    
+
     for service in "${services[@]}"; do
         echo "=== Starting $service ==="
         if ! start_service_with_deps "$service"; then
@@ -130,14 +130,14 @@ start_services_ordered() {
         echo "=== $service started successfully ==="
         echo
     done
-    
+
     echo "All services started successfully!"
 }
 
 # Main function
 main() {
     local phase=${1:-"all"}
-    
+
     case $phase in
         "core")
             start_services_ordered "vault" "vault-agent" "postgres" "redis" "nginx"

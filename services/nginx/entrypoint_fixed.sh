@@ -47,7 +47,7 @@ function wait_for_vault() {
     local count=0
 
     while [[ $count -lt $retries ]]; do
-        if curl -s -k "$VAULT_ADDR/v1/sys/health" &> /dev/null; then
+        if curl -sk -k "$VAULT_ADDR/v1/sys/health" &> /dev/null; then
             log_success "Vault is available"
             return 0
         fi
@@ -73,7 +73,7 @@ function vault_authenticate() {
 
     # Authenticate using AppRole
     local auth_response
-    auth_response=$(curl -s -k -X POST \
+    auth_response=$(curl -sk -k -X POST \
         -d "{\"role_id\":\"$VAULT_ROLE_ID\",\"secret_id\":\"$VAULT_SECRET_ID\"}" \
         "$VAULT_ADDR/v1/auth/approle/login")
 

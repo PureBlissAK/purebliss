@@ -222,9 +222,16 @@ validate_runtime_metadata() {
 
     log_health "INFO" "🔍 RUNTIME METADATA VALIDATION: Analyzing $service_name runtime metadata"
 
-    if docker ps -q -f name="purebliss-$service_name" | grep -q .; then
-        local container_name="purebliss-$service_name"
-
+    # Dynamically detect running container for nginx (nginx or purebliss-nginx)
+    local container_name="purebliss-$service_name"
+    if [[ "$service_name" == "nginx" ]]; then
+        if docker ps -q -f name="nginx" | grep -q .; then
+            container_name="nginx"
+        elif docker ps -q -f name="purebliss-nginx" | grep -q .; then
+            container_name="purebliss-nginx"
+        fi
+    fi
+    if docker ps -q -f name="$container_name" | grep -q .; then
         # Extract runtime information
         local image=$(docker inspect --format='{{.Config.Image}}' "$container_name" 2>/dev/null)
         local labels=$(docker inspect --format='{{range $k,$v := .Config.Labels}}{{$k}}={{$v}}{{"\n"}}{{end}}' "$container_name" 2>/dev/null)
@@ -258,10 +265,9 @@ validate_runtime_metadata() {
 
         log_health "SUCCESS" "✅ Runtime metadata validation completed for $service_name"
     else
-        log_health "ERROR" "❌ Container purebliss-$service_name not found for runtime metadata validation"
+        log_health "ERROR" "❌ Container $container_name not found for runtime metadata validation"
         return 1
     fi
-
     return 0
 }
 # --- Autonomous Enhancement: Add validate_dependency_independent for strict sequential dependency validation ---

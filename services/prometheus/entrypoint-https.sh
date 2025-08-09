@@ -1,5 +1,19 @@
 #!/bin/bash
 set -euo pipefail
+
+# PURE BLISS SCRIPT METADATA
+# Script: prometheus/entrypoint-https.sh
+# Purpose: Enhanced Prometheus HTTPS entrypoint with Vault PKI enforcement
+# Version: 2.0
+# Last Modified: 2025-08-08
+# Author: Pure Bliss Development Team
+# Dependencies: vault, prometheus
+# Security Policy: Vault/Let's Encrypt PKI only - no self-signed fallback
+# Integration: Centralized logging, health validation, autonomous enhancement
+# Usage: Docker entrypoint for Prometheus with HTTPS and Vault integration
+# Enhancement Notes: Enforced Vault PKI policy, removed self-signed fallback
+# END METADATA
+
 # Prometheus HTTPS Entrypoint Enhancement
 # Logs all actions to /opt/my-secure-ha-stack/logs/dev-environment-setup.log
 
@@ -10,33 +24,17 @@ log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') [$SERVICE] $1" | tee -a "$LOG_FILE"
 }
 
-# 1. Vault AppRole Authentication (if VAULT_ROLE_ID and VAULT_SECRET_ID are set)
-if [[ -n "${VAULT_ROLE_ID:-}" && -n "${VAULT_SECRET_ID:-}" ]]; then
-    log "Attempting Vault AppRole authentication..."
-    VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID" || true)
-    if [[ -n "$VAULT_TOKEN" ]]; then
-        export VAULT_TOKEN
-        log "Vault AppRole authentication successful."
-    else
-        log "Vault AppRole authentication failed. Running in degraded mode."
-    fi
-else
-    log "Vault AppRole credentials not set. Skipping Vault authentication."
-fi
 
-# 2. Ensure HTTPS certs exist (Vault PKI or fallback self-signed)
+# 2. Enforce Vault PKI/Let's Encrypt certs only (no self-signed fallback)
 CERT_DIR="/etc/prometheus/certs"
 CERT_FILE="$CERT_DIR/tls.crt"
 KEY_FILE="$CERT_DIR/tls.key"
 if [[ ! -f "$CERT_FILE" || ! -f "$KEY_FILE" ]]; then
-    log "No TLS certs found, generating self-signed fallback."
-    mkdir -p "$CERT_DIR"
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout "$KEY_FILE" -out "$CERT_FILE" \
-        -subj "/CN=dev.purebliss.app"
-    log "Self-signed cert generated."
+    log "ERROR: No Vault/Let's Encrypt PKI certs found at $CERT_FILE and $KEY_FILE. Container will not start."
+    log "POLICY: Self-signed certificates are not allowed. Use Vault PKI or Let's Encrypt only."
+    exit 1
 else
-    log "TLS certs found, using existing."
+    log "Using Vault/Let's Encrypt PKI certificate at $CERT_FILE"
 fi
 
 # 3. Dynamic Prometheus config management (reload if config changes)

@@ -1,0 +1,5 @@
+# Dockerfile for Loki (Pure Bliss)
+FROM grafana/loki:2.9.0
+
+# Centralized script integration (if needed)
+# Entrypoint and CMD are inherited from base image

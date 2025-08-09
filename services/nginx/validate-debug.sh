@@ -12,7 +12,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_NAME="nginx"
 LOG_FILE="/opt/logs/dev-environment-setup.log"
-VAULT_ADDR="${VAULT_ADDR:-http://127.0.0.1:8200}"
+VAULT_ADDR="${VAULT_ADDR:-https://127.0.0.1:8200}"
 VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"
 
 # Colors for output
@@ -125,7 +125,7 @@ validate_vault_connectivity() {
     echo -e "\n${CYAN}🔐 Validating Vault Connectivity...${NC}"
     
     # Check Vault server
-    if curl -sf "${VAULT_ADDR}/v1/sys/health" >/dev/null 2>&1; then
+    if curl -skf "${VAULT_ADDR}/v1/sys/health" >/dev/null 2>&1; then
         log_test "PASS" "Vault Server" "Vault server is accessible at ${VAULT_ADDR}"
     else
         log_test "FAIL" "Vault Server" "Vault server not accessible at ${VAULT_ADDR}"
@@ -281,7 +281,7 @@ validate_network_connectivity() {
     echo -e "\n${CYAN}🌐 Validating Network Connectivity...${NC}"
     
     # Check HTTP port
-    local http_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80 2>/dev/null || echo "000")
+    local http_status=$(curl -sk -o /dev/null -w "%{http_code}" http://localhost:80 2>/dev/null || echo "000")
     if [[ $http_status -ne 000 ]]; then
         log_test "PASS" "HTTP Port" "HTTP responding with status: $http_status"
     else
@@ -289,7 +289,7 @@ validate_network_connectivity() {
     fi
     
     # Check HTTPS port
-    local https_status=$(curl -sk -o /dev/null -w "%{http_code}" https://localhost:443 2>/dev/null || echo "000")
+    local https_status=$(curl -skk -o /dev/null -w "%{http_code}" https://localhost:443 2>/dev/null || echo "000")
     if [[ $https_status -ne 000 ]]; then
         log_test "PASS" "HTTPS Port" "HTTPS responding with status: $https_status"
     else
@@ -297,7 +297,7 @@ validate_network_connectivity() {
     fi
     
     # Check domain name resolution
-    if curl -sk -o /dev/null -w "%{http_code}" https://dev.purebliss.app 2>/dev/null | grep -q "[0-9]"; then
+    if curl -skk -o /dev/null -w "%{http_code}" https://dev.purebliss.app 2>/dev/null | grep -q "[0-9]"; then
         log_test "PASS" "Domain Resolution" "dev.purebliss.app resolves and responds"
     else
         log_test "WARN" "Domain Resolution" "dev.purebliss.app not accessible (may need DNS/hosts configuration)"
@@ -326,7 +326,7 @@ validate_upstream_connectivity() {
             log_test "PASS" "Upstream $service" "Container is running"
             
             # Test proxy connectivity through nginx
-            local proxy_status=$(curl -sk -o /dev/null -w "%{http_code}" "https://localhost:443/$path" 2>/dev/null || echo "000")
+            local proxy_status=$(curl -skk -o /dev/null -w "%{http_code}" "https://localhost:443/$path" 2>/dev/null || echo "000")
             if [[ $proxy_status -ne 000 ]]; then
                 log_test "PASS" "Proxy to $service" "Nginx proxy responding with status: $proxy_status"
             else
@@ -342,7 +342,7 @@ validate_security_headers() {
     echo -e "\n${CYAN}🔒 Validating Security Headers...${NC}"
     
     # Get headers from HTTPS endpoint
-    local headers=$(curl -skI https://localhost:443 2>/dev/null)
+    local headers=$(curl -skkI https://localhost:443 2>/dev/null)
     
     # Check HSTS
     if echo "$headers" | grep -qi "strict-transport-security"; then
@@ -377,7 +377,7 @@ validate_performance() {
     echo -e "\n${CYAN}⚡ Validating Performance...${NC}"
     
     # Check response time
-    local response_time=$(curl -sk -o /dev/null -w "%{time_total}" https://localhost:443 2>/dev/null || echo "99.999")
+    local response_time=$(curl -skk -o /dev/null -w "%{time_total}" https://localhost:443 2>/dev/null || echo "99.999")
     if [[ $(echo "$response_time < 1.0" | awk '{print ($1 < $3)}') -eq 1 ]]; then
         log_test "PASS" "Response Time" "Response time: ${response_time}s (< 1s)"
     elif [[ $(echo "$response_time < 5.0" | awk '{print ($1 < $3)}') -eq 1 ]]; then

@@ -1,3 +1,16 @@
+# PURE BLISS CONTAINER METADATA
+# Container: purebliss-keycloak
+# Purpose: Authentication and identity management service for Pure Bliss
+# Scaffolding Phase: Phase3 - Core Service Integration
+# Description: This container provides Keycloak OIDC/SAML authentication for all services. Depends on postgres, redis, and vault. Must be attached to purebliss-net.
+# Production Status: production-ready
+# Dependencies: postgres,redis,vault
+# Network: purebliss-net
+# Vault Integration: yes
+# Last Enhanced: 2025-08-08
+# Enhancement Notes: Added complete metadata fields for validation compliance
+# END METADATA
+
 # Stage 1: Builder stage to compile dependencies and get all shared libraries
 FROM fedora:latest AS builder
 

@@ -162,7 +162,7 @@ echo "  🔐 Vault: $(docker exec purebliss-vault vault status -format=json 2>/d
 echo ""
 echo "🔗 Access Information:"
 echo "  📊 PostgreSQL: localhost:5432 (postgres/[vault-managed])"
-echo "  🔐 Vault: http://localhost:8200 (token: dev-root-token-purebliss)"
+echo "  🔐 Vault: https://localhost:8200 (token: dev-root-token-purebliss)"
 echo ""
 echo "🔧 Useful Commands:"
 echo "  # View logs: docker-compose logs -f"

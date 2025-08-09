@@ -1,3 +1,16 @@
+# PURE BLISS CONTAINER METADATA
+# Container: purebliss-letsencrypt
+# Purpose: SSL/TLS certificate management via Vault PKI integration
+# Scaffolding Phase: Phase4 - Security Integration
+# Description: Certbot-based certificate management with Vault PKI backend for automatic SSL/TLS provisioning
+# Production Status: production-ready
+# Dependencies: vault
+# Network: purebliss-net
+# Vault Integration: yes
+# Last Enhanced: 2025-08-08
+# Enhancement Notes: Added comprehensive metadata and enhanced Vault PKI integration with auto-renewal
+# END METADATA
+
 FROM certbot/certbot:latest
 
 # Install Vault CLI and jq for Vault PKI integration

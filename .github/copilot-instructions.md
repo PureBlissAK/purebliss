@@ -8,6 +8,7 @@ This document defines the standards for GitHub Copilot's autonomous task executi
    - [Continuous Log Monitoring](#continuous-log-monitoring)
    - [Automatic Script Enhancement](#automatic-script-enhancement)
    - [Self-Healing Integration Workflow](#self-healing-integration-workflow)
+   - [Centralized Script Index & Metadata Management](#centralized-script-index--metadata-management)
 
 1. [Autonomous Task Execution](#autonomous-task-execution)
    - [Decision-Making Authority](#decision-making-authority)
@@ -411,6 +412,218 @@ The Autonomous Self-Healing System provides continuous monitoring, automatic scr
 # Example Enhancement Logging
 echo "[$(date)] ENHANCEMENT: nginx-upstream-failure - Added smart upstream detection to prevent startup failures - VALIDATED: Zero startup failures in 48h test period - PREVENTION: Graceful degradation when upstream services unavailable" >> /opt/my-secure-ha-stack/logs/autonomous-enhancements.log
 ```
+
+---
+
+## Centralized Script Index & Metadata Management
+
+### Automated Script Discovery & Indexing
+
+**SCRIPT INDEX LIBRARY FRAMEWORK:**
+- **Central Index Location**: `/opt/dev-purebliss/dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md`
+- **Automated Discovery**: Continuous scanning of `/opt` directory structure for all scripts and automation
+- **Metadata Tagging**: Tags, descriptions, dependencies, service associations, and functionality classification
+- **Smart Search**: Index-based script discovery to prevent duplication and promote reuse
+- **Usage Tracking**: Monitor script utilization patterns for optimization opportunities
+
+**SCRIPT METADATA STANDARDS:**
+All scripts must include standardized headers with the following metadata structure:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# =============================================================================
+# SCRIPT METADATA - CENTRALIZED INDEX SYSTEM
+# =============================================================================
+# Script Name: [descriptive-script-name.sh]
+# Version: [semantic version - e.g., 1.2.3]
+# Purpose: [brief one-line description of script functionality]
+# Category: [automation|health-check|deployment|utility|service-specific|troubleshooting]
+# Service Tags: [comma-separated list - e.g., vault,nginx,keycloak]
+# Dependencies: [required services, scripts, or tools]
+# Environment: [development|staging|production|all]
+# Last Enhanced: [YYYY-MM-DD - ISO date]
+# Enhancement Reason: [brief description of latest enhancement]
+# =============================================================================
+
+# CENTRALIZED SCRIPT REFERENCE SYSTEM
+SCRIPT_DIR="/opt/dev-purebliss/dev_scripts"
+DOC_DIR="/opt/dev-purebliss/Documentation"
+INDEX_DIR="/opt/dev-purebliss/dev_scripts/indexing"
+
+# MANDATORY UTILITY IMPORTS
+source "$SCRIPT_DIR/utilities/common-functions-library.sh"
+source "$SCRIPT_DIR/utilities/retry-utils.sh"
+source "$SCRIPT_DIR/utilities/script-communication-bridge.sh"
+
+# AUTO-UPDATE INDEX WHEN SCRIPT EXECUTES
+update_script_index "$0" "execution" "$(date -Iseconds)"
+```
+
+**AUTOMATIC INDEX GENERATION:**
+- **Scan Trigger**: Automated scanning triggered by script creation, modification, or execution
+- **Metadata Extraction**: Parse script headers to extract tags, categories, dependencies, and descriptions
+- **Index Update**: Real-time updates to central script index with cross-referencing capabilities
+- **Legacy Detection**: Identify and tag legacy scripts for potential consolidation opportunities
+- **Duplicate Detection**: Flag similar functionality for consolidation consideration
+
+**SCRIPT ORGANIZATION BY CATEGORY:**
+
+**Core Infrastructure** (`automation`, `core`, `health-checks`):
+- Deployment orchestration and service startup
+- Health validation and container monitoring
+- Infrastructure provisioning and configuration
+
+**Service-Specific** (`services/[service-name]`):
+- Individual service enhancement and configuration
+- Service-specific troubleshooting and maintenance
+- Integration scripts for specific service combinations
+
+**Utilities & Libraries** (`utilities`, `indexing`, `management`):
+- Shared function libraries and common operations
+- Script management and indexing tools
+- Communication bridges and dependency resolution
+
+**INDEXING AUTOMATION WORKFLOW:**
+
+**1. Discovery Phase:**
+```bash
+# Automated script discovery across /opt
+find /opt -name "*.sh" -type f | grep -E "(dev_scripts|services)" > "$INDEX_DIR/discovered_scripts.tmp"
+```
+
+**2. Metadata Extraction:**
+```bash
+# Extract metadata from script headers
+for script in $(cat "$INDEX_DIR/discovered_scripts.tmp"); do
+    extract_script_metadata "$script" >> "$INDEX_DIR/script_metadata.json"
+done
+```
+
+**3. Index Generation:**
+```bash
+# Generate searchable index with cross-references
+generate_script_index "$INDEX_DIR/script_metadata.json" > "$INDEX_DIR/SCRIPT_INDEX_LIBRARY.md"
+```
+
+**4. Smart Search Integration:**
+```bash
+# Enable intelligent script discovery
+search_scripts_by_functionality "vault integration" "database setup" "health validation"
+```
+
+### À La Carte Script Enhancement Protocol
+
+**ENHANCEMENT METHODOLOGY:**
+- **Organic Development**: Scripts enhanced as they are used, not in monolithic batches
+- **Usage-Driven Improvements**: Enhancement priority based on script frequency and importance
+- **Incremental Standardization**: Gradual migration to metadata standards during normal development
+- **Backward Compatibility**: Legacy scripts continue functioning while being progressively enhanced
+- **Opportunity-Based Enhancement**: Enhance scripts when they are modified for other reasons
+
+**ENHANCEMENT TRIGGERS:**
+- **Script Execution**: When script runs, check if metadata enhancement is needed
+- **Bug Resolution**: When fixing issues, add prevention metadata and enhanced error handling
+- **Feature Addition**: When adding functionality, update metadata and cross-references
+- **Consolidation Discovery**: When similar scripts identified, enhance with consolidation metadata
+- **Documentation Update**: When documenting processes, enhance related script metadata
+
+**ENHANCEMENT STANDARDS:**
+- **Header Standardization**: Add complete metadata headers during script modifications
+- **Function Extraction**: Extract reusable functions to shared libraries when appropriate
+- **Dependency Documentation**: Clear documentation of service and script dependencies
+- **Error Handling Enhancement**: Improve error handling and logging during modifications
+- **Index Auto-Update**: Automatic index updates when scripts are enhanced
+
+**NON-DISRUPTIVE ENHANCEMENT:**
+- **Preserve Functionality**: All enhancements must maintain existing script behavior
+- **Incremental Migration**: Gradual transition to centralized patterns without breaking changes
+- **Legacy Wrapper Support**: Maintain compatibility for existing integrations
+- **Rollback Capability**: Always maintain ability to rollback enhancements if issues arise
+- **Testing Integration**: Enhanced scripts must pass existing validation before deployment
+
+### Script Index Library Structure
+
+**MASTER INDEX DOCUMENT**: `/opt/dev-purebliss/dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md`
+
+```markdown
+# Pure Bliss Script Index Library
+**Generated**: [Auto-updated timestamp]
+**Total Scripts**: [Count] | **Last Scan**: [ISO timestamp]
+
+## Quick Reference by Category
+
+### 🚀 Deployment & Orchestration
+| Script | Purpose | Services | Status | Last Enhanced |
+|--------|---------|----------|--------|---------------|
+| [script-name] | [description] | [tags] | [active/deprecated] | [date] |
+
+### 🏥 Health Validation & Monitoring
+| Script | Purpose | Services | Status | Last Enhanced |
+|--------|---------|----------|--------|---------------|
+| [script-name] | [description] | [tags] | [active/deprecated] | [date] |
+
+### 🔧 Service-Specific Automation
+| Script | Purpose | Services | Status | Last Enhanced |
+|--------|---------|----------|--------|---------------|
+| [script-name] | [description] | [tags] | [active/deprecated] | [date] |
+
+### 🛠️ Utilities & Libraries
+| Script | Purpose | Services | Status | Last Enhanced |
+|--------|---------|----------|--------|---------------|
+| [script-name] | [description] | [tags] | [active/deprecated] | [date] |
+
+## Smart Search Index
+- **By Service**: vault, postgres, nginx, keycloak, grafana, loki, prometheus, plane, codeserver
+- **By Function**: deployment, health-check, troubleshooting, integration, backup, security
+- **By Dependencies**: Lists scripts that depend on specific services or other scripts
+- **By Enhancement Date**: Recently improved scripts for quality reference
+
+## Consolidation Opportunities
+- **Similar Functionality**: Scripts with overlapping purposes for potential consolidation
+- **Duplicate Patterns**: Common code patterns that could be extracted to libraries
+- **Legacy Scripts**: Older scripts that could benefit from modernization
+
+## Enhancement Queue
+- **High Priority**: Frequently used scripts needing metadata enhancement
+- **Medium Priority**: Occasionally used scripts for gradual improvement
+- **Low Priority**: Rarely used scripts for eventual enhancement
+```
+
+**SEARCH AND DISCOVERY FUNCTIONS:**
+```bash
+# Smart script discovery functions
+search_scripts_by_service() { grep -l "Service Tags:.*$1" "$INDEX_DIR"/*.sh; }
+search_scripts_by_category() { grep -l "Category: $1" "$INDEX_DIR"/*.sh; }
+find_similar_functionality() { grep -l "Purpose:.*$1" "$INDEX_DIR"/*.sh; }
+get_script_dependencies() { grep "Dependencies:" "$1" | cut -d: -f2; }
+list_enhancement_candidates() { find /opt -name "*.sh" -exec grep -L "SCRIPT METADATA" {} \; ; }
+```
+
+### Integration with Existing Automation
+
+**PROJECT PLAN INTEGRATION:**
+- **Index Status**: Include script indexing status in PROJECT_PLAN_ENHANCED.md
+- **Enhancement Tracking**: Track script enhancement progress alongside other development tasks
+- **Consolidation Metrics**: Report on script consolidation achievements and opportunities
+
+**HEALTH VALIDATION INTEGRATION:**
+- **Index Validation**: Include script index health in container health validation
+- **Metadata Verification**: Validate script metadata completeness during health checks
+- **Enhancement Monitoring**: Monitor script enhancement adoption rates
+
+**DEVELOPMENT LOG INTEGRATION:**
+- **Index Updates**: Log all script index updates and metadata enhancements
+- **Discovery Events**: Log new script discoveries and categorization results
+- **Enhancement Activities**: Log all script enhancements with before/after comparisons
+
+**MANDATORY IMPLEMENTATION REQUIREMENTS:**
+- **Index Maintenance**: Keep script index current with automated scanning and updates
+- **Metadata Standards**: All new scripts must include complete metadata headers
+- **Discovery Integration**: Use script index for development decisions and reuse opportunities
+- **Enhancement Logging**: Log all script enhancements with improvement documentation
+- **Search Utilization**: Use indexed search before creating new scripts to prevent duplication
 
 ---
 
@@ -1158,6 +1371,10 @@ Key Directories & Files
 /opt/my-secure-ha-stack/prometheus.yml: Prometheus configuration.
 /opt/my-secure-ha-stack/GoogleIDPMetadata.xml: Google Workspace SSO metadata.
 /opt/my-secure-ha-stack/config.env: Environment variables (e.g., LOCAL_HOSTNAME=dev.purebliss.app).
+/opt/dev-purebliss/dev_scripts/: 🎯 CENTRALIZED SCRIPT REPOSITORY - All automation and utility scripts.
+/opt/dev-purebliss/dev_scripts/indexing/: 📚 SCRIPT INDEX & METADATA MANAGEMENT - Central hub for script discovery.
+/opt/dev-purebliss/dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md: 🧠 MASTER SCRIPT INDEX - Searchable catalog of all scripts.
+/opt/dev-purebliss/Documentation/: 📚 CENTRALIZED DOCUMENTATION LOCATION - All guides and procedures.
 
 Service Endpoints
 

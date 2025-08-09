@@ -41,7 +41,7 @@ cd /opt/dev-purebliss || {
 log_validation "Checking autonomous script availability..."
 
 autonomous_scripts=(
-    "/opt/dev-purebliss/validate-container-health.sh"
+    "/opt/dev-purebliss/dev_scripts/core/validate-container-health.sh"
     "/opt/dev-purebliss/autonomous-scripts/auto-endpoint-diagnostics.sh"
     "/opt/dev-purebliss/autonomous-scripts/autonomous-completion-report.sh"
 )

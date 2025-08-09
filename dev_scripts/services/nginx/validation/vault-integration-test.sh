@@ -64,7 +64,7 @@ function validate_vault_integration() {
     log_check "Validating $SERVICE_NAME Vault integration..."
 
     # Auto-detect Vault protocol (HTTP/HTTPS) and validate endpoint
-    VAULT_ADDR_CANDIDATES=("https://127.0.0.1:8200" "http://127.0.0.1:8200")
+    VAULT_ADDR_CANDIDATES=("https://127.0.0.1:8200" "https://127.0.0.1:8200")
     export VAULT_SKIP_VERIFY=1
     if [[ -f "/opt/my-secure-ha-stack/secrets/vault_token" ]]; then
         export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
@@ -204,7 +204,7 @@ function validate_service_functionality() {
             log_check "Generic service functionality validation for $SERVICE_NAME"
             # Generic HTTP health check
             local service_port=$(docker port purebliss-$SERVICE_NAME | head -1 | cut -d: -f2)
-            if [[ -n "$service_port" ]] && curl -sf "http://localhost:$service_port/health" >/dev/null 2>&1; then
+            if [[ -n "$service_port" ]] && curl -skf "http://localhost:$service_port/health" >/dev/null 2>&1; then
                 log_success "$SERVICE_NAME service endpoint responding"
             else
                 log_check "$SERVICE_NAME service endpoint not responding (may be expected)"
@@ -223,7 +223,7 @@ function validate_redis_functionality() {
 }
 
 function validate_keycloak_functionality() {
-    if curl -s "http://localhost:8080/" | grep -qE "(Keycloak|Resource not found)"; then
+    if curl -sk "http://localhost:8080/" | grep -qE "(Keycloak|Resource not found)"; then
         log_success "Keycloak endpoint responding"
     else
         log_error "Keycloak endpoint not responding"
@@ -232,7 +232,7 @@ function validate_keycloak_functionality() {
 }
 
 function validate_nginx_functionality() {
-    if curl -sk "https://dev.purebliss.app" -o /dev/null -w "%{http_code}" | grep -q 200; then
+    if curl -skk "https://dev.purebliss.app" -o /dev/null -w "%{http_code}" | grep -q 200; then
         log_success "Nginx HTTPS endpoint responding"
     else
         log_error "Nginx HTTPS endpoint not responding"
@@ -241,7 +241,7 @@ function validate_nginx_functionality() {
 }
 
 function validate_prometheus_functionality() {
-    if curl -s "http://localhost:9090/-/healthy" | grep -q "Prometheus is Healthy"; then
+    if curl -sk "http://localhost:9090/-/healthy" | grep -q "Prometheus is Healthy"; then
         log_success "Prometheus health endpoint responding"
     else
         log_error "Prometheus health endpoint not responding"

@@ -10,7 +10,7 @@ LOG_FILE="/opt/logs/dev-environment-setup.log"
 
 # Test configuration
 KEYCLOAK_URL="http://localhost:8080"
-VAULT_ADDR="${VAULT_ADDR:-http://localhost:8200}"
+VAULT_ADDR="${VAULT_ADDR:-https://localhost:8200}"
 TEST_COUNT=0
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -68,21 +68,21 @@ test_health_endpoint() {
     local live_url="$KEYCLOAK_URL/auth/health/live"
 
     # Test general health
-    if curl -s -f "$health_url" > /dev/null; then
+    if curl -sk -f "$health_url" > /dev/null; then
         log_pass "Health endpoint accessible"
     else
         log_fail "Health endpoint not accessible"
     fi
 
     # Test readiness
-    if curl -s -f "$ready_url" > /dev/null; then
+    if curl -sk -f "$ready_url" > /dev/null; then
         log_pass "Ready endpoint reports ready"
     else
         log_fail "Ready endpoint not ready"
     fi
 
     # Test liveness
-    if curl -s -f "$live_url" > /dev/null; then
+    if curl -sk -f "$live_url" > /dev/null; then
         log_pass "Live endpoint reports alive"
     else
         log_fail "Live endpoint not alive"
@@ -94,7 +94,7 @@ test_admin_console() {
     log_test "Admin Console Access"
 
     local admin_url="$KEYCLOAK_URL/auth/admin"
-    local response_code=$(curl -s -o /dev/null -w "%{http_code}" "$admin_url" || echo "000")
+    local response_code=$(curl -sk -o /dev/null -w "%{http_code}" "$admin_url" || echo "000")
 
     if [ "$response_code" = "200" ] || [ "$response_code" = "302" ]; then
         log_pass "Admin console accessible (HTTP $response_code)"
@@ -195,7 +195,7 @@ test_vault_connectivity() {
     log_test "Vault Connectivity"
 
     # Test Vault health
-    local vault_health=$(curl -s "$VAULT_ADDR/v1/sys/health" 2>/dev/null || echo '{"sealed":true}')
+    local vault_health=$(curl -sk "$VAULT_ADDR/v1/sys/health" 2>/dev/null || echo '{"sealed":true}')
     local vault_sealed=$(echo "$vault_health" | jq -r '.sealed // true' 2>/dev/null || echo "true")
 
     if echo "$vault_health" | jq -e '.' > /dev/null 2>&1; then
@@ -229,14 +229,14 @@ test_vault_secrets() {
     fi
 
     # Test Keycloak secrets
-    local db_secret=$(curl -s -H "X-Vault-Token: $vault_token" "$VAULT_ADDR/v1/secret/data/keycloak/database" 2>/dev/null || echo '{}')
+    local db_secret=$(curl -sk -H "X-Vault-Token: $vault_token" "$VAULT_ADDR/v1/secret/data/keycloak/database" 2>/dev/null || echo '{}')
     if echo "$db_secret" | jq -e '.data.data.username' > /dev/null 2>&1; then
         log_pass "Keycloak database secrets accessible in Vault"
     else
         log_fail "Keycloak database secrets not found in Vault"
     fi
 
-    local admin_secret=$(curl -s -H "X-Vault-Token: $vault_token" "$VAULT_ADDR/v1/secret/data/keycloak/admin" 2>/dev/null || echo '{}')
+    local admin_secret=$(curl -sk -H "X-Vault-Token: $vault_token" "$VAULT_ADDR/v1/secret/data/keycloak/admin" 2>/dev/null || echo '{}')
     if echo "$admin_secret" | jq -e '.data.data.username' > /dev/null 2>&1; then
         log_pass "Keycloak admin secrets accessible in Vault"
     else
@@ -308,13 +308,13 @@ test_admin_authentication() {
         return
     fi
 
-    local admin_secret=$(curl -s -H "X-Vault-Token: $vault_token" "$VAULT_ADDR/v1/secret/data/keycloak/admin" 2>/dev/null || echo '{}')
+    local admin_secret=$(curl -sk -H "X-Vault-Token: $vault_token" "$VAULT_ADDR/v1/secret/data/keycloak/admin" 2>/dev/null || echo '{}')
     local admin_user=$(echo "$admin_secret" | jq -r '.data.data.username // "admin"' 2>/dev/null || echo "admin")
     local admin_password=$(echo "$admin_secret" | jq -r '.data.data.password // "admin123"' 2>/dev/null || echo "admin123")
 
     # Test admin login
     local auth_url="$KEYCLOAK_URL/auth/realms/master/protocol/openid-connect/token"
-    local auth_response=$(curl -s -X POST "$auth_url" \
+    local auth_response=$(curl -sk -X POST "$auth_url" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         -d "username=$admin_user" \
         -d "password=$admin_password" \
@@ -358,7 +358,7 @@ test_performance() {
 
     # Response time
     local start_time=$(date +%s%3N)
-    curl -s "$KEYCLOAK_URL/auth" > /dev/null 2>&1 || true
+    curl -sk "$KEYCLOAK_URL/auth" > /dev/null 2>&1 || true
     local end_time=$(date +%s%3N)
     local response_time=$((end_time - start_time))
 

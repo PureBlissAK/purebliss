@@ -1,0 +1,14 @@
+[2025-08-09T08:52:46-04:00] INDEXING: Starting automated script indexing scan
+[2025-08-09T08:52:46-04:00] INDEXING: Starting comprehensive script discovery across /opt
+[2025-08-09T08:52:46-04:00] INDEXING: Indexing: /opt/cleanup-purebliss.sh
+[2025-08-09T08:54:22-04:00] INDEXING: Starting automated script indexing scan
+[2025-08-09T08:54:22-04:00] INDEXING: Starting comprehensive script discovery across /opt
+[2025-08-09T08:54:22-04:00] INDEXING: Indexing: /opt/cleanup-purebliss.sh
+[2025-08-09T08:54:29-04:00] INDEXING: Starting automated script indexing scan
+[2025-08-09T08:54:29-04:00] INDEXING: Starting comprehensive script discovery across /opt
+[2025-08-09T08:54:41-04:00] INDEXING: Starting automated script indexing scan
+[2025-08-09T08:54:41-04:00] INDEXING: Starting comprehensive script discovery across /opt
+[2025-08-09T08:54:41-04:00] INDEXING: Indexing: /opt/cleanup-purebliss.sh
+[2025-08-09T08:55:59-04:00] INDEXING: Starting automated script indexing scan
+[2025-08-09T08:55:59-04:00] INDEXING: Starting comprehensive script discovery across /opt
+[2025-08-09T08:55:59-04:00] INDEXING: Indexing: /opt/my-secure-ha-stack/orchestrator/scripts/start-environment.sh

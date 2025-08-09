@@ -61,7 +61,7 @@ else
 fi
 
 # 6. Test log ingestion (push a test log)
-if curl -s -X POST "http://localhost:3100/loki/api/v1/push" \
+if curl -sk -X POST "http://localhost:3100/loki/api/v1/push" \
     -H "Content-Type: application/json" \
     -d '{"streams": [{"stream": {"job": "test"}, "values": [["'$(date +%s)'000000000", "Test log entry from automation"]]}]}' \
     | grep -qv "error"; then

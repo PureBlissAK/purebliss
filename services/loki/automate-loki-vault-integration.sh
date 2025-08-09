@@ -17,7 +17,7 @@ log "Starting complete Loki Vault integration automation."
 # Step 1: Create Loki AppRole in Vault
 log "Creating Loki AppRole in Vault."
 docker exec purebliss-vault sh -c '
-export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_ADDR=https://127.0.0.1:8200
 export VAULT_TOKEN=dev-root-token-purebliss
 vault policy write loki-policy - <<EOF
 path "secret/data/loki/*" {
@@ -40,15 +40,15 @@ vault write auth/approle/role/loki \
 
 # Step 2: Get AppRole credentials
 log "Retrieving Loki AppRole credentials."
-ROLE_ID=$(docker exec purebliss-vault sh -c 'export VAULT_ADDR=http://127.0.0.1:8200; export VAULT_TOKEN=dev-root-token-purebliss; vault read -field=role_id auth/approle/role/loki/role-id')
-SECRET_ID=$(docker exec purebliss-vault sh -c 'export VAULT_ADDR=http://127.0.0.1:8200; export VAULT_TOKEN=dev-root-token-purebliss; vault write -force -field=secret_id auth/approle/role/loki/secret-id')
+ROLE_ID=$(docker exec purebliss-vault sh -c 'export VAULT_ADDR=https://127.0.0.1:8200; export VAULT_TOKEN=dev-root-token-purebliss; vault read -field=role_id auth/approle/role/loki/role-id')
+SECRET_ID=$(docker exec purebliss-vault sh -c 'export VAULT_ADDR=https://127.0.0.1:8200; export VAULT_TOKEN=dev-root-token-purebliss; vault write -force -field=secret_id auth/approle/role/loki/secret-id')
 
 log "AppRole credentials retrieved: role_id=${ROLE_ID:0:8}..."
 
 # Step 3: Create Loki storage secrets in Vault
 log "Creating Loki storage secrets in Vault."
 docker exec purebliss-vault sh -c '
-export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_ADDR=https://127.0.0.1:8200
 export VAULT_TOKEN=dev-root-token-purebliss
 vault kv put secret/loki/storage \
     access_key="loki-access-key-$(date +%s)" \
@@ -60,7 +60,7 @@ vault kv put secret/loki/storage \
 # Step 4: Get initial token for Loki
 log "Getting initial Vault token for Loki."
 TOKEN=$(docker exec purebliss-vault sh -c '
-export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_ADDR=https://127.0.0.1:8200
 export VAULT_TOKEN=dev-root-token-purebliss
 vault write -field=token auth/approle/login role_id='$ROLE_ID' secret_id='$SECRET_ID'
 ')
@@ -138,7 +138,7 @@ else
 fi
 
 # 6. Test log ingestion (push a test log)
-if curl -s -X POST "http://localhost:3100/loki/api/v1/push" \
+if curl -sk -X POST "http://localhost:3100/loki/api/v1/push" \
     -H "Content-Type: application/json" \
     -d '{"streams": [{"stream": {"job": "test"}, "values": [["'$(date +%s)'000000000", "Test log entry from automation"]]}]}' \
     | grep -qv "error"; then
@@ -243,7 +243,7 @@ EOF
 
 # Step 11: Final health validation
 log "Running final health validation on Loki service."
-/opt/dev-purebliss/validate-container-health.sh loki vault-integration-complete
+/opt/dev-purebliss/dev_scripts/core/validate-container-health.sh loki vault-integration-complete
 
 # Step 12: Log completion
 log "Loki Vault integration automation COMPLETE. All validation tests passed."

@@ -431,7 +431,7 @@ EOF
 enhance_dependency_validation() {
     log_action "INFO" "Creating enhanced dependency validation script"
 
-    cat > /opt/dev-purebliss/validate-service-dependencies.sh << 'EOF'
+    cat > /opt/dev-purebliss/dev_scripts/health-checks/validate-service-dependencies.sh << 'EOF'
 #!/bin/bash
 
 # Enhanced Service Dependency Validation
@@ -561,7 +561,7 @@ main() {
 main "$@"
 EOF
 
-    chmod +x /opt/dev-purebliss/validate-service-dependencies.sh
+    chmod +x /opt/dev-purebliss/dev_scripts/health-checks/validate-service-dependencies.sh
     log_action "SUCCESS" "Enhanced dependency validation script created"
 }
 
@@ -918,7 +918,7 @@ main() {
 
     # Execute mandatory health validation
     log_action "INFO" "Executing mandatory health validation after script enhancement"
-    if /opt/dev-purebliss/validate-container-health.sh keycloak script-enhancement-implementation; then
+    if /opt/dev-purebliss/dev_scripts/core/validate-container-health.sh keycloak script-enhancement-implementation; then
         log_action "SUCCESS" "Health validation passed - enhancements ready for deployment"
     else
         log_action "ERROR" "Health validation failed - review enhancement implementation"

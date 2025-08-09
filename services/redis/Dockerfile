@@ -1,3 +1,10 @@
+# PURE BLISS CONTAINER METADATA
+# Container: purebliss-redis
+# Purpose: Production Redis instance for Pure Bliss stack
+# Scaffolding Phase: Phase 3 - Core Service Integration
+# Description: This container provides the Redis caching backend for all core services on the purebliss-net network. It must be discoverable as 'redis' by all dependent containers.
+# DO NOT use for scaffolding or development-only tasks.
+# END METADATA
 # syntax=docker/dockerfile:1
 FROM redis:7-alpine
 

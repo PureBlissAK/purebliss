@@ -256,8 +256,8 @@ test_affected_services() {
             fi
 
             # Test service-specific health if script exists
-            if [[ -x "/opt/dev-purebliss/validate-container-health.sh" ]]; then
-                if /opt/dev-purebliss/validate-container-health.sh "$service" "script-migration-test" >/dev/null 2>&1; then
+            if [[ -x "/opt/dev-purebliss/dev_scripts/core/validate-container-health.sh" ]]; then
+                if /opt/dev-purebliss/dev_scripts/core/validate-container-health.sh "$service" "script-migration-test" >/dev/null 2>&1; then
                     log_migration "✓ $service: Health validation passed"
                 else
                     log_migration "✗ $service: Health validation failed"

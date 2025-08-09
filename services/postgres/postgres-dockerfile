@@ -1,1 +1,14 @@
+# PURE BLISS CONTAINER METADATA
+# Container: purebliss-postgres
+# Purpose: Primary database backend for all Pure Bliss services
+# Scaffolding Phase: Phase3 - Core Service Integration
+# Description: PostgreSQL 16 database with Vault integration for dynamic credentials and SSL/TLS support
+# Production Status: production-ready
+# Dependencies: vault
+# Network: purebliss-net
+# Vault Integration: yes
+# Last Enhanced: 2025-08-08
+# Enhancement Notes: Added comprehensive metadata for improved traceability and troubleshooting
+# END METADATA
+
 FROM postgres:16

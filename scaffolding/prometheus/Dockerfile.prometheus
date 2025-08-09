@@ -1,0 +1,7 @@
+# Dockerfile for Prometheus (Pure Bliss)
+FROM prom/prometheus:latest
+
+# Centralized script integration (if needed)
+# Health check is handled by docker-compose inline command
+
+# Entrypoint and CMD are inherited from base image

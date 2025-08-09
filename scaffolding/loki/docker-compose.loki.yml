@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  purebliss-loki:
+    image: grafana/loki:2.9.0
+    container_name: purebliss-loki
+    networks:
+      - purebliss-net
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo 'GET /ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' | nc localhost 3100 | grep -q '200 OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+volumes:
+  loki-data:
+    driver: local
+networks:
+  purebliss-net:
+    external: true

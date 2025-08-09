@@ -15,7 +15,7 @@ log "Starting Loki Vault integration validation."
 
 
 # 1. Validate Vault health endpoint from Loki container (use Docker network IP)
-if docker exec purebliss-loki curl -sf http://$VAULT_ADDR:8200/v1/sys/health; then
+if docker exec purebliss-loki curl -skf http://$VAULT_ADDR:8200/v1/sys/health; then
     log "Vault health endpoint reachable from Loki container (IP $VAULT_ADDR)."
 else
     log "ERROR: Vault health endpoint NOT reachable from Loki container (IP $VAULT_ADDR)."; exit 1
@@ -43,7 +43,7 @@ else
 fi
 
 # 5. Validate Loki ingestion and log query functionality
-if curl -sf "http://localhost:3100/loki/api/v1/query?query={job=\"varlogs\"}"; then
+if curl -skf "http://localhost:3100/loki/api/v1/query?query={job=\"varlogs\"}"; then
     log "Loki log query API responded successfully."
 else
     log "ERROR: Loki log query API did not respond successfully."; exit 1

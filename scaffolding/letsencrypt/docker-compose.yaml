@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  letsencrypt:
+    command: ["tail", "-f", "/dev/null"]
+    image: certbot/certbot:latest
+    container_name: purebliss-letsencrypt
+    volumes:
+      - ./certs:/etc/letsencrypt
+      - ./logs:/var/log/letsencrypt
+    # No command override; certbot/certbot expects certbot subcommands only
+    networks:
+      - purebliss-net
+    restart: unless-stopped
+networks:
+  purebliss-net:
+    external: true

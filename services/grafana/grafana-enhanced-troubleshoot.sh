@@ -36,11 +36,11 @@ function assess_current_state() {
     log_action "Health Status: $health_status"
 
     # Check if Grafana is actually responding internally
-    local grafana_api_response=$(docker exec purebliss-grafana curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || echo "connection_failed")
+    local grafana_api_response=$(docker exec purebliss-grafana curl -sk -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || echo "connection_failed")
     log_action "Grafana API Response: $grafana_api_response"
 
     # Check if healthcheck endpoint is wrong
-    local health_endpoint_check=$(docker exec purebliss-grafana curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health 2>/dev/null || echo "health_endpoint_failed")
+    local health_endpoint_check=$(docker exec purebliss-grafana curl -sk -o /dev/null -w "%{http_code}" http://localhost:3000/health 2>/dev/null || echo "health_endpoint_failed")
     log_action "Health Endpoint Check: $health_endpoint_check"
 
     # Return assessment
@@ -101,7 +101,7 @@ function analyze_vault_integration() {
 
     # Test dynamic credential generation from host
     log_action "Testing Vault dynamic credential generation..."
-    local vault_addr="http://127.0.0.1:8200"
+    local vault_addr="https://127.0.0.1:8200"
     local vault_token=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
 
     VAULT_ADDR="$vault_addr" VAULT_TOKEN="$vault_token" \
@@ -130,7 +130,7 @@ function implement_definitive_fix() {
     log_action "Configuring Grafana with proper environment variables..."
 
     # Get fresh dynamic credentials
-    local vault_addr="http://127.0.0.1:8200"
+    local vault_addr="https://127.0.0.1:8200"
     local vault_token=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
 
     VAULT_ADDR="$vault_addr" VAULT_TOKEN="$vault_token" \
@@ -168,7 +168,7 @@ function implement_definitive_fix() {
         -e GF_SERVER_DOMAIN=dev.purebliss.app \
         -e GF_SECURITY_ADMIN_USER=admin \
         -e GF_SECURITY_ADMIN_PASSWORD=admin \
-        --health-cmd="curl -f http://localhost:3000/api/health || exit 1" \
+        --health-cmd="curl -fk http://localhost:3000/api/health || exit 1" \
         --health-interval=30s \
         --health-timeout=10s \
         --health-retries=3 \
@@ -216,7 +216,7 @@ function main() {
         log_action "Final validation..."
         sleep 5
         local final_health=$(docker inspect --format='{{.State.Health.Status}}' purebliss-grafana)
-        local api_response=$(docker exec purebliss-grafana curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || echo "failed")
+        local api_response=$(docker exec purebliss-grafana curl -sk -o /dev/null -w "%{http_code}" http://localhost:3000/api/health 2>/dev/null || echo "failed")
 
         log_success "Final Status - Health: $final_health, API: $api_response"
 

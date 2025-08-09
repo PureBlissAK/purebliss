@@ -1,17 +1,21 @@
 #!/bin/bash
 set -euo pipefail
 
+
 # Define log file paths
 LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
 FALLBACK_LOG="/tmp/redis-entrypoint.log"
 
-# Function for robust logging
+
+
 log_msg() {
     local message="$1"
     local log_entry="[$(date +'%Y-%m-%dT%H:%M:%S%z')] [redis-entrypoint] $message"
 
-    # Attempt to write to the primary log file, fallback if it fails
-    if ! echo "$log_entry" >> "$LOG_FILE" 2>/dev/null; then
+    # Only log to LOG_FILE if directory is writable, else always use FALLBACK_LOG
+    if [ -w "$(dirname "$LOG_FILE")" ]; then
+        echo "$log_entry" >> "$LOG_FILE"
+    else
         echo "$log_entry" >> "$FALLBACK_LOG"
     fi
 }
@@ -36,37 +40,18 @@ wait_for_service() {
 }
 
 # Vault integration
+
 if [[ "${USE_VAULT:-true}" == "true" ]]; then
     log_msg "INFO: Vault integration enabled."
 
-    if [ -z "${VAULT_ADDR}" ]; then
+    if [ -z "${VAULT_ADDR:-}" ]; then
         log_msg "ERROR: VAULT_ADDR not set. Disabling Vault integration."
         USE_VAULT="false"
     else
         wait_for_service "$(echo "$VAULT_ADDR" | awk -F[/:] '{print $4}')" "$(echo "$VAULT_ADDR" | awk -F[/:] '{print $5}')" "Vault"
 
         log_msg "INFO: Authenticating to Vault using AppRole."
-        if [ -z "${REDIS_VAULT_ROLE_ID}" ] || [ -z "${REDIS_VAULT_SECRET_ID}" ]; then
-            log_msg "ERROR: Vault AppRole credentials not set. Disabling Vault integration."
-            USE_VAULT="false"
-        else
-            VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$REDIS_VAULT_ROLE_ID" secret_id="$REDIS_VAULT_SECRET_ID")
-            if [ -z "$VAULT_TOKEN" ]; then
-                log_msg "ERROR: Vault AppRole login failed. Disabling Vault integration."
-                USE_VAULT="false"
-            else
-                log_msg "SUCCESS: Vault AppRole login successful."
-                export VAULT_TOKEN
 
-                log_msg "INFO: Retrieving Redis password from Vault."
-                REDIS_PASSWORD=$(vault kv get -field=password secret/redis)
-                if [ -z "$REDIS_PASSWORD" ]; then
-                    log_msg "WARNING: Failed to retrieve Redis password. Proceeding without authentication."
-                else
-                    log_msg "SUCCESS: Redis password retrieved from Vault."
-                fi
-            fi
-        fi
     fi
 fi
 

@@ -1,0 +1,7 @@
+2025-08-09 00:25:01 - [INFO] common-functions-library.sh: Common Functions Library v1.0 loaded
+2025-08-09 00:25:01 - [INFO] script-communication-bridge.sh: Script communication bridge initialized
+2025-08-09 00:25:01 - [INFO] script-communication-bridge.sh: Script communication bridge initialized
+2025-08-09 00:25:01 - [INFO] script-communication-bridge.sh: Script communication bridge initialized
+2025-08-09 00:25:01 - [INFO] consolidated-vault-integration.sh: Checking Vault health for grafana
+2025-08-09 00:25:01 - [ERROR] consolidated-vault-integration.sh: Vault health check failed for grafana (code: 000)
+2025-08-09 00:25:01 - [ERROR] setup-grafana-vault-db-role.sh: Grafana DB role configuration failed

@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  purebliss-keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: purebliss-keycloak
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    env_file:
+      - ./keycloak.env
+    command: |
+      bash -c '
+        # Enhanced startup sequence with database validation
+        echo "[$(date)] Starting enhanced Keycloak startup sequence..."
+
+        # Wait for PostgreSQL to be ready
+        echo "[$(date)] Waiting for PostgreSQL..."
+        until nc -z purebliss-postgres 5432; do
+          echo "[$(date)] PostgreSQL not ready, waiting..."
+          sleep 5
+        done
+
+        # Test database connection
+        echo "[$(date)] Testing database connection..."
+        export PGPASSWORD=keycloak_secure_2025
+        until psql -h purebliss-postgres -U keycloak -d keycloak -c "SELECT 1;" > /dev/null 2>&1; do
+          echo "[$(date)] Database connection failed, waiting..."
+          sleep 10
+        done
+
+        echo "[$(date)] Database connection successful, starting Keycloak..."
+
+        # Start Keycloak
+        /opt/keycloak/bin/kc.sh start-dev \
+          --db=postgres \
+          --db-url="jdbc:postgresql://purebliss-postgres:5432/keycloak" \
+          --db-username=keycloak \
+          --db-password=keycloak_secure_2025 \
+          --hostname=dev.purebliss.app \
+          --hostname-strict=false \
+          --proxy=edge \
+          --http-enabled=true \
+          --optimized
+      '
+    depends_on:
+      purebliss-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: |
+        bash -c '
+          # Multi-stage health check
+          if ! pgrep -f "keycloak" > /dev/null; then
+            echo "Keycloak process not running"
+            exit 1
+          fi
+
+          if ! nc -z localhost 8080; then
+            echo "Port 8080 not accessible"
+            exit 1
+          fi
+
+          if ! curl -f -s --connect-timeout 5 --max-time 10 "http://localhost:8080" > /dev/null; then
+            echo "HTTP endpoint not responding"
+            exit 1
+          fi
+
+          if ! curl -f -s --connect-timeout 5 --max-time 10 "http://localhost:8080/admin" > /dev/null; then
+            echo "Admin console not accessible"
+            exit 1
+          fi
+
+          echo "Keycloak is healthy"
+          exit 0
+        '
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 120s  # Allow 2 minutes for startup
+    networks:
+      - purebliss-net
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./conf:/opt/keycloak/conf:ro
+
+volumes:
+  keycloak_data:
+    external: false
+
+networks:
+  purebliss-net:
+    external: true

@@ -26,7 +26,7 @@ function log_error() {
 function check_vault_connectivity() {
     log_action "Checking Vault connectivity..."
 
-    if docker exec purebliss-grafana curl -sk http://127.0.0.1:8200/v1/sys/health >/dev/null 2>&1; then
+    if docker exec purebliss-grafana curl -skk https://127.0.0.1:8200/v1/sys/health >/dev/null 2>&1; then
         log_success "Vault accessible from Grafana container"
         return 0
     else
@@ -41,7 +41,7 @@ function check_vault_token() {
     if docker exec purebliss-grafana test -f /vault-token; then
         log_success "Vault token file exists"
         # Test token validity
-        if docker exec purebliss-grafana bash -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$(cat /vault-token) vault status' >/dev/null 2>&1; then
+        if docker exec purebliss-grafana bash -c 'VAULT_ADDR=https://127.0.0.1:8200 VAULT_TOKEN=$(cat /vault-token) vault status' >/dev/null 2>&1; then
             log_success "Vault token is valid"
             return 0
         else
@@ -142,11 +142,11 @@ EOF
             --name purebliss-grafana \
             --network purebliss-net \
             --env-file /tmp/grafana-env \
-            -e VAULT_ADDR=http://127.0.0.1:8200 \
+            -e VAULT_ADDR=https://127.0.0.1:8200 \
             -e DATABASE_HOST=purebliss-postgres \
             -e DATABASE_PORT=5432 \
             -e DATABASE_NAME=grafana \
-            --health-cmd="curl -f http://localhost:3000/api/health || exit 1" \
+            --health-cmd="curl -fk http://localhost:3000/api/health || exit 1" \
             --health-interval=30s \
             --health-timeout=10s \
             --health-retries=3 \
@@ -204,7 +204,7 @@ function main() {
     log_action "Starting comprehensive Grafana Vault integration troubleshooting..."
 
     # Set Vault address for this script
-    export VAULT_ADDR="http://127.0.0.1:8200"
+    export VAULT_ADDR="https://127.0.0.1:8200"
 
     # Step 1: Check Vault connectivity
     if ! check_vault_connectivity; then
@@ -251,7 +251,7 @@ function main() {
 
         # Final validation test
         log_action "Running final API test..."
-        if docker exec purebliss-grafana curl -f http://localhost:3000/api/health >/dev/null 2>&1; then
+        if docker exec purebliss-grafana curl -fk http://localhost:3000/api/health >/dev/null 2>&1; then
             log_success "Grafana API is responding correctly"
         else
             log_error "Grafana API not responding"

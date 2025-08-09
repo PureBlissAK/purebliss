@@ -28,7 +28,7 @@ function log_error() {
 function configure_vault_integration() {
     log_action "Configuring Vault $INTEGRATION_TYPE integration for $SERVICE_NAME..."
 
-    export VAULT_ADDR="http://127.0.0.1:8200"
+    export VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN=$(cat /opt/my-secure-ha-stack/secrets/vault_token)
 
     case "$INTEGRATION_TYPE" in

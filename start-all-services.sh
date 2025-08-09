@@ -27,18 +27,18 @@ function onboard_redis_to_vault() {
   echo "[$(date)] INFO: Onboarding Redis into Vault for dynamic secrets (host: $REDIS_HOST)" | tee -a "$LOG_FILE"
 
   # Auto-detect Vault mode and set appropriate address
-  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTP="https://127.0.0.1:8200"
   local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
   local VAULT_ADDR=""
 
   # Test HTTP first (dev mode)
-  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTP"
     export VAULT_ADDR
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Using Vault dev mode (HTTP) for Redis onboarding" | tee -a "$LOG_FILE"
   # Test HTTPS (production mode)
-  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTPS"
     export VAULT_ADDR
     export VAULT_SKIP_VERIFY=1
@@ -384,7 +384,7 @@ function run_post_startup() {
       echo "[$(date)] INFO: Waiting for Keycloak to initialize (this may take up to 3 minutes)..." | tee -a "$LOG_FILE"
       while [[ $wait_count -lt $max_wait ]]; do
         # Check if Keycloak is responding to HTTP requests
-        if curl -s -f http://localhost:8080/auth/ >/dev/null 2>&1; then
+        if curl -sk -f http://localhost:8080/auth/ >/dev/null 2>&1; then
           echo "[$(date)] SUCCESS: Keycloak is responding to HTTP requests" | tee -a "$LOG_FILE"
           break
         fi
@@ -527,7 +527,7 @@ function onboard_prometheus_to_vault() {
   if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
      docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
     # Development mode - vault running in dev mode
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Detected Vault in development mode" | tee -a "$LOG_FILE"
   elif docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
@@ -542,7 +542,7 @@ function onboard_prometheus_to_vault() {
     echo "[$(date)] INFO: Detected Vault in production mode" | tee -a "$LOG_FILE"
   else
     # Fallback - assume dev server if no container
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: No Vault container detected, assuming development mode" | tee -a "$LOG_FILE"
   fi
@@ -586,18 +586,18 @@ function onboard_nginx_to_vault() {
   echo "[$(date)] INFO: Onboarding Nginx to Vault PKI (domain: $DOMAIN)" | tee -a "$LOG_FILE"
 
   # Auto-detect Vault mode and set appropriate address
-  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTP="https://127.0.0.1:8200"
   local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
   local VAULT_ADDR=""
 
   # Test HTTP first (dev mode)
-  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTP"
     export VAULT_ADDR
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Using Vault dev mode (HTTP) for Nginx onboarding" | tee -a "$LOG_FILE"
   # Test HTTPS (production mode)
-  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTPS"
     export VAULT_ADDR
     export VAULT_SKIP_VERIFY=1
@@ -798,18 +798,18 @@ function vault_auto_unseal_enhanced() {
   echo "[$(date)] INFO: Enhanced Vault auto-unseal with integrated automation..." | tee -a "$LOG_FILE"
 
   # Auto-detect Vault mode and set appropriate address
-  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTP="https://127.0.0.1:8200"
   local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
   local VAULT_ADDR=""
   local vault_mode=""
 
   # Test HTTP first (dev mode)
-  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTP"
     vault_mode="dev"
     echo "[$(date)] INFO: Detected Vault running in development mode (HTTP)" | tee -a "$LOG_FILE"
   # Test HTTPS (production mode)
-  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTPS"
     vault_mode="production"
     echo "[$(date)] INFO: Detected Vault running in production mode (HTTPS)" | tee -a "$LOG_FILE"
@@ -821,9 +821,9 @@ function vault_auto_unseal_enhanced() {
   # Check if Vault is already unsealed (dev mode is always unsealed)
   local status_response sealed_status
   if [[ "$vault_mode" == "dev" ]]; then
-    status_response=$(curl -s "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
-  else
     status_response=$(curl -sk "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
+  else
+    status_response=$(curl -skk "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
   fi
 
   sealed_status=$(echo "$status_response" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' "')
@@ -869,7 +869,7 @@ function vault_auto_unseal_enhanced() {
     echo "[$(date)] INFO: Running vault break-fix diagnostic..." | tee -a "$LOG_FILE"
     if VAULT_ADDR="$VAULT_ADDR" /opt/dev-purebliss/services/vault/vault-break-fix.sh diagnostic >> "$LOG_FILE" 2>&1; then
       # Check if vault is now unsealed after diagnostic
-      status_response=$(curl -sk "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
+      status_response=$(curl -skk "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
       sealed_status=$(echo "$status_response" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' "')
 
       if [[ "$sealed_status" == "false" ]]; then
@@ -889,7 +889,7 @@ function vault_auto_unseal_enhanced() {
     echo "[$(date)] INFO: Manual unseal attempt $attempt/$max_attempts..." | tee -a "$LOG_FILE"
 
     # Check if Vault is reachable
-    if ! curl -sk "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
+    if ! curl -skk "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
       echo "[$(date)] WARNING: Vault not reachable, waiting 5 seconds..." | tee -a "$LOG_FILE"
       sleep 5
       ((attempt++))
@@ -897,7 +897,7 @@ function vault_auto_unseal_enhanced() {
     fi
 
     # Check seal status
-    sealed_status=$(curl -sk "$VAULT_ADDR/v1/sys/health" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' ')
+    sealed_status=$(curl -skk "$VAULT_ADDR/v1/sys/health" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' ')
 
     if [[ "$sealed_status" == "false" ]]; then
       echo "[$(date)] SUCCESS: Vault is already unsealed (attempt $attempt)" | tee -a "$LOG_FILE"
@@ -914,7 +914,7 @@ function vault_auto_unseal_enhanced() {
         for key_var in VAULT_DEV_UNSEAL_KEY_1 VAULT_DEV_UNSEAL_KEY_2 VAULT_DEV_UNSEAL_KEY_3; do
           key="${!key_var:-}"
           if [[ -n "$key" ]]; then
-            if curl -sk --request POST --data '{"key": "'$key'"}' "$VAULT_ADDR/v1/sys/unseal" >/dev/null 2>&1; then
+            if curl -skk --request POST --data '{"key": "'$key'"}' "$VAULT_ADDR/v1/sys/unseal" >/dev/null 2>&1; then
               echo "[$(date)] INFO: Successfully submitted $key_var" | tee -a "$LOG_FILE"
               ((keys_submitted++))
             else
@@ -926,7 +926,7 @@ function vault_auto_unseal_enhanced() {
         if [[ $keys_submitted -ge 3 ]]; then
           echo "[$(date)] INFO: Submitted $keys_submitted unseal keys, checking status..." | tee -a "$LOG_FILE"
           sleep 2
-          sealed_status=$(curl -sk "$VAULT_ADDR/v1/sys/health" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' ')
+          sealed_status=$(curl -skk "$VAULT_ADDR/v1/sys/health" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' ')
           if [[ "$sealed_status" == "false" ]]; then
             echo "[$(date)] SUCCESS: Vault unsealed successfully with stored keys" | tee -a "$LOG_FILE"
             return 0
@@ -966,20 +966,20 @@ function vault_status_check() {
   echo "[$(date)] INFO: Performing comprehensive Vault status and compliance check..." | tee -a "$LOG_FILE"
 
   # Auto-detect Vault mode and set appropriate address
-  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTP="https://127.0.0.1:8200"
   local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
   local VAULT_ADDR=""
   local vault_mode=""
 
   # Test HTTP first (dev mode)
-  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTP"
     vault_mode="dev"
     export VAULT_ADDR
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Vault running in development mode (HTTP)" | tee -a "$LOG_FILE"
   # Test HTTPS (production mode)
-  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTPS"
     vault_mode="production"
     export VAULT_ADDR
@@ -1000,7 +1000,7 @@ function vault_status_check() {
 
   # Check vault health and seal status
   local health_response
-  health_response=$(curl -s${vault_mode:+k} "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
+  health_response=$(curl -sk${vault_mode:+k} "$VAULT_ADDR/v1/sys/health" 2>/dev/null)
 
   if [[ -n "$health_response" ]]; then
     local sealed_status initialized_status
@@ -1072,7 +1072,7 @@ function test_service_independence() {
   # Service-specific independence test
   case "$service_name" in
     "vault")
-      if curl -s http://localhost:8200/v1/sys/health >/dev/null 2>&1; then
+      if curl -sk https://localhost:8200/v1/sys/health >/dev/null 2>&1; then
         echo "[$(date)] SUCCESS: Vault API accessible independently" | tee -a "$LOG_FILE"
         return 0
       fi
@@ -1090,7 +1090,7 @@ function test_service_independence() {
       fi
       ;;
     "nginx")
-      if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|301"; then
+      if curl -sk -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|301"; then
         echo "[$(date)] SUCCESS: Nginx serving requests independently" | tee -a "$LOG_FILE"
         return 0
       fi
@@ -1113,7 +1113,7 @@ function onboard_loki_to_vault() {
   if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
      docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
     # Development mode - vault running in dev mode
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Detected Vault in development mode for Loki" | tee -a "$LOG_FILE"
   elif docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
@@ -1128,7 +1128,7 @@ function onboard_loki_to_vault() {
     echo "[$(date)] INFO: Detected Vault in production mode for Loki" | tee -a "$LOG_FILE"
   else
     # Fallback - assume dev server if no container
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: No Vault container detected, assuming development mode for Loki" | tee -a "$LOG_FILE"
   fi
@@ -1137,7 +1137,7 @@ function onboard_loki_to_vault() {
   echo "[$(date)] INFO: Using Vault at $VAULT_ADDR for Loki onboarding" | tee -a "$LOG_FILE"
 
   # Test Vault connectivity before proceeding
-  if ! curl -sk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
+  if ! curl -skk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
     echo "[$(date)] WARNING: Cannot connect to Vault with current token - proceeding with basic startup" | tee -a "$LOG_FILE"
     return 0
   fi
@@ -1217,7 +1217,7 @@ function setup_loki_vault_token() {
   fi
 
   # Method 2: Try to extract token from vault-agent which may have one
-  vault_token=$(curl -sk http://localhost:8100/v1/auth/token/lookup-self 2>/dev/null | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+  vault_token=$(curl -skk http://localhost:8100/v1/auth/token/lookup-self 2>/dev/null | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
 
   if [[ -n "$vault_token" && "$vault_token" != "" ]]; then
     echo "$vault_token" > "$VAULT_TOKEN_FILE"
@@ -1232,7 +1232,7 @@ function setup_loki_vault_token() {
     local secret_id=$(cat /opt/dev-purebliss/services/vault-agent/.vault_secret_id 2>/dev/null)
 
     if [[ -n "$role_id" && -n "$secret_id" ]]; then
-      vault_token=$(curl -sk -X POST -d "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" \
+      vault_token=$(curl -skk -X POST -d "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" \
         https://127.0.0.1:8200/v1/auth/approle/login 2>/dev/null | \
         grep -o '"client_token":"[^"]*"' | cut -d'"' -f4)
 
@@ -1266,7 +1266,7 @@ function onboard_grafana_to_vault() {
   if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
      docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
     # Development mode - vault running in dev mode
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Detected Vault in development mode for Grafana" | tee -a "$LOG_FILE"
   elif docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
@@ -1281,7 +1281,7 @@ function onboard_grafana_to_vault() {
     echo "[$(date)] INFO: Detected Vault in production mode for Grafana" | tee -a "$LOG_FILE"
   else
     # Fallback - assume dev server if no container
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: No Vault container detected, assuming development mode for Grafana" | tee -a "$LOG_FILE"
   fi
@@ -1290,7 +1290,7 @@ function onboard_grafana_to_vault() {
   echo "[$(date)] INFO: Using Vault at $VAULT_ADDR for Grafana onboarding" | tee -a "$LOG_FILE"
 
   # Test Vault connectivity before proceeding
-  if ! curl -sk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
+  if ! curl -skk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
     echo "[$(date)] WARNING: Cannot connect to Vault with current token - proceeding with basic startup" | tee -a "$LOG_FILE"
     return 0
   fi
@@ -1366,7 +1366,7 @@ function onboard_codeserver_to_vault() {
   if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
      docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
     # Development mode - vault running in dev mode
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Detected Vault in development mode for CodeServer" | tee -a "$LOG_FILE"
   elif docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
@@ -1381,7 +1381,7 @@ function onboard_codeserver_to_vault() {
     echo "[$(date)] INFO: Detected Vault in production mode for CodeServer" | tee -a "$LOG_FILE"
   else
     # Fallback to dev mode if no container detected
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: No Vault container detected, assuming development mode for CodeServer" | tee -a "$LOG_FILE"
   fi
@@ -1460,7 +1460,7 @@ function onboard_letsencrypt_to_vault() {
   if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
      docker logs purebliss-vault 2>/dev/null | grep -q "dev mode is enabled"; then
     # Development mode - vault running in dev mode
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: Detected Vault in development mode for Let's Encrypt" | tee -a "$LOG_FILE"
   elif docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
@@ -1475,7 +1475,7 @@ function onboard_letsencrypt_to_vault() {
     echo "[$(date)] INFO: Detected Vault in production mode for Let's Encrypt" | tee -a "$LOG_FILE"
   else
     # Fallback - assume dev server if no container
-    VAULT_ADDR="http://127.0.0.1:8200"
+    VAULT_ADDR="https://127.0.0.1:8200"
     export VAULT_TOKEN="dev-root-token-purebliss"
     echo "[$(date)] INFO: No Vault container detected, assuming development mode for Let's Encrypt" | tee -a "$LOG_FILE"
   fi
@@ -1484,7 +1484,7 @@ function onboard_letsencrypt_to_vault() {
   echo "[$(date)] INFO: Using Vault at $VAULT_ADDR for Let's Encrypt PKI onboarding" | tee -a "$LOG_FILE"
 
   # Test Vault connectivity before proceeding
-  if ! curl -sk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
+  if ! curl -skk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/health" >/dev/null 2>&1; then
     echo "[$(date)] WARNING: Cannot connect to Vault with current token - proceeding with basic startup" | tee -a "$LOG_FILE"
     return 0
   fi
@@ -1593,7 +1593,7 @@ function start_redis() {
   fi
 
   # Auto-detect Vault configuration
-  local vault_addr="http://127.0.0.1:8200"
+  local vault_addr="https://127.0.0.1:8200"
   local vault_token="dev-root-token-purebliss"
 
   if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
@@ -1660,7 +1660,7 @@ function start_nginx() {
   fi
 
   # Auto-detect Vault configuration
-  local vault_addr="http://127.0.0.1:8200"
+  local vault_addr="https://127.0.0.1:8200"
   local vault_token="dev-root-token-purebliss"
   local domain="${LOCAL_HOSTNAME:-dev.purebliss.app}"
 
@@ -1772,7 +1772,7 @@ function start_service_robust() {
       if docker ps --format '{{.Names}}' | grep -q "purebliss-vault"; then
         export VAULT_ADDR="http://purebliss-vault:8200"
       else
-        export VAULT_ADDR="http://localhost:8200"
+        export VAULT_ADDR="https://localhost:8200"
       fi
 
       # Load service environment
@@ -1855,7 +1855,7 @@ function start_service_robust() {
         echo "[$(date)] INFO: Starting Grafana with Vault integration..." | tee -a "$LOG_FILE"
 
         # Auto-detect vault mode for Grafana
-        local vault_addr="http://127.0.0.1:8200"
+        local vault_addr="https://127.0.0.1:8200"
         local vault_token="dev-root-token-purebliss"
 
         if docker ps --format '{{.Names}}' | grep -q "purebliss-vault" && \
@@ -1928,16 +1928,16 @@ function wait_for_vault_api() {
   echo "[$(date)] INFO: Waiting for Vault API to be fully operational for API calls..." | tee -a "$LOG_FILE"
   local max_api_wait=30
   local api_ready=false
-  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTP="https://127.0.0.1:8200"
   local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
   local VAULT_ADDR=""
 
   # Auto-detect Vault mode
-  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTP"
     export VAULT_ADDR="$VAULT_ADDR_HTTP"
     echo "[$(date)] INFO: Detected Vault dev mode (HTTP) for API operations" | tee -a "$LOG_FILE"
-  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTPS"
     export VAULT_ADDR="$VAULT_ADDR_HTTPS"
     export VAULT_SKIP_VERIFY=1
@@ -1963,9 +1963,9 @@ function wait_for_vault_api() {
     # Alternative test without token - just check if we get proper API response codes
     local api_response_code
     if [[ "$VAULT_ADDR" == "$VAULT_ADDR_HTTP" ]]; then
-      api_response_code=$(curl -s -w "%{http_code}" -o /dev/null "$VAULT_ADDR/v1/sys/auth" 2>/dev/null || echo "000")
-    else
       api_response_code=$(curl -sk -w "%{http_code}" -o /dev/null "$VAULT_ADDR/v1/sys/auth" 2>/dev/null || echo "000")
+    else
+      api_response_code=$(curl -skk -w "%{http_code}" -o /dev/null "$VAULT_ADDR/v1/sys/auth" 2>/dev/null || echo "000")
     fi
 
     if [[ "$api_response_code" == "200" || "$api_response_code" == "403" ]]; then
@@ -2135,7 +2135,7 @@ function setup_vault_approle_credentials {
   fi
 
   # Check if we're in dev mode - if so, skip complex AppRole setup
-  if curl -s "http://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "https://127.0.0.1:8200/v1/sys/health" >/dev/null 2>&1; then
     echo "[$(date)] INFO: Vault is running in development mode - skipping AppRole setup" >> "$LOG_FILE"
     echo "[$(date)] INFO: Dev mode uses simplified authentication suitable for development" >> "$LOG_FILE"
     return 0
@@ -2230,16 +2230,16 @@ function validate_service_dependencies() {
 }
 
 function vault_status_check() {
-  local VAULT_ADDR_HTTP="http://127.0.0.1:8200"
+  local VAULT_ADDR_HTTP="https://127.0.0.1:8200"
   local VAULT_ADDR_HTTPS="https://127.0.0.1:8200"
   local VAULT_ADDR=""
   local sealed_status health_status api_ready
 
   # Auto-detect Vault mode (HTTP or HTTPS)
-  if curl -s "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
+  if curl -sk "$VAULT_ADDR_HTTP/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTP"
     echo "[$(date)] INFO: Using Vault dev mode (HTTP)" | tee -a "$LOG_FILE"
-  elif curl -sk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
+  elif curl -skk "$VAULT_ADDR_HTTPS/v1/sys/health" >/dev/null 2>&1; then
     VAULT_ADDR="$VAULT_ADDR_HTTPS"
     echo "[$(date)] INFO: Using Vault production mode (HTTPS)" | tee -a "$LOG_FILE"
   else
@@ -2249,20 +2249,20 @@ function vault_status_check() {
 
   # Check status based on detected mode
   if [[ "$VAULT_ADDR" == "$VAULT_ADDR_HTTP" ]]; then
-    sealed_status=$(curl -s "$VAULT_ADDR/v1/sys/health" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' ')
-    health_status=$(curl -s "$VAULT_ADDR/v1/sys/health" | grep -o '"initialized":[^,]*' | cut -d: -f2 | tr -d ' ')
-  else
     sealed_status=$(curl -sk "$VAULT_ADDR/v1/sys/health" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' ')
     health_status=$(curl -sk "$VAULT_ADDR/v1/sys/health" | grep -o '"initialized":[^,]*' | cut -d: -f2 | tr -d ' ')
+  else
+    sealed_status=$(curl -skk "$VAULT_ADDR/v1/sys/health" | grep -o '"sealed":[^,]*' | cut -d: -f2 | tr -d ' ')
+    health_status=$(curl -skk "$VAULT_ADDR/v1/sys/health" | grep -o '"initialized":[^,]*' | cut -d: -f2 | tr -d ' ')
   fi
 
   if [[ "$health_status" == "true" && "$sealed_status" == "false" ]]; then
     # Additional check: ensure API is ready for operations
     local api_response_code
     if [[ "$VAULT_ADDR" == "$VAULT_ADDR_HTTP" ]]; then
-      api_response_code=$(curl -s -w "%{http_code}" -o /dev/null "$VAULT_ADDR/v1/sys/auth" 2>/dev/null || echo "000")
-    else
       api_response_code=$(curl -sk -w "%{http_code}" -o /dev/null "$VAULT_ADDR/v1/sys/auth" 2>/dev/null || echo "000")
+    else
+      api_response_code=$(curl -skk -w "%{http_code}" -o /dev/null "$VAULT_ADDR/v1/sys/auth" 2>/dev/null || echo "000")
     fi
 
     if [[ "$api_response_code" == "200" || "$api_response_code" == "403" ]]; then
@@ -2303,7 +2303,7 @@ function post_service_validation() {
         echo "[$(date)] WARNING: Vault Agent authentication may not be working" >> "$LOG_FILE"
       fi
       # Check if API proxy is responding
-      if curl -sk "http://localhost:8100/v1/sys/health" >/dev/null 2>&1; then
+      if curl -skk "http://localhost:8100/v1/sys/health" >/dev/null 2>&1; then
         echo "[$(date)] SUCCESS: Vault Agent API proxy accessible" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Vault Agent API proxy not accessible" >> "$LOG_FILE"
@@ -2347,21 +2347,21 @@ function post_service_validation() {
       onboard_loki_to_vault
 
       # Loki health check
-      if curl -sk "http://localhost:3100/ready" | grep -q "ready"; then
+      if curl -skk "http://localhost:3100/ready" | grep -q "ready"; then
         echo "[$(date)] SUCCESS: Loki health endpoint is ready" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Loki health endpoint not ready" >> "$LOG_FILE"
       fi
 
       # Test Loki metrics endpoint
-      if curl -sk "http://localhost:3100/metrics" | head -1 | grep -q "#"; then
+      if curl -skk "http://localhost:3100/metrics" | head -1 | grep -q "#"; then
         echo "[$(date)] SUCCESS: Loki metrics endpoint is accessible" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Loki metrics endpoint not accessible" >> "$LOG_FILE"
       fi
 
       # Validate Loki can query itself (basic functionality test)
-      if curl -sk "http://localhost:3100/loki/api/v1/labels" | grep -q "status.*success\|data"; then
+      if curl -skk "http://localhost:3100/loki/api/v1/labels" | grep -q "status.*success\|data"; then
         echo "[$(date)] SUCCESS: Loki API is responding correctly" >> "$LOG_FILE"
       else
         echo "[$(date)] INFO: Loki API may still be initializing" >> "$LOG_FILE"
@@ -2382,21 +2382,21 @@ function post_service_validation() {
       onboard_grafana_to_vault
 
       # Grafana health check
-      if curl -sk "http://localhost:3001/api/health" | grep -q "ok\|database.*ok"; then
+      if curl -skk "http://localhost:3001/api/health" | grep -q "ok\|database.*ok"; then
         echo "[$(date)] SUCCESS: Grafana health endpoint is ready" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Grafana health endpoint not ready" >> "$LOG_FILE"
       fi
 
       # Test Grafana metrics endpoint
-      if curl -sk "http://localhost:3001/metrics" | head -1 | grep -q "#"; then
+      if curl -skk "http://localhost:3001/metrics" | head -1 | grep -q "#"; then
         echo "[$(date)] SUCCESS: Grafana metrics endpoint is accessible" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Grafana metrics endpoint not accessible" >> "$LOG_FILE"
       fi
 
       # Validate Grafana API is responding
-      if curl -sk "http://localhost:3001/api/org" -u "admin:admin" | grep -q "orgId\|name"; then
+      if curl -skk "http://localhost:3001/api/org" -u "admin:admin" | grep -q "orgId\|name"; then
         echo "[$(date)] SUCCESS: Grafana API is responding correctly" >> "$LOG_FILE"
       else
         echo "[$(date)] INFO: Grafana API may still be initializing or credentials may need updating" >> "$LOG_FILE"
@@ -2409,14 +2409,14 @@ function post_service_validation() {
       echo "[$(date)] INFO: Testing Keycloak admin endpoint and database connectivity..." >> "$LOG_FILE"
 
       # Test basic health endpoint first
-      if curl -sk "http://localhost:8080/" >/dev/null 2>&1; then
+      if curl -skk "http://localhost:8080/" >/dev/null 2>&1; then
         echo "[$(date)] SUCCESS: Keycloak basic endpoint accessible" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Keycloak basic endpoint not accessible" >> "$LOG_FILE"
       fi
 
       # Test admin console endpoint
-      if curl -sk "http://localhost:8080/admin" >/dev/null 2>&1; then
+      if curl -skk "http://localhost:8080/admin" >/dev/null 2>&1; then
         echo "[$(date)] SUCCESS: Keycloak admin console accessible" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Keycloak admin console not accessible" >> "$LOG_FILE"
@@ -2452,7 +2452,7 @@ function post_service_validation() {
       ;;
     "nginx")
       # Test main proxy endpoint
-      if curl -sk "https://dev.purebliss.app" >/dev/null 2>&1; then
+      if curl -skk "https://dev.purebliss.app" >/dev/null 2>&1; then
         echo "[$(date)] SUCCESS: Main nginx endpoint accessible" >> "$LOG_FILE"
       else
         echo "[$(date)] WARNING: Main nginx endpoint not accessible" >> "$LOG_FILE"
@@ -2515,7 +2515,7 @@ function final_system_validation() {
   # External endpoint tests (disabled until nginx is added back)
   # local endpoints=("https://dev.purebliss.app" "https://dev.purebliss.app/keycloak")
   # for endpoint in "${endpoints[@]}"; do
-  #   if curl -sk "$endpoint" >/dev/null 2>&1; then
+  #   if curl -skk "$endpoint" >/dev/null 2>&1; then
   #     echo "[$(date)] SUCCESS: $endpoint accessible" >> "$LOG_FILE"
   #   else
   #     echo "[$(date)] WARNING: $endpoint not accessible" >> "$LOG_FILE"

@@ -51,11 +51,11 @@ function wait_for_vault() {
     fi
 
     # Try hostname first
-    if curl -s http://purebliss-vault:8200/v1/sys/health >/dev/null 2>&1; then
+    if curl -sk http://purebliss-vault:8200/v1/sys/health >/dev/null 2>&1; then
         vault_accessible=true
         log_info "Vault accessible via hostname"
     # Try direct IP as fallback
-    elif curl -s http://172.32.0.4:8200/v1/sys/health >/dev/null 2>&1; then
+    elif curl -sk http://172.32.0.4:8200/v1/sys/health >/dev/null 2>&1; then
         vault_accessible=true
         log_info "Vault accessible via IP address"
         # Update environment to use IP
@@ -65,9 +65,9 @@ function wait_for_vault() {
     if [[ "$vault_accessible" == "true" ]]; then
         local vault_status
         if [[ "$VAULT_ADDR" == *"172.32.0.4"* ]]; then
-            vault_status=$(curl -s http://172.32.0.4:8200/v1/sys/health 2>/dev/null)
+            vault_status=$(curl -sk http://172.32.0.4:8200/v1/sys/health 2>/dev/null)
         else
-            vault_status=$(curl -s http://purebliss-vault:8200/v1/sys/health 2>/dev/null)
+            vault_status=$(curl -sk http://purebliss-vault:8200/v1/sys/health 2>/dev/null)
         fi            # Check if Vault is unsealed
             if echo "$vault_status" | grep -q '"sealed":false'; then
                 log_success "Vault is ready and unsealed"
@@ -125,7 +125,7 @@ function fetch_postgres_secrets() {
         local download_success=false
         for attempt in 1 2 3; do
             log_info "Vault CLI download attempt $attempt/3..."
-            if curl -f -s -L -o vault.zip https://releases.hashicorp.com/vault/1.17.3/vault_1.17.3_linux_amd64.zip; then
+            if curl -fk -s -L -o vault.zip https://releases.hashicorp.com/vault/1.17.3/vault_1.17.3_linux_amd64.zip; then
                 # Verify download integrity
                 if unzip -t vault.zip >/dev/null 2>&1; then
                     unzip -q vault.zip
@@ -174,7 +174,7 @@ function fetch_postgres_secrets() {
     # Fallback to curl-based authentication
     if [[ "$vault_auth_success" == "false" ]]; then
         local vault_addr="${VAULT_ADDR:-http://purebliss-vault:8200}"
-        if curl -s -H "X-Vault-Token: $vault_token" "$vault_addr/v1/auth/token/lookup-self" >/dev/null 2>&1; then
+        if curl -sk -H "X-Vault-Token: $vault_token" "$vault_addr/v1/auth/token/lookup-self" >/dev/null 2>&1; then
             vault_auth_success=true
             log_success "Vault authentication successful (curl)"
         fi
@@ -218,7 +218,7 @@ function fetch_postgres_secrets() {
 
         # Try to fetch existing password first
         local vault_response
-        if vault_response=$(curl -s -H "X-Vault-Token: $vault_token" "$vault_addr/v1/secret/data/postgres" 2>/dev/null); then
+        if vault_response=$(curl -sk -H "X-Vault-Token: $vault_token" "$vault_addr/v1/secret/data/postgres" 2>/dev/null); then
             if echo "$vault_response" | grep -q '"bootstrap_password"'; then
                 bootstrap_password=$(echo "$vault_response" | jq -r '.data.data.bootstrap_password' 2>/dev/null)
                 if [[ -n "$bootstrap_password" && "$bootstrap_password" != "null" ]]; then

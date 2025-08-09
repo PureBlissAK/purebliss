@@ -1,0 +1,197 @@
++ set -euo pipefail
++ SCRIPT_DIR=/opt/dev-purebliss/dev_scripts
++ DOC_DIR=/opt/dev-purebliss/Documentation
++ source /opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh
+++ [[ '' == \t\r\u\e ]]
+++ export COMMON_FUNCTIONS_LOADED=true
+++ COMMON_FUNCTIONS_LOADED=true
+++ COMMON_LIB_VERSION=1.0
+++ LOG_FILE=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
+++ HEALTH_LOG=/opt/my-secure-ha-stack/logs/container-health-validation.log
+++ init_common_functions
+++ log_info 'Common Functions Library v1.0 loaded'
+++ log_with_level INFO 'Common Functions Library v1.0 loaded'
+++ local level=INFO
+++ local 'message=Common Functions Library v1.0 loaded'
++++ date '+%Y-%m-%d %H:%M:%S'
+++ local 'timestamp=2025-08-09 00:25:01'
+++ local caller_script=common-functions-library.sh
+++ echo '2025-08-09 00:25:01 - [INFO] common-functions-library.sh: Common Functions Library v1.0 loaded'
+++ tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
++++ dirname /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+++ ensure_directory /opt/my-secure-ha-stack/logs
+++ local dir_path=/opt/my-secure-ha-stack/logs
+++ local permissions=755
+++ [[ ! -d /opt/my-secure-ha-stack/logs ]]
++++ dirname /opt/my-secure-ha-stack/logs/container-health-validation.log
+++ ensure_directory /opt/my-secure-ha-stack/logs
+++ local dir_path=/opt/my-secure-ha-stack/logs
+++ local permissions=755
+++ [[ ! -d /opt/my-secure-ha-stack/logs ]]
+++ [[ '' != \t\r\u\e ]]
+++ set -euo pipefail
+++ export ERROR_HANDLING_SETUP=true
+++ ERROR_HANDLING_SETUP=true
+++ export -f log_with_level log_info log_warn log_error log_debug log_success log_action
+++ export -f container_exists container_running container_healthy get_container_ip get_container_status wait_for_container_healthy
+++ export -f wait_for_service_endpoint service_ready vault_available vault_auth_approle vault_get_secret
+++ export -f test_database_connection wait_for_database retry_with_backoff retry_with_timeout
+++ export -f ensure_directory backup_file health_check_service port_available wait_for_port
+++ export -f generate_random_string command_exists get_timestamp get_epoch seconds_to_duration
+++ export -f validate_env_vars validate_file validate_directory
++ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
+++ export -f retry_with_backoff
+++ export -f wait_for_port
+++ export -f wait_for_http_endpoint
+++ export -f wait_for_container_health
++ source /opt/dev-purebliss/dev_scripts/utilities/script-communication-bridge.sh
+++ BRIDGE_ACTIVE=true
+++ BRIDGE_LOG=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
+++ BRIDGE_TEMP_DIR=/tmp/purebliss-bridge
+++ [[ /opt/dev-purebliss/dev_scripts/utilities/script-communication-bridge.sh != \/\o\p\t\/\d\e\v\-\p\u\r\e\b\l\i\s\s\/\d\e\v\_\s\c\r\i\p\t\s\/\s\e\r\v\i\c\e\s\/\g\r\a\f\a\n\a\/\s\e\t\u\p\-\g\r\a\f\a\n\a\-\v\a\u\l\t\-\d\b\-\r\o\l\e\.\s\h ]]
+++ init_bridge
+++ mkdir -p /tmp/purebliss-bridge
+++ log_info 'Script communication bridge initialized'
+++ log_with_level INFO 'Script communication bridge initialized'
+++ local level=INFO
+++ local 'message=Script communication bridge initialized'
++++ date '+%Y-%m-%d %H:%M:%S'
+++ local 'timestamp=2025-08-09 00:25:01'
+++ local caller_script=script-communication-bridge.sh
+++ echo '2025-08-09 00:25:01 - [INFO] script-communication-bridge.sh: Script communication bridge initialized'
+++ tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
++ source /opt/dev-purebliss/dev_scripts/utilities/consolidated-vault-integration.sh
+++ set -euo pipefail
+++ SCRIPT_DIR=/opt/dev-purebliss/dev_scripts
+++ DOC_DIR=/opt/dev-purebliss/Documentation
+++ source /opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh
++++ [[ true == \t\r\u\e ]]
++++ return 0
+++ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
++++ export -f retry_with_backoff
++++ export -f wait_for_port
++++ export -f wait_for_http_endpoint
++++ export -f wait_for_container_health
+++ source /opt/dev-purebliss/dev_scripts/utilities/script-communication-bridge.sh
++++ BRIDGE_ACTIVE=true
++++ BRIDGE_LOG=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
++++ BRIDGE_TEMP_DIR=/tmp/purebliss-bridge
++++ [[ /opt/dev-purebliss/dev_scripts/utilities/script-communication-bridge.sh != \/\o\p\t\/\d\e\v\-\p\u\r\e\b\l\i\s\s\/\d\e\v\_\s\c\r\i\p\t\s\/\s\e\r\v\i\c\e\s\/\g\r\a\f\a\n\a\/\s\e\t\u\p\-\g\r\a\f\a\n\a\-\v\a\u\l\t\-\d\b\-\r\o\l\e\.\s\h ]]
++++ init_bridge
++++ mkdir -p /tmp/purebliss-bridge
++++ log_info 'Script communication bridge initialized'
++++ log_with_level INFO 'Script communication bridge initialized'
++++ local level=INFO
++++ local 'message=Script communication bridge initialized'
+++++ date '+%Y-%m-%d %H:%M:%S'
++++ local 'timestamp=2025-08-09 00:25:01'
++++ local caller_script=script-communication-bridge.sh
++++ echo '2025-08-09 00:25:01 - [INFO] script-communication-bridge.sh: Script communication bridge initialized'
++++ tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
++++ basename /opt/dev-purebliss/dev_scripts/services/grafana/setup-grafana-vault-db-role.sh
+++ SCRIPT_NAME=setup-grafana-vault-db-role.sh
+++ SCRIPT_VERSION=2.0
+++ SCRIPT_PURPOSE='Consolidated functionality from multiple similar scripts'
+++ LOG_FILE=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
+++ set -euo pipefail
+++ SCRIPT_DIR=/opt/dev-purebliss/dev_scripts
+++ DOC_DIR=/opt/dev-purebliss/Documentation
+++ source /opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh
++++ [[ true == \t\r\u\e ]]
++++ return 0
+++ source /opt/dev-purebliss/dev_scripts/utilities/retry-utils.sh
++++ export -f retry_with_backoff
++++ export -f wait_for_port
++++ export -f wait_for_http_endpoint
++++ export -f wait_for_container_health
+++ source /opt/dev-purebliss/dev_scripts/utilities/script-communication-bridge.sh
++++ BRIDGE_ACTIVE=true
++++ BRIDGE_LOG=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
++++ BRIDGE_TEMP_DIR=/tmp/purebliss-bridge
++++ [[ /opt/dev-purebliss/dev_scripts/utilities/script-communication-bridge.sh != \/\o\p\t\/\d\e\v\-\p\u\r\e\b\l\i\s\s\/\d\e\v\_\s\c\r\i\p\t\s\/\s\e\r\v\i\c\e\s\/\g\r\a\f\a\n\a\/\s\e\t\u\p\-\g\r\a\f\a\n\a\-\v\a\u\l\t\-\d\b\-\r\o\l\e\.\s\h ]]
++++ init_bridge
++++ mkdir -p /tmp/purebliss-bridge
++++ log_info 'Script communication bridge initialized'
++++ log_with_level INFO 'Script communication bridge initialized'
++++ local level=INFO
++++ local 'message=Script communication bridge initialized'
+++++ date '+%Y-%m-%d %H:%M:%S'
++++ local 'timestamp=2025-08-09 00:25:01'
++++ local caller_script=script-communication-bridge.sh
++++ echo '2025-08-09 00:25:01 - [INFO] script-communication-bridge.sh: Script communication bridge initialized'
++++ tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
++++ basename /opt/dev-purebliss/dev_scripts/services/grafana/setup-grafana-vault-db-role.sh
+++ SCRIPT_NAME=setup-grafana-vault-db-role.sh
+++ SCRIPT_VERSION=2.1
+++ SCRIPT_PURPOSE='Consolidated Vault integration utilities (AppRole, DB roles, HTTPS enforcement)'
+++ LOG_FILE=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
+++ [[ /opt/dev-purebliss/dev_scripts/utilities/consolidated-vault-integration.sh == \/\o\p\t\/\d\e\v\-\p\u\r\e\b\l\i\s\s\/\d\e\v\_\s\c\r\i\p\t\s\/\s\e\r\v\i\c\e\s\/\g\r\a\f\a\n\a\/\s\e\t\u\p\-\g\r\a\f\a\n\a\-\v\a\u\l\t\-\d\b\-\r\o\l\e\.\s\h ]]
+++ basename /opt/dev-purebliss/dev_scripts/services/grafana/setup-grafana-vault-db-role.sh
++ SCRIPT_NAME=setup-grafana-vault-db-role.sh
++ SCRIPT_VERSION=1.0
++ SCRIPT_PURPOSE='Configure Grafana Vault PostgreSQL role with safe revocation and validate'
++ LOG_FILE=/opt/my-secure-ha-stack/logs/dev-environment-setup.log
++ main
+++ date '+%Y-%m-%d %H:%M:%S'
++ echo '2025-08-09 00:25:01 - GRAFANA_ROLE_SETUP: Starting'
++ ensure_vault_https
++ [[ -z https://127.0.0.1:8200 ]]
++ [[ -f /opt/dev-purebliss/secrets/grafana-role-id ]]
++ configure_grafana_db_role
++ ensure_vault_https
++ [[ -z https://127.0.0.1:8200 ]]
++ local db_config_path=database/config/postgres-app
++ local role_path=database/roles/grafana-role
++ local service_tag=GRAFANA_VAULT_ROLE
+++ date '+%Y-%m-%d %H:%M:%S'
++ echo '2025-08-09 00:25:01 - GRAFANA_VAULT_ROLE: Starting configuration for database/roles/grafana-role'
++ vault_health_check grafana
++ local service_name=grafana
++ ensure_vault_https
++ [[ -z https://127.0.0.1:8200 ]]
++ local addr=https://127.0.0.1:8200
++ [[ https://127.0.0.1:8200 =~ ^http:// ]]
++ curl_opts=('-sS' '-o' '/dev/null' '-w' '%{http_code}')
++ local curl_opts
++ [[ 1 == \1 ]]
++ curl_opts+=("-k")
++ log_info 'Checking Vault health for grafana'
++ log_with_level INFO 'Checking Vault health for grafana'
++ local level=INFO
++ local 'message=Checking Vault health for grafana'
+++ date '+%Y-%m-%d %H:%M:%S'
++ local 'timestamp=2025-08-09 00:25:01'
++ local caller_script=consolidated-vault-integration.sh
++ echo '2025-08-09 00:25:01 - [INFO] consolidated-vault-integration.sh: Checking Vault health for grafana'
++ tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
++ local code
+++ curl -sS -o /dev/null -w '%{http_code}' -k https://127.0.0.1:8200/v1/sys/health
+++ true
++ code=000
++ [[ 000 == \2\0\0 ]]
++ [[ 000 == \4\2\9 ]]
++ log_error 'Vault health check failed for grafana (code: 000)'
++ log_with_level ERROR 'Vault health check failed for grafana (code: 000)'
++ local level=ERROR
++ local 'message=Vault health check failed for grafana (code: 000)'
+++ date '+%Y-%m-%d %H:%M:%S'
++ local 'timestamp=2025-08-09 00:25:01'
++ local caller_script=consolidated-vault-integration.sh
++ echo '2025-08-09 00:25:01 - [ERROR] consolidated-vault-integration.sh: Vault health check failed for grafana (code: 000)'
++ tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
++ return 1
+++ date '+%Y-%m-%d %H:%M:%S'
++ echo '2025-08-09 00:25:01 - GRAFANA_VAULT_ROLE [ERROR]: Vault health check failed'
++ return 1
++ log_error 'Grafana DB role configuration failed'
++ log_with_level ERROR 'Grafana DB role configuration failed'
++ local level=ERROR
++ local 'message=Grafana DB role configuration failed'
+++ date '+%Y-%m-%d %H:%M:%S'
++ local 'timestamp=2025-08-09 00:25:01'
++ local caller_script=setup-grafana-vault-db-role.sh
++ echo '2025-08-09 00:25:01 - [ERROR] setup-grafana-vault-db-role.sh: Grafana DB role configuration failed'
++ tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+++ date '+%Y-%m-%d %H:%M:%S'
++ echo '2025-08-09 00:25:01 - GRAFANA_ROLE_SETUP: ❌ ERROR configure_grafana_db_role'
++ exit 1

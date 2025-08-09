@@ -37,7 +37,7 @@ detect_vault_address() {
         export VAULT_ADDR="http://purebliss-vault:8200"
         log_info "Detected Docker environment, using Vault at: $VAULT_ADDR"
     else
-        export VAULT_ADDR="http://localhost:8200"
+        export VAULT_ADDR="https://localhost:8200"
         log_info "Using localhost Vault address: $VAULT_ADDR"
     fi
 }
@@ -46,7 +46,7 @@ detect_vault_address() {
 wait_for_vault() {
     local retries=0
     while [ $retries -lt $VAULT_RETRY_MAX ]; do
-        if curl -s -o /dev/null -w "%{http_code}" "$VAULT_ADDR/v1/sys/health" | grep -q "200\|429\|473\|503"; then
+        if curl -sk -o /dev/null -w "%{http_code}" "$VAULT_ADDR/v1/sys/health" | grep -q "200\|429\|473\|503"; then
             log_info "Vault is available at $VAULT_ADDR"
             return 0
         fi
@@ -63,7 +63,7 @@ wait_for_vault() {
 # Check if Vault is sealed and try to unseal
 ensure_vault_unsealed() {
     local seal_status
-    seal_status=$(curl -s "$VAULT_ADDR/v1/sys/seal-status" | jq -r '.sealed // true' 2>/dev/null || echo "true")
+    seal_status=$(curl -sk "$VAULT_ADDR/v1/sys/seal-status" | jq -r '.sealed // true' 2>/dev/null || echo "true")
 
     if [ "$seal_status" = "true" ]; then
         log_warn "Vault is sealed, attempting to unseal..."
@@ -77,13 +77,13 @@ ensure_vault_unsealed() {
             for i in {1..3}; do
                 local key_var="UNSEAL_KEY_$i"
                 if [ -n "${!key_var:-}" ]; then
-                    curl -s -X PUT -d "{\"key\":\"${!key_var}\"}" "$VAULT_ADDR/v1/sys/unseal" > /dev/null
+                    curl -sk -X PUT -d "{\"key\":\"${!key_var}\"}" "$VAULT_ADDR/v1/sys/unseal" > /dev/null
                     log_info "Applied unseal key $i"
                 fi
             done
 
             # Check if unsealed
-            seal_status=$(curl -s "$VAULT_ADDR/v1/sys/seal-status" | jq -r '.sealed // true' 2>/dev/null || echo "true")
+            seal_status=$(curl -sk "$VAULT_ADDR/v1/sys/seal-status" | jq -r '.sealed // true' 2>/dev/null || echo "true")
             if [ "$seal_status" = "false" ]; then
                 log_info "Successfully unsealed Vault"
             else
@@ -128,7 +128,7 @@ authenticate_vault() {
     export VAULT_TOKEN="$token"
 
     # Verify token works
-    if curl -s -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/auth/token/lookup-self" | jq -e '.data' > /dev/null 2>&1; then
+    if curl -sk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/auth/token/lookup-self" | jq -e '.data' > /dev/null 2>&1; then
         log_info "Vault authentication successful"
         return 0
     else
@@ -142,7 +142,7 @@ setup_keycloak_secrets() {
     log_info "Setting up Keycloak secrets in Vault"
 
     # Enable KV secrets engine if not already enabled
-    curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
+    curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
         -d '{"type":"kv-v2"}' \
         "$VAULT_ADDR/v1/sys/mounts/secret" > /dev/null 2>&1 || true
 
@@ -157,7 +157,7 @@ setup_keycloak_secrets() {
         }
     }'
 
-    curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
+    curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
         -d "$keycloak_db_secrets" \
         "$VAULT_ADDR/v1/secret/data/keycloak/database" > /dev/null
 
@@ -170,7 +170,7 @@ setup_keycloak_secrets() {
         }
     }'
 
-    curl -s -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
+    curl -sk -H "X-Vault-Token: $VAULT_TOKEN" -X POST \
         -d "$keycloak_admin_secrets" \
         "$VAULT_ADDR/v1/secret/data/keycloak/admin" > /dev/null
 
@@ -183,7 +183,7 @@ get_vault_secret() {
     local secret_key="$2"
 
     local secret_data
-    secret_data=$(curl -s -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/secret/data/$secret_path" | jq -r ".data.data.$secret_key // empty" 2>/dev/null)
+    secret_data=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/secret/data/$secret_path" | jq -r ".data.data.$secret_key // empty" 2>/dev/null)
 
     if [ -n "$secret_data" ] && [ "$secret_data" != "null" ]; then
         echo "$secret_data"

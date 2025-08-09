@@ -54,7 +54,7 @@ fi
 
 # 2. Vault Connectivity Validation
 log_action "Validating Vault connectivity"
-export VAULT_ADDR="http://127.0.0.1:8200"
+export VAULT_ADDR="https://127.0.0.1:8200"
 export VAULT_SKIP_VERIFY=1
 
 VAULT_TOKEN_FILE="/opt/my-secure-ha-stack/secrets/vault_token"

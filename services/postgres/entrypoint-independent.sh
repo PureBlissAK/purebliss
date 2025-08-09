@@ -38,7 +38,7 @@ if [[ -z "${POSTGRES_PASSWORD:-}" ]] && [[ ! -f "${POSTGRES_PASSWORD_FILE:-}" ]]
     log_info "No password provided, checking for Vault integration..."
 
     # Check if Vault is available (optional dependency)
-    if command -v curl >/dev/null 2>&1 && curl -s http://purebliss-vault:8200/v1/sys/health >/dev/null 2>&1; then
+    if command -v curl >/dev/null 2>&1 && curl -sk http://purebliss-vault:8200/v1/sys/health >/dev/null 2>&1; then
         log_info "Vault detected, will try to use Vault integration"
         # For now, use a development password - Vault integration can be added later
         export POSTGRES_PASSWORD="purebliss_dev_postgres_2025"

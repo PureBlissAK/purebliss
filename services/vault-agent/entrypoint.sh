@@ -33,7 +33,7 @@ ATTEMPT=1
 log_info "Waiting for Vault server to become available at ${VAULT_ADDR}..."
 
 while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-    if curl -s -k "${VAULT_ADDR}/v1/sys/health" > /dev/null 2>&1; then
+    if curl -sk -k "${VAULT_ADDR}/v1/sys/health" > /dev/null 2>&1; then
         log_success "Vault server is available."
         append_to_log "Vault server available at ${VAULT_ADDR}"
         break
@@ -71,7 +71,7 @@ log_info "Configuration file found, validating..."
 
 # Test Vault connectivity before starting agent
 log_info "Testing Vault connectivity..."
-if ! curl -s -k "${VAULT_ADDR}/v1/sys/health" | grep -q '"initialized":true'; then
+if ! curl -sk -k "${VAULT_ADDR}/v1/sys/health" | grep -q '"initialized":true'; then
     log_error "Vault server is not initialized or not healthy"
     append_to_log "ERROR: Vault server not initialized or unhealthy"
     exit 1

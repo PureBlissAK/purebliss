@@ -2,10 +2,11 @@ version: '3.8'
 
 services:
   nginx:
-    image: ${NGINX_IMAGE:-nginx:latest}
-    container_name: nginx
+    image: purebliss-nginx
+    container_name: purebliss-nginx
     restart: unless-stopped
     environment:
+      RAID_STORAGE: /raid-storage
       VAULT_ADDR: http://host.docker.internal:8200
       VAULT_SKIP_VERIFY: "true"
       # PKI certificate paths
@@ -15,7 +16,7 @@ services:
       - ./vault-pki-entrypoint.sh:/docker-entrypoint.d/00-vault-pki.sh:ro
       - nginx_certs:/certs
       - nginx_data:/data
-      - ./config:/etc/nginx/conf.d:ro
+      - nginx_config:/etc/nginx/conf.d
     networks:
       - purebliss-net
     ports:
@@ -36,6 +37,7 @@ services:
 volumes:
   nginx_certs:
   nginx_data:
+  nginx_config:
 
 networks:
   purebliss-net:

@@ -1,0 +1,38 @@
+# Auto-Commit Background Service Configuration
+# Pure Bliss Elite Development Framework
+#
+# To enable automatic background monitoring as a systemd service:
+# 1. Copy this file to /etc/systemd/system/purebliss-auto-commit.service
+# 2. Run: sudo systemctl daemon-reload
+# 3. Run: sudo systemctl enable purebliss-auto-commit
+# 4. Run: sudo systemctl start purebliss-auto-commit
+
+[Unit]
+Description=Pure Bliss Auto-Commit Service
+Documentation=https://github.com/PureBlissAK/purebliss
+After=multi-user.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+WorkingDirectory=/opt
+ExecStart=/opt/dev-purebliss/dev_scripts/automation/task-completion-monitor.sh start
+ExecStop=/opt/dev-purebliss/dev_scripts/automation/task-completion-monitor.sh stop
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=purebliss-auto-commit
+
+# Security settings
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/opt /tmp
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

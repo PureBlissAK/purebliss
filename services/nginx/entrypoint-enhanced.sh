@@ -1,6 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
+# PURE BLISS SCRIPT METADATA
+# Script: nginx/entrypoint-enhanced.sh
+# Purpose: Enhanced Nginx entrypoint with smart upstream logic and Vault PKI enforcement
+# Version: 2.0
+# Last Modified: 2025-08-08
+# Author: Pure Bliss Development Team
+# Dependencies: nginx, vault, upstream services
+# Security Policy: Vault/Let's Encrypt PKI only - no self-signed fallback
+# Integration: Smart upstream detection, centralized logging, health validation
+# Usage: Docker entrypoint for Nginx with upstream intelligence and HTTPS
+# Enhancement Notes: Enforced Vault PKI policy, enhanced upstream logic
+# END METADATA
+
 # Enhanced Nginx Entrypoint with Smart Upstream Logic
 # Handles upstream servers that may not be available during initial container builds
 
@@ -190,7 +203,7 @@ EOF
 }
 
 
-# Dynamically select certificate paths: prefer Let's Encrypt, fallback to self-signed
+# Dynamically select certificate paths: prefer Let's Encrypt/Vault PKI only
 get_certificate_paths() {
     local domain_cert_dir="/etc/letsencrypt/live/$DOMAIN"
     if [[ -f "$domain_cert_dir/fullchain.pem" && -f "$domain_cert_dir/privkey.pem" ]]; then
@@ -198,26 +211,14 @@ get_certificate_paths() {
         export NGINX_KEY="$domain_cert_dir/privkey.pem"
         log_success "Using Let's Encrypt/Vault PKI certificates for $DOMAIN"
     else
-        export NGINX_CERT="/etc/nginx/ssl/nginx.crt"
-        export NGINX_KEY="/etc/nginx/ssl/nginx.key"
-        log_warn "Let's Encrypt/Vault PKI certs not found, using fallback self-signed certs for $DOMAIN"
+        log_error "ERROR: No Vault/Let's Encrypt PKI certs found for $DOMAIN. Container will not start."
+        log_error "POLICY: Self-signed certificates are not allowed. Use Vault PKI or Let's Encrypt only."
+        exit 1
     fi
 }
 
-# Generate fallback certificates if needed
-generate_fallback_certificates() {
-    if [[ ! -f /etc/nginx/ssl/nginx.crt || ! -f /etc/nginx/ssl/nginx.key ]]; then
-        log_info "Generating fallback self-signed certificates for $DOMAIN..."
-        mkdir -p /etc/nginx/ssl
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-            -keyout /etc/nginx/ssl/nginx.key \
-            -out /etc/nginx/ssl/nginx.crt \
-            -subj "/C=US/ST=State/L=City/O=Organization/CN=$DOMAIN"
-        chmod 600 /etc/nginx/ssl/nginx.key
-        chmod 644 /etc/nginx/ssl/nginx.crt
-        log_success "Fallback certificates generated"
-    fi
-}
+# Remove self-signed certificate generation - PKI only policy enforced
+# generate_fallback_certificates() function removed for security compliance
 
 
 # Smart nginx configuration generation based on available services and dynamic certs
@@ -556,8 +557,7 @@ monitor_certificate_expiry() {
 }
 
 # Main startup logic
-generate_fallback_certificates
-get_certificate_paths
+get_certificate_paths  # PKI cert validation only - no fallback generation
 configure_nginx_smart
 monitor_certificate_expiry
 

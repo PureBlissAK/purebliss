@@ -1,0 +1,91 @@
+
+# docker-compose.yml for Vault service
+
+services:
+  vault:
+    image: purebliss-vault:latest
+    container_name: purebliss-vault
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c", "vault server -config=/vault/config/vault.hcl & sleep 5 && /opt/dev-purebliss/dev_scripts/services/vault/automation/vault-dev-init.sh && fg"]
+    command: [] # Entrypoint script will handle Vault startup
+    environment:
+      VAULT_ADDR: https://127.0.0.1:8200
+      VAULT_API_ADDR: https://127.0.0.1:8200
+      VAULT_CLUSTER_ADDR: https://127.0.0.1:8201
+    ports:
+      - "8200:8200"
+      - "8201:8201"
+    volumes:
+      - ./vault.hcl:/vault/config/vault.hcl:ro
+      - ./certs:/vault/certs:ro
+      - /raid-storage/vault/data:/vault/data
+      - vaultlogs:/vault/logs
+      - /opt/my-secure-ha-stack/logs/dev-environment-setup.log:/opt/my-secure-ha-stack/logs/dev-environment-setup.log
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      test: ["CMD-SHELL", "vault status -address=https://127.0.0.1:8200 || exit 1"]
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+    networks:
+      - purebliss-net
+    secrets:
+      - postgres_password
+
+  # NEW SERVICE: Vault Agent
+  vault-agent:
+    image: hashicorp/vault:1.17.3 # Using the official Vault image for agent
+    container_name: purebliss-vault-agent
+    restart: unless-stopped
+    command: "agent -config=/vault/agent/config.hcl" # Tells Vault to run in agent mode
+    volumes:
+      - ./vault-agent-config:/vault/agent:ro # Mounts agent config & creds
+      - vault-agent-data:/var/run/vault:rw # Agent writes secrets/tokens here
+    environment:
+      VAULT_ADDR: https://vault:8200 # Important: Use the service name `vault` for inter-container communication
+      VAULT_SKIP_VERIFY: "true" # Agent needs this for self-signed Vault certs
+    cap_add:
+      - IPC_LOCK # Prevent Vault Agent from being swapped to disk (security)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '1.0'
+    networks:
+      - purebliss-net # Connect to the same network as Vault
+    depends_on:
+      - vault # Ensure Vault server is up before agent tries to connect
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -k https://vault:8200/v1/sys/health | grep 'initialized' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+# Define named volumes for Vault's persistent data
+volumes:
+  vaultlogs:
+  vault-agent-data:
+
+# Define the shared external network
+networks:
+  purebliss-net:
+    external: true # Assumes this network is created once manually
+
+# Define the Docker secret
+secrets:
+  postgres_password:
+    file: /opt/dev-purebliss/secrets/postgres_password.txt

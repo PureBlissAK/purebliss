@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  codeserver:
+    image: codercom/code-server:4.20.0
+    container_name: purebliss-codeserver
+    environment:
+      - TZ=UTC
+      - VAULT_ADDR=http://vault:8200 # Vault integration placeholder
+    ports:
+      - "8443:8080"
+    volumes:
+      - ./data:/home/coder/project
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - purebliss-net
+    restart: unless-stopped
+networks:
+  purebliss-net:
+    external: true

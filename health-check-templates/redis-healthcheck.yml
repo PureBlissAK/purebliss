@@ -4,33 +4,33 @@ healthcheck:
   test: |
     bash -c '
       # Multi-stage health check for Redis
-      
+
       # Stage 1: Process check
       if ! pgrep -f "redis-server" > /dev/null; then
         echo "Redis process not running"
         exit 1
       fi
-      
+
       # Stage 2: Connection check
       if ! redis-cli ping > /dev/null 2>&1; then
         echo "Redis ping failed"
         exit 1
       fi
-      
+
       # Stage 3: Write/read test
       if ! redis-cli set healthcheck "ok" > /dev/null 2>&1; then
         echo "Redis write test failed"
         exit 1
       fi
-      
+
       if [ "$(redis-cli get healthcheck 2>/dev/null)" != "ok" ]; then
         echo "Redis read test failed"
         exit 1
       fi
-      
+
       # Clean up test key
       redis-cli del healthcheck > /dev/null 2>&1
-      
+
       echo "Redis is healthy"
       exit 0
     '

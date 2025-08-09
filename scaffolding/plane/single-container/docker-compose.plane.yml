@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  plane:
+    image: artifacts.plane.so/makeplane/plane-frontend:v0.28.0
+    container_name: purebliss-plane
+    ports:
+      - "3001:3000"  # Use port 3001 to avoid conflicts
+    environment:
+      - API_BASE_URL=http://localhost:8000/api
+      - WEB_URL=http://localhost:3001
+      - DEBUG=0
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - purebliss-net
+    restart: unless-stopped
+
+networks:
+  purebliss-net:
+    external: true
