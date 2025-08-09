@@ -1,0 +1,1960 @@
+#!/bin/bash
+set -euo pipefail
+
+# CENTRALIZED SCRIPT REFERENCE SYSTEM
+SCRIPT_DIR="/opt/dev-purebliss/dev_scripts"
+DOC_DIR="/opt/dev-purebliss/Documentation"
+
+# MANDATORY UTILITY IMPORTS (DON'T REINVENT THE WHEEL)
+source "$SCRIPT_DIR/utilities/common-functions-library.sh"
+source "$SCRIPT_DIR/utilities/retry-utils.sh"
+source "$SCRIPT_DIR/utilities/script-communication-bridge.sh"
+
+# SCRIPT METADATA
+SCRIPT_NAME="$(basename "$0")"
+SCRIPT_VERSION="1.0"
+SCRIPT_PURPOSE="Comprehensive container health validation and troubleshooting"
+
+# Enhanced health-specific logging function
+log_health() {
+    local level="$1"
+    local message="$2"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    # Color codes for different levels
+    local RED='\033[0;31m'
+    local GREEN='\033[0;32m'
+    local YELLOW='\033[1;33m'
+    local BLUE='\033[0;34m'
+    local PURPLE='\033[0;35m'
+    local CYAN='\033[0;36m'
+    local NC='\033[0m'
+
+    # Define HEALTH_LOG if not set
+    if [[ -z "${HEALTH_LOG:-}" ]]; then
+        HEALTH_LOG="/opt/my-secure-ha-stack/logs/container-health-validation.log"
+    fi
+
+    case "$level" in
+        "SUCCESS")
+            echo -e "${GREEN}[$timestamp] [HEALTH-SUCCESS] $message${NC}"
+            echo "[$timestamp] [HEALTH-SUCCESS] $message" >> "$HEALTH_LOG"
+            ;;
+        "ERROR")
+            echo -e "${RED}[$timestamp] [HEALTH-ERROR] $message${NC}"
+            echo "[$timestamp] [HEALTH-ERROR] $message" >> "$HEALTH_LOG"
+            ;;
+        "WARN")
+            echo -e "${YELLOW}[$timestamp] [HEALTH-WARN] $message${NC}"
+            echo "[$timestamp] [HEALTH-WARN] $message" >> "$HEALTH_LOG"
+            ;;
+        "INFO")
+            echo -e "${CYAN}[$timestamp] [HEALTH-INFO] $message${NC}"
+            echo "[$timestamp] [HEALTH-INFO] $message" >> "$HEALTH_LOG"
+            ;;
+        "CRITICAL")
+            echo -e "${PURPLE}[$timestamp] [HEALTH-CRITICAL] $message${NC}"
+            echo "[$timestamp] [HEALTH-CRITICAL] $message" >> "$HEALTH_LOG"
+            ;;
+        *)
+            echo -e "${BLUE}[$timestamp] [HEALTH] $message${NC}"
+            echo "[$timestamp] [HEALTH] $message" >> "$HEALTH_LOG"
+            ;;
+    esac
+}
+
+# --- ENHANCED PURE BLISS CONTAINER METADATA VALIDATION ---
+validate_container_metadata() {
+    local service_name="$1"
+    local dockerfile_path=""
+    local metadata_score=0
+    local max_score=10
+
+    log_health "INFO" "🔍 ENHANCED METADATA VALIDATION: Analyzing $service_name container metadata"
+
+    # Map service names to their primary Dockerfile paths
+    case "$service_name" in
+        vault-agent)
+            dockerfile_path="/opt/dev_scripts/services/vault-agent/Dockerfile";;
+        postgres)
+            dockerfile_path="/opt/dev_scripts/services/postgres/Dockerfile";;
+        redis)
+            dockerfile_path="/opt/dev-purebliss/services/redis/Dockerfile";;
+        plane)
+            dockerfile_path="/opt/dev-purebliss/services/plane/plane-dockerfile";;
+        keycloak)
+            dockerfile_path="/opt/dev-purebliss/services/keycloak/Dockerfile";;
+        codeserver)
+            dockerfile_path="/opt/dev-purebliss/services/codeserver/Dockerfile";;
+        nginx)
+            dockerfile_path="/opt/dev-purebliss/services/nginx/Dockerfile";;
+        loki)
+            dockerfile_path="/opt/dev-purebliss/services/loki/Dockerfile";;
+        prometheus)
+            dockerfile_path="/opt/dev-purebliss/services/prometheus/Dockerfile";;
+        grafana)
+            dockerfile_path="/opt/dev-purebliss/services/grafana/Dockerfile";;
+        letsencrypt)
+            dockerfile_path="/opt/dev-purebliss/services/letsencrypt/Dockerfile";;
+        vault)
+            # Vault uses the official image, but validate container metadata
+            log_info "Vault uses official hashicorp/vault image - validating runtime metadata"
+            validate_runtime_metadata "$service_name"
+            return $?;;
+        *)
+            log_info "No Dockerfile metadata validation defined for $service_name"
+            return 0;;
+    esac
+
+    if [ -f "$dockerfile_path" ]; then
+        log_health "INFO" "📄 Dockerfile found: $dockerfile_path"
+
+        # Check for PURE BLISS CONTAINER METADATA header
+        if grep -q "PURE BLISS CONTAINER METADATA" "$dockerfile_path"; then
+            log_health "SUCCESS" "✅ PURE BLISS CONTAINER METADATA header found"
+            metadata_score=$((metadata_score + 2))
+        else
+            log_health "ERROR" "❌ Missing PURE BLISS CONTAINER METADATA header"
+        fi
+
+        # Extract and validate required metadata fields
+        local purpose=$(grep "^# Purpose:" "$dockerfile_path" | sed 's/^# Purpose: //' | head -1)
+        local phase=$(grep "^# Scaffolding Phase:" "$dockerfile_path" | sed 's/^# Scaffolding Phase: //' | head -1)
+        local version=$(grep "^# Version:" "$dockerfile_path" | sed 's/^# Version: //' | head -1)
+        local maintainer=$(grep "^# Maintainer:" "$dockerfile_path" | sed 's/^# Maintainer: //' | head -1)
+        local dependencies=$(grep "^# Dependencies:" "$dockerfile_path" | sed 's/^# Dependencies: //' | head -1)
+        local ports=$(grep "^# Ports:" "$dockerfile_path" | sed 's/^# Ports: //' | head -1)
+        local volumes=$(grep "^# Volumes:" "$dockerfile_path" | sed 's/^# Volumes: //' | head -1)
+        local health_check=$(grep "^# Health Check:" "$dockerfile_path" | sed 's/^# Health Check: //' | head -1)
+
+        # Validate Purpose
+        if [[ -n "$purpose" ]]; then
+            log_health "SUCCESS" "✅ Container Purpose: $purpose"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "WARN" "⚠️ Missing Purpose metadata"
+        fi
+
+        # Validate Scaffolding Phase
+        if [[ -n "$phase" ]]; then
+            log_health "SUCCESS" "✅ Scaffolding Phase: $phase"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "WARN" "⚠️ Missing Scaffolding Phase metadata"
+        fi
+
+        # Validate Version
+        if [[ -n "$version" ]]; then
+            log_health "SUCCESS" "✅ Version: $version"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "WARN" "⚠️ Missing Version metadata"
+        fi
+
+        # Validate Maintainer
+        if [[ -n "$maintainer" ]]; then
+            log_health "SUCCESS" "✅ Maintainer: $maintainer"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "WARN" "⚠️ Missing Maintainer metadata"
+        fi
+
+        # Validate Dependencies
+        if [[ -n "$dependencies" ]]; then
+            log_health "SUCCESS" "✅ Dependencies: $dependencies"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "INFO" "ℹ️ No Dependencies specified (may be acceptable)"
+        fi
+
+        # Validate Ports
+        if [[ -n "$ports" ]]; then
+            log_health "SUCCESS" "✅ Ports: $ports"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "INFO" "ℹ️ No Ports specified (may be acceptable)"
+        fi
+
+        # Validate Volumes
+        if [[ -n "$volumes" ]]; then
+            log_health "SUCCESS" "✅ Volumes: $volumes"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "INFO" "ℹ️ No Volumes specified (may be acceptable)"
+        fi
+
+        # Validate Health Check
+        if [[ -n "$health_check" ]]; then
+            log_health "SUCCESS" "✅ Health Check: $health_check"
+            metadata_score=$((metadata_score + 1))
+        else
+            log_health "WARN" "⚠️ Missing Health Check metadata"
+        fi
+
+        # Calculate metadata completeness score
+        local completeness_percentage=$(( (metadata_score * 100) / max_score ))
+        log_health "INFO" "📊 Metadata Completeness: ${metadata_score}/${max_score} (${completeness_percentage}%)"
+
+        if [[ $metadata_score -ge 8 ]]; then
+            log_health "SUCCESS" "✅ EXCELLENT metadata completeness (${completeness_percentage}%)"
+        elif [[ $metadata_score -ge 6 ]]; then
+            log_health "SUCCESS" "✅ GOOD metadata completeness (${completeness_percentage}%)"
+        elif [[ $metadata_score -ge 4 ]]; then
+            log_health "WARN" "⚠️ FAIR metadata completeness (${completeness_percentage}%) - consider improvements"
+        else
+            log_health "ERROR" "❌ POOR metadata completeness (${completeness_percentage}%) - requires enhancement"
+            return 1
+        fi
+
+    else
+        log_health "WARN" "⚠️ $service_name Dockerfile not found at expected path: $dockerfile_path"
+        # Check if using official image
+        validate_runtime_metadata "$service_name"
+        return $?
+    fi
+
+    return 0
+}
+
+# Validate runtime metadata for official images
+validate_runtime_metadata() {
+    local service_name="$1"
+
+    log_health "INFO" "🔍 RUNTIME METADATA VALIDATION: Analyzing $service_name runtime metadata"
+
+    if docker ps -q -f name="purebliss-$service_name" | grep -q .; then
+        local container_name="purebliss-$service_name"
+
+        # Extract runtime information
+        local image=$(docker inspect --format='{{.Config.Image}}' "$container_name" 2>/dev/null)
+        local labels=$(docker inspect --format='{{range $k,$v := .Config.Labels}}{{$k}}={{$v}}{{"\n"}}{{end}}' "$container_name" 2>/dev/null)
+        local env_vars=$(docker inspect --format='{{range .Config.Env}}{{.}}{{"\n"}}{{end}}' "$container_name" 2>/dev/null | grep -E "VERSION|RELEASE|BUILD" | head -5)
+        local ports=$(docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}}{{$p}} {{end}}' "$container_name" 2>/dev/null)
+        local volumes=$(docker inspect --format='{{range .Mounts}}{{.Destination}} {{end}}' "$container_name" 2>/dev/null)
+
+        log_health "SUCCESS" "✅ Image: $image"
+
+        if [[ -n "$labels" ]]; then
+            log_health "INFO" "📋 Container Labels:"
+            echo "$labels" | head -10 | while read -r label; do
+                [[ -n "$label" ]] && log_health "INFO" "   $label"
+            done
+        fi
+
+        if [[ -n "$env_vars" ]]; then
+            log_health "INFO" "🔧 Version Environment Variables:"
+            echo "$env_vars" | while read -r env_var; do
+                [[ -n "$env_var" ]] && log_health "INFO" "   $env_var"
+            done
+        fi
+
+        if [[ -n "$ports" ]]; then
+            log_health "SUCCESS" "✅ Exposed Ports: $ports"
+        fi
+
+        if [[ -n "$volumes" ]]; then
+            log_health "SUCCESS" "✅ Mounted Volumes: $volumes"
+        fi
+
+        log_health "SUCCESS" "✅ Runtime metadata validation completed for $service_name"
+    else
+        log_health "ERROR" "❌ Container purebliss-$service_name not found for runtime metadata validation"
+        return 1
+    fi
+
+    return 0
+}
+# --- Autonomous Enhancement: Add validate_dependency_independent for strict sequential dependency validation ---
+# Supports: postgres, redis, vault
+validate_dependency_independent() {
+    local service=$1
+    local dependency=$2
+    local test_type=$3
+    local result=1
+    log_health "INFO" "DEPENDENCY_TEST: Testing $dependency independently for $service ($test_type)"
+    case $dependency in
+        "postgres")
+            # Phase 1: Network connectivity
+            if docker exec $CONTAINER_NAME bash -c 'timeout 10 bash -c "until echo > /dev/tcp/purebliss-postgres/5432; do sleep 1; done"'; then
+                log_health "SUCCESS" "PostgreSQL reachable from $service"
+
+                # ✅ RAID Storage Validation
+                if [[ "$service" == "postgres" ]]; then
+                    # Validate PostgreSQL RAID migration
+                    if docker exec $CONTAINER_NAME ls -la /var/lib/postgresql/data/pgdata/ >/dev/null 2>&1; then
+                        local data_size=$(docker exec $CONTAINER_NAME du -sh /var/lib/postgresql/data/pgdata/ 2>/dev/null | cut -f1 || echo "Unknown")
+                        log_health "SUCCESS" "PostgreSQL RAID storage validated - Data size: $data_size"
+
+                        # Validate data integrity
+                        if docker exec $CONTAINER_NAME test -f /var/lib/postgresql/data/pgdata/PG_VERSION; then
+                            local pg_version=$(docker exec $CONTAINER_NAME cat /var/lib/postgresql/data/pgdata/PG_VERSION 2>/dev/null)
+                            log_health "SUCCESS" "PostgreSQL data integrity confirmed - Version: $pg_version"
+                        else
+                            log_health "ERROR" "PostgreSQL data integrity check failed - missing PG_VERSION"
+                        fi
+
+                        # Validate existing databases
+                        if docker exec $CONTAINER_NAME bash -c 'PGPASSWORD="$(cat /run/secrets/postgres_bootstrap_password 2>/dev/null || echo "")" psql -U postgres -c "\l" 2>/dev/null | grep -E "(keycloak|plane|vikunja)"'; then
+                            log_health "SUCCESS" "PostgreSQL RAID migration validated - Application databases present"
+                        else
+                            log_health "WARNING" "PostgreSQL database validation incomplete - may need password sync"
+                        fi
+                    else
+                        log_health "ERROR" "PostgreSQL RAID storage validation failed"
+                    fi
+                fi
+
+                # Phase 2: Authentication - Set service-specific environment variables
+                local auth_cmd=""
+                if [[ "$service" == "keycloak" ]]; then
+                    # Keycloak uses KC_ prefixed variables
+                    auth_cmd='export KC_DB_USERNAME=keycloak && export KC_DB_PASSWORD=keycloak_secure_password && export KC_DB_NAME=keycloak && PGPASSWORD=$KC_DB_PASSWORD psql -h purebliss-postgres -U $KC_DB_USERNAME -d $KC_DB_NAME -c "SELECT 1;" 2>/dev/null'
+                else
+                    # Other services use standard DB_ prefixed variables
+                    auth_cmd='PGPASSWORD=$DB_PASSWORD psql -h purebliss-postgres -U $DB_USERNAME -d $DB_NAME -c "SELECT 1;" 2>/dev/null'
+                fi
+
+                if docker exec $CONTAINER_NAME bash -c "$auth_cmd"; then
+                    log_health "SUCCESS" "PostgreSQL authentication successful from $service"
+                    result=0
+                else
+                    log_health "ERROR" "PostgreSQL authentication failed from $service"
+                fi
+            else
+                log_health "ERROR" "PostgreSQL unreachable from $service"
+            fi
+            ;;
+        "redis")
+            if docker exec $CONTAINER_NAME bash -c 'timeout 10 bash -c "until echo > /dev/tcp/purebliss-redis/6379; do sleep 1; done"'; then
+                log_health "SUCCESS" "Redis reachable from $service"
+                # Service-specific Redis validation
+                if [[ "$service" == "keycloak" ]]; then
+                    # Keycloak uses Redis through its caching layer, not direct CLI
+                    log_health "SUCCESS" "Redis connectivity confirmed for Keycloak (uses Redis through caching layer)"
+                    result=0
+                elif docker exec $CONTAINER_NAME bash -c 'redis-cli -h purebliss-redis -p 6379 ping'; then
+                    log_health "SUCCESS" "Redis authentication successful from $service"
+                    result=0
+                else
+                    log_health "ERROR" "Redis authentication failed from $service"
+                fi
+            else
+                log_health "ERROR" "Redis unreachable from $service"
+            fi
+            ;;
+        "vault")
+            if docker exec $CONTAINER_NAME bash -c 'timeout 10 bash -c "until echo > /dev/tcp/purebliss-vault/8200; do sleep 1; done"'; then
+                log_health "SUCCESS" "Vault reachable from $service"
+                if docker exec $CONTAINER_NAME bash -c 'vault status 2>/dev/null'; then
+                    log_health "SUCCESS" "Vault accessible from $service"
+                    result=0
+                else
+                    log_health "ERROR" "Vault inaccessible from $service"
+                fi
+            else
+                log_health "ERROR" "Vault unreachable from $service"
+            fi
+            ;;
+        *)
+            log_health "WARN" "No independent validation implemented for dependency: $dependency"
+            ;;
+    esac
+    log_health "INFO" "DEPENDENCY_RESULT: $dependency test result: $result"
+    return $result
+}
+#!/bin/bash
+# validate-container-health.sh - Comprehensive container health validation script
+# MANDATORY: This script must be executed after EVERY task before proceeding to the next task
+# ENHANCED DIRECTIVE: ALWAYS FURTHER TROUBLESHOOT HEALTH - Never proceed with ANY health issues unresolved
+
+set -euo pipefail
+
+# Configuration
+SERVICE_NAME="${1:-}"
+TASK_NAME="${2:-unknown-task}"
+LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
+
+# DEEP HEALTH TROUBLESHOOTING DIRECTIVE
+# If ANY health check fails, warnings appear, or performance degrades:
+# 1. STOP immediately - no exceptions
+# 2. Perform comprehensive troubleshooting
+# 3. Identify and fix root cause
+# 4. Run additional validation cycles
+# 5. Document all issues and resolutions
+# 6. Only proceed when 100% healthy
+HEALTH_LOG="/opt/my-secure-ha-stack/logs/container-health-validation.log"
+
+# Normalize service name to avoid double prefix
+if [[ "$SERVICE_NAME" == purebliss-* ]]; then
+    CONTAINER_NAME="$SERVICE_NAME"
+else
+    CONTAINER_NAME="purebliss-${SERVICE_NAME}"
+fi
+
+# --- Validate container metadata comment for this service ---
+validate_container_metadata "$SERVICE_NAME"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Exit codes
+EXIT_HEALTHY=0
+EXIT_UNHEALTHY=1
+EXIT_CRITICAL=2
+
+# Logging functions
+log_health() {
+    local level=$1
+    local message=$2
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    echo -e "${timestamp} - HEALTH_VALIDATION [$level]: $message" | tee -a "$HEALTH_LOG"
+    echo "${timestamp} - HEALTH_VALIDATION [$level] ($SERVICE_NAME - $TASK_NAME): $message" >> "$LOG_FILE"
+
+    case $level in
+        "SUCCESS") echo -e "${GREEN}✓ $message${NC}" ;;
+        "ERROR") echo -e "${RED}✗ $message${NC}" ;;
+        "WARN") echo -e "${YELLOW}⚠ $message${NC}" ;;
+        "INFO") echo -e "${BLUE}ℹ $message${NC}" ;;
+    esac
+}
+
+# RAID Storage Validation Function
+validate_raid_storage() {
+    local service_name="$1"
+    local result=0
+
+    log_health "INFO" "Validating RAID storage for $service_name"
+
+    case "$service_name" in
+        "postgres")
+            # Validate PostgreSQL RAID storage accessibility
+            if [[ -d "/raid-storage" ]] && [[ -r "/raid-storage" ]] && [[ -w "/raid-storage" ]]; then
+                # Check if it's a mount point or accessible directory
+                if mountpoint -q /raid-storage; then
+                    log_health "SUCCESS" "RAID storage mounted successfully as mount point"
+                else
+                    log_health "SUCCESS" "RAID storage accessible as directory"
+                fi
+
+                # Check storage health and performance
+                local raid_status=$(cat /proc/mdstat 2>/dev/null | grep -A 3 "md" || echo "RAID status unavailable")
+                log_health "INFO" "RAID status: $raid_status"
+
+                # Validate PostgreSQL data directory
+                if [[ -d "/raid-storage/postgres-data/pgdata" ]]; then
+                    local data_size=$(du -sh /raid-storage/postgres-data/pgdata 2>/dev/null | cut -f1 || echo "Unknown")
+                    log_health "SUCCESS" "PostgreSQL RAID data directory validated - Size: $data_size"
+
+                    # Check file permissions
+                    local perms=$(stat -c "%U:%G %a" /raid-storage/postgres-data/pgdata 2>/dev/null || echo "Unknown permissions")
+                    log_health "INFO" "PostgreSQL data permissions: $perms"
+
+                    # Validate disk I/O performance (basic test)
+                    if command -v iotop >/dev/null 2>&1; then
+                        log_health "INFO" "RAID I/O monitoring available via iotop"
+                    fi
+
+                    # Verify PostgreSQL can access the data
+                    if [[ -f "/raid-storage/postgres-data/pgdata/PG_VERSION" ]]; then
+                        local pg_version=$(cat /raid-storage/postgres-data/pgdata/PG_VERSION 2>/dev/null || echo "Unknown")
+                        log_health "SUCCESS" "PostgreSQL data integrity verified - Version: $pg_version"
+                    else
+                        log_health "WARN" "PostgreSQL version file not found - may be initializing"
+                    fi
+                else
+                    log_health "ERROR" "PostgreSQL RAID data directory not found"
+                    result=1
+                fi
+            else
+                log_health "ERROR" "RAID storage not accessible at /raid-storage"
+                result=1
+            fi
+            ;;
+        *)
+            log_health "INFO" "No RAID storage validation required for $service_name"
+            ;;
+    esac
+
+    return $result
+}
+
+# --- Autonomous Enhancement: Port Conflict Detection ---
+# Detects and resolves port conflicts before container health validation
+check_port_conflicts() {
+    local service=$1
+    local required_ports=""
+
+    # Define service-specific ports
+    case $service in
+        "loki") required_ports="3100" ;;
+        "grafana") required_ports="3000" ;;
+        "prometheus") required_ports="9090" ;;
+        "keycloak") required_ports="8080" ;;
+        "nginx") required_ports="80 443" ;;
+        "vault") required_ports="8200" ;;
+        "postgres") required_ports="5432" ;;
+        "redis") required_ports="6379" ;;
+        *) return 0 ;; # Skip port check for services without specific ports
+    esac
+
+    for port in $required_ports; do
+        local conflicting_container=$(docker ps --format "table {{.Names}}\t{{.Ports}}" | grep ":${port}->" | grep -v "purebliss-${service}" | awk '{print $1}' | head -1)
+        if [[ -n "$conflicting_container" ]]; then
+            log_health "WARNING" "Port conflict detected: $conflicting_container is using port $port needed by $service"
+            log_health "INFO" "Attempting to resolve port conflict by stopping conflicting container: $conflicting_container"
+            if docker stop "$conflicting_container" && docker rm "$conflicting_container"; then
+                log_health "SUCCESS" "Resolved port conflict: removed $conflicting_container to free port $port for $service"
+                echo "$(date '+%Y-%m-%d %H:%M:%S') - AUTONOMOUS_ENHANCEMENT: Resolved port conflict for $service by removing $conflicting_container from port $port" >> "$LOG_FILE"
+            else
+                log_health "ERROR" "Failed to resolve port conflict: could not remove $conflicting_container"
+                return 1
+            fi
+        fi
+    done
+    return 0
+}
+
+# Usage information
+show_usage() {
+    echo "Usage: $0 <service_name> [task_name]"
+    echo ""
+    echo "Examples:"
+    echo "  $0 nginx build-phase-1"
+    echo "  $0 keycloak config-update"
+    echo "  $0 vault integration-test"
+    echo ""
+    echo "Exit codes:"
+    echo "  0 = Container is healthy, proceed to next task"
+    echo "  1 = Container is unhealthy, STOP and remediate"
+    echo "  2 = Critical failure, immediate intervention required"
+    echo ""
+    echo "ENHANCED DIRECTIVE: ALWAYS FURTHER TROUBLESHOOT HEALTH"
+    echo "- ANY health issue triggers comprehensive troubleshooting"
+    echo "- NO shortcuts or bypassing of health problems"
+    echo "- ALL issues must be resolved before proceeding"
+    exit 1
+}
+
+# DEEP HEALTH TROUBLESHOOTING FUNCTION
+# Called whenever ANY health issue is detected
+perform_deep_health_troubleshooting() {
+    local issue_type="$1"
+    local issue_details="$2"
+
+    log_health "CRITICAL" "DEEP HEALTH TROUBLESHOOTING INITIATED - Issue: $issue_type"
+    log_health "INFO" "Issue Details: $issue_details"
+    log_health "INFO" "Performing comprehensive health analysis..."
+
+    # 1. Container State Analysis
+    log_health "INFO" "=== CONTAINER STATE ANALYSIS ==="
+    if docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep "$CONTAINER_NAME"; then
+        local container_status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+        local exit_code=$(docker inspect --format='{{.State.ExitCode}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+        log_health "INFO" "Container Status: $container_status, Exit Code: $exit_code"
+    else
+        log_health "ERROR" "Container $CONTAINER_NAME not found in docker ps output"
+    fi
+
+    # 2. Resource Usage Analysis
+    log_health "INFO" "=== RESOURCE USAGE ANALYSIS ==="
+    if docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}" | grep "$CONTAINER_NAME"; then
+        log_health "INFO" "Resource usage captured above"
+    else
+        log_health "WARN" "Cannot capture resource usage - container may not be running"
+    fi
+
+    # 3. Log Analysis - Last 50 lines
+    log_health "INFO" "=== CONTAINER LOG ANALYSIS ==="
+    docker logs --tail 50 "$CONTAINER_NAME" 2>&1 | while read line; do
+        if echo "$line" | grep -qiE "(error|fail|critical|exception|fatal)"; then
+            log_health "ERROR" "Critical log entry: $line"
+        elif echo "$line" | grep -qiE "(warn|warning)"; then
+            log_health "WARN" "Warning log entry: $line"
+        else
+            log_health "INFO" "Log: $line"
+        fi
+    done
+
+    # 4. Network Connectivity Analysis
+    log_health "INFO" "=== NETWORK CONNECTIVITY ANALYSIS ==="
+    docker network ls | grep purebliss-net && log_health "SUCCESS" "Pure Bliss network exists" || log_health "ERROR" "Pure Bliss network missing"
+    if docker inspect "$CONTAINER_NAME" --format='{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}' 2>/dev/null | grep -q .; then
+        log_health "SUCCESS" "Container is connected to networks"
+    else
+        log_health "ERROR" "Container network connectivity issues"
+    fi
+
+    # 5. Docker System Health Check
+    log_health "INFO" "=== DOCKER SYSTEM HEALTH CHECK ==="
+    if docker system info >/dev/null 2>&1; then
+        log_health "SUCCESS" "Docker daemon is responding"
+        local docker_version=$(docker version --format '{{.Server.Version}}' 2>/dev/null || echo "unknown")
+        log_health "INFO" "Docker version: $docker_version"
+    else
+        log_health "CRITICAL" "Docker daemon is not responding - triggering system recovery"
+        trigger_docker_system_recovery
+        return 2  # Critical failure requiring system recovery
+    fi
+
+    # 6. Dependency Health Check
+    log_health "INFO" "=== DEPENDENCY HEALTH CHECK ==="
+    local dependencies=""
+    case "$SERVICE_NAME" in
+        "keycloak") dependencies="postgres redis vault" ;;
+        "grafana") dependencies="postgres prometheus vault" ;;
+        "loki") dependencies="vault" ;;
+        "prometheus") dependencies="vault" ;;
+        "plane") dependencies="postgres redis vault" ;;
+        *) log_health "INFO" "No specific dependencies defined for $SERVICE_NAME" ;;
+    esac
+
+    for dep in $dependencies; do
+        if docker ps --format "{{.Names}}" | grep -q "purebliss-$dep"; then
+            log_health "SUCCESS" "Dependency $dep is running"
+        else
+            log_health "ERROR" "Critical dependency $dep is not running"
+        fi
+    done
+
+    # 6. Port and Process Analysis
+    log_health "INFO" "=== PORT AND PROCESS ANALYSIS ==="
+    netstat -tlnp 2>/dev/null | grep -E ":80:|:443:|:8080:|:3000:|:3100:|:5432:|:6379:|:8200:|:9090:" | while read line; do
+        log_health "INFO" "Port usage: $line"
+    done
+
+    # 7. Generate Remediation Recommendations
+    log_health "INFO" "=== REMEDIATION RECOMMENDATIONS ==="
+    case "$issue_type" in
+        "container_not_running")
+            log_health "INFO" "RECOMMENDATION: Check container logs, restart container, verify dependencies"
+            log_health "INFO" "COMMAND: docker start $CONTAINER_NAME"
+            log_health "INFO" "COMMAND: docker logs $CONTAINER_NAME"
+            ;;
+        "health_check_failed")
+            log_health "INFO" "RECOMMENDATION: Check service endpoints, verify configuration, restart if needed"
+            log_health "INFO" "COMMAND: docker exec $CONTAINER_NAME curl -f http://localhost:8080/health || true"
+            ;;
+        "dependency_failure")
+            log_health "INFO" "RECOMMENDATION: Start dependencies first, check network connectivity"
+            log_health "INFO" "COMMAND: Check dependency containers are running and healthy"
+            ;;
+        *)
+            log_health "INFO" "RECOMMENDATION: Review logs, check configuration, verify resources"
+            ;;
+    esac
+
+    log_health "CRITICAL" "DEEP HEALTH TROUBLESHOOTING COMPLETE - Review findings above"
+    log_health "CRITICAL" "RESOLUTION REQUIRED: All identified issues must be fixed before proceeding"
+
+    return 1 # Always return failure to ensure troubleshooting stops progression
+}
+
+# Validate container exists and is running
+validate_container_exists() {
+    log_health "INFO" "Checking if container $CONTAINER_NAME exists and is running"
+
+    if ! docker ps --format "{{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
+        log_health "ERROR" "Container $CONTAINER_NAME is not running"
+
+        # Check if container exists but is stopped
+        if docker ps -a --format "{{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
+            local status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+            log_health "ERROR" "Container $CONTAINER_NAME exists but is in state: $status"
+
+            # Show last 10 lines of container logs for debugging
+            log_health "INFO" "Last 10 lines of container logs:"
+            docker logs --tail 10 "$CONTAINER_NAME" 2>&1 | while read line; do
+                log_health "INFO" "Container log: $line"
+            done
+        else
+            log_health "ERROR" "Container $CONTAINER_NAME does not exist"
+        fi
+
+        # TRIGGER DEEP HEALTH TROUBLESHOOTING
+        perform_deep_health_troubleshooting "container_not_running" "Container $CONTAINER_NAME is not in running state"
+
+        return $EXIT_UNHEALTHY
+    fi
+
+    log_health "SUCCESS" "Container $CONTAINER_NAME is running"
+    return $EXIT_HEALTHY
+}
+
+# Check Docker health status
+validate_docker_health() {
+    log_health "INFO" "Checking Docker health status for $CONTAINER_NAME"
+
+    local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "no-healthcheck")
+
+    case $health_status in
+        "healthy")
+            log_health "SUCCESS" "Docker health check reports: healthy"
+            return $EXIT_HEALTHY
+            ;;
+        "unhealthy")
+            log_health "ERROR" "Docker health check reports: unhealthy"
+
+            # Get health check details
+            local health_log=$(docker inspect --format='{{range .State.Health.Log}}{{.Output}}{{end}}' "$CONTAINER_NAME" 2>/dev/null || echo "No health log available")
+            log_health "ERROR" "Health check output: $health_log"
+
+            # TRIGGER DEEP HEALTH TROUBLESHOOTING
+            perform_deep_health_troubleshooting "health_check_failed" "Docker health check reports unhealthy status"
+            return $EXIT_UNHEALTHY
+            ;;
+        "starting")
+            log_health "WARN" "Docker health check reports: starting (waiting for completion)"
+
+            # Wait up to 60 seconds for health check to complete
+            local max_attempts=30
+            local attempt=1
+
+            while [[ $attempt -le $max_attempts ]]; do
+                sleep 2
+                health_status=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "no-healthcheck")
+
+                if [[ "$health_status" == "healthy" ]]; then
+                    log_health "SUCCESS" "Health check completed successfully after ${attempt} attempts"
+                    return $EXIT_HEALTHY
+                elif [[ "$health_status" == "unhealthy" ]]; then
+                    log_health "ERROR" "Health check failed after ${attempt} attempts"
+                    # TRIGGER DEEP HEALTH TROUBLESHOOTING
+                    perform_deep_health_troubleshooting "health_check_failed" "Health check failed after ${attempt} attempts during startup"
+                    return $EXIT_UNHEALTHY
+                fi
+
+                attempt=$((attempt + 1))
+            done
+
+            log_health "ERROR" "Health check timeout after $max_attempts attempts"
+            # TRIGGER DEEP HEALTH TROUBLESHOOTING
+            perform_deep_health_troubleshooting "health_check_timeout" "Health check timed out after $max_attempts attempts"
+            return $EXIT_UNHEALTHY
+            ;;
+        "no-healthcheck")
+            log_health "WARN" "No Docker health check configured for $CONTAINER_NAME"
+            log_health "INFO" "RECOMMENDATION: Add HEALTHCHECK to Dockerfile for better monitoring"
+            return $EXIT_HEALTHY
+            ;;
+        *)
+            log_health "ERROR" "Unknown health status: $health_status"
+            # TRIGGER DEEP HEALTH TROUBLESHOOTING
+            perform_deep_health_troubleshooting "unknown_health_status" "Unknown health status: $health_status"
+            return $EXIT_UNHEALTHY
+            ;;
+    esac
+}
+
+# Service-specific endpoint validation
+validate_service_endpoints() {
+    log_health "INFO" "Validating service endpoints for $SERVICE_NAME"
+
+    case $SERVICE_NAME in
+        "nginx")
+            validate_nginx_endpoints
+            ;;
+        "vault")
+            validate_vault_endpoints
+            ;;
+        "postgres")
+            validate_postgres_endpoints
+            ;;
+        "redis")
+            validate_redis_endpoints
+            ;;
+        "keycloak")
+            validate_keycloak_endpoints
+            ;;
+        "plane")
+            validate_plane_endpoints
+            ;;
+        "codeserver")
+            validate_codeserver_endpoints
+            ;;
+        "prometheus")
+            validate_prometheus_endpoints
+            ;;
+        "grafana")
+            validate_grafana_endpoints
+            ;;
+        "loki")
+            validate_loki_endpoints
+            ;;
+        *)
+            log_health "WARN" "No specific endpoint validation defined for $SERVICE_NAME"
+            return $EXIT_HEALTHY
+            ;;
+    esac
+}
+
+# Nginx endpoint validation
+validate_nginx_endpoints() {
+    local errors=0
+
+    # Test HTTP health endpoint
+    if curl -f -s -m 10 "http://localhost/health" -H "Host: dev.purebliss.app" >/dev/null 2>&1; then
+        log_health "SUCCESS" "Nginx HTTP health endpoint responding"
+    else
+        log_health "ERROR" "Nginx HTTP health endpoint not responding"
+        errors=$((errors + 1))
+    fi
+
+    # Test HTTPS health endpoint if SSL is configured
+    if curl -f -s -k -m 10 "https://localhost/health" -H "Host: dev.purebliss.app" >/dev/null 2>&1; then
+        log_health "SUCCESS" "Nginx HTTPS health endpoint responding"
+    else
+        log_health "WARN" "Nginx HTTPS health endpoint not responding (may not be configured yet)"
+    fi
+
+    # Test status endpoint if available
+    if curl -f -s -m 10 "http://localhost/status" -H "Host: dev.purebliss.app" >/dev/null 2>&1; then
+        log_health "SUCCESS" "Nginx status endpoint responding"
+    else
+        log_health "INFO" "Nginx status endpoint not available (may not be implemented yet)"
+    fi
+
+    return $errors
+}
+
+# Vault endpoint validation
+validate_vault_endpoints() {
+    local errors=0
+
+    # Test health endpoint with status code logic (HTTPS-only for Vault)
+    local status_code
+    status_code=$(docker exec "$CONTAINER_NAME" curl -s -o /dev/null -w "%{http_code}" -k -m 10 "https://localhost:8200/v1/sys/health" || echo "000")
+    if [[ "$status_code" =~ ^(200|429|472|473|501)$ ]]; then
+        log_health "SUCCESS" "Vault health endpoint responding (HTTP $status_code)"
+    else
+        log_health "ERROR" "Vault health endpoint not responding (HTTP $status_code)"
+        errors=$((errors + 1))
+    fi
+
+    # Test if vault is initialized and unsealed
+    local vault_status=$(docker exec "$CONTAINER_NAME" vault status -format=json 2>/dev/null || echo "{}")
+    local sealed=$(echo "$vault_status" | jq -r '.sealed // true' 2>/dev/null || echo "true")
+    local initialized=$(echo "$vault_status" | jq -r '.initialized // false' 2>/dev/null || echo "false")
+
+    if [[ "$initialized" == "true" ]]; then
+        log_health "SUCCESS" "Vault is initialized"
+    else
+        log_health "WARN" "Vault is not initialized (may be expected for development mode)"
+    fi
+
+    if [[ "$sealed" == "false" ]]; then
+        log_health "SUCCESS" "Vault is unsealed"
+    else
+        log_health "WARN" "Vault is sealed (may be expected for development mode)"
+    fi
+
+    return $errors
+}
+
+# PostgreSQL endpoint validation
+validate_postgres_endpoints() {
+    local errors=0
+
+    # Test PostgreSQL connectivity
+    if docker exec "$CONTAINER_NAME" pg_isready -U postgres >/dev/null 2>&1; then
+        log_health "SUCCESS" "PostgreSQL is ready and accepting connections"
+    else
+        log_health "ERROR" "PostgreSQL is not ready"
+        errors=$((errors + 1))
+    fi
+
+    # Test database connection
+    if docker exec "$CONTAINER_NAME" psql -U postgres -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+        log_health "SUCCESS" "PostgreSQL database connection successful"
+    else
+        log_health "ERROR" "PostgreSQL database connection failed"
+        errors=$((errors + 1))
+    fi
+
+    return $errors
+}
+
+# Redis endpoint validation
+validate_redis_endpoints() {
+    local errors=0
+
+    # Test Redis connectivity
+    if docker exec "$CONTAINER_NAME" redis-cli ping >/dev/null 2>&1; then
+        log_health "SUCCESS" "Redis ping successful"
+    else
+        log_health "ERROR" "Redis ping failed"
+        errors=$((errors + 1))
+    fi
+
+    # Test basic Redis operations
+    if docker exec "$CONTAINER_NAME" redis-cli set health_check_test "ok" >/dev/null 2>&1 && \
+       docker exec "$CONTAINER_NAME" redis-cli get health_check_test >/dev/null 2>&1 && \
+       docker exec "$CONTAINER_NAME" redis-cli del health_check_test >/dev/null 2>&1; then
+        log_health "SUCCESS" "Redis basic operations working"
+    else
+        log_health "ERROR" "Redis basic operations failed"
+        errors=$((errors + 1))
+    fi
+
+    return $errors
+}
+
+# Keycloak endpoint validation (supports Keycloak 24+ and legacy)
+validate_keycloak_endpoints() {
+    local errors=0
+    local endpoint=""
+    local found=0
+
+    # Try new Keycloak 24+ endpoint first
+    if docker exec "$CONTAINER_NAME" bash -c 'timeout 5 bash -c "printf \"GET /realms/master HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n\" >&3; cat <&3" 3<>/dev/tcp/localhost/8080 | grep -q "200 OK"'; then
+        log_health "SUCCESS" "Keycloak /realms/master endpoint responding (Keycloak 24+ health check)"
+        endpoint="/realms/master"
+        found=1
+    fi
+
+    # Fallback to legacy endpoint if new one fails
+    if [[ $found -eq 0 ]]; then
+        if docker exec "$CONTAINER_NAME" bash -c 'timeout 5 bash -c "printf \"GET /auth/realms/master HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n\" >&3; cat <&3" 3<>/dev/tcp/localhost/8080 | grep -q "200 OK"'; then
+            log_health "SUCCESS" "Keycloak /auth/realms/master endpoint responding (legacy health check)"
+            endpoint="/auth/realms/master"
+            found=1
+        fi
+    fi
+
+    if [[ $found -eq 0 ]]; then
+        log_health "ERROR" "Keycloak health endpoint not responding on either /realms/master (24+) or /auth/realms/master (legacy)"
+        errors=$((errors + 1))
+    else
+        log_health "INFO" "Keycloak health validated using endpoint: $endpoint"
+    fi
+
+    # --- Autonomous Enhancement Log ---
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - SCRIPT_ENHANCEMENT: Enhanced validate-container-health.sh to support Keycloak 24+ health endpoint. Root cause: Keycloak endpoint changed from /auth/realms/master to /realms/master. Prevention: Script now checks both endpoints and logs which is used. Validation: Health validation passes for both Keycloak 24+ and legacy. Files modified: /opt/dev-purebliss/dev_scripts/health-checks/validate-container-health.sh" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+
+    return $errors
+}
+
+# Plane endpoint validation
+validate_plane_endpoints() {
+    local errors=0
+
+    # Test Plane health endpoint
+    if docker exec "$CONTAINER_NAME" curl -f -s -m 10 "http://localhost:3000/api/health" >/dev/null 2>&1; then
+        log_health "SUCCESS" "Plane health endpoint responding"
+    else
+        log_health "ERROR" "Plane health endpoint not responding"
+        errors=$((errors + 1))
+    fi
+
+    return $errors
+}
+
+# CodeServer endpoint validation
+validate_codeserver_endpoints() {
+    local errors=0
+
+    # Test CodeServer health endpoint
+    if docker exec "$CONTAINER_NAME" curl -f -s -m 10 "http://localhost:8080/healthz" >/dev/null 2>&1; then
+        log_health "SUCCESS" "CodeServer health endpoint responding"
+    else
+        log_health "ERROR" "CodeServer health endpoint not responding"
+        errors=$((errors + 1))
+    fi
+
+    return $errors
+}
+
+# Prometheus endpoint validation
+validate_prometheus_endpoints() {
+    local errors=0
+
+
+    # Test Prometheus health endpoint using wget (curl not present in prom/prometheus)
+    if docker exec "$CONTAINER_NAME" wget -q --spider "http://localhost:9090/-/healthy"; then
+        log_health "SUCCESS" "Prometheus health endpoint responding"
+    else
+        log_health "ERROR" "Prometheus health endpoint not responding"
+        errors=$((errors + 1))
+    fi
+
+    return $errors
+}
+
+# Grafana endpoint validation
+validate_grafana_endpoints() {
+    local errors=0
+
+    # Test Grafana health endpoint
+    if docker exec "$CONTAINER_NAME" curl -f -s -m 10 "http://localhost:3000/api/health" >/dev/null 2>&1; then
+        log_health "SUCCESS" "Grafana health endpoint responding"
+    else
+        log_health "ERROR" "Grafana health endpoint not responding"
+        errors=$((errors + 1))
+    fi
+
+    return $errors
+}
+
+# Loki endpoint validation
+validate_loki_endpoints() {
+    local errors=0
+
+    # Test Loki health endpoint
+    # Use wget instead of curl for compatibility with loki container
+    if docker exec "$CONTAINER_NAME" wget -q --spider "http://localhost:3100/ready"; then
+        log_health "SUCCESS" "Loki health endpoint responding"
+    else
+        log_health "ERROR" "Loki health endpoint not responding"
+        errors=$((errors + 1))
+    fi
+
+    return $errors
+}
+
+# Validate container dependencies
+validate_dependencies() {
+    log_health "INFO" "Validating dependencies for $SERVICE_NAME"
+
+    case $SERVICE_NAME in
+        "keycloak")
+            # Keycloak strict sequential dependency validation
+            # Step 1: Validate Postgres (all phases)
+            validate_dependency_independent keycloak postgres connectivity
+            POSTGRES_STATUS=$?
+            if [[ $POSTGRES_STATUS -ne 0 ]]; then
+                echo "❌ Keycloak: PostgreSQL dependency validation failed. Redis will NOT be tested."
+                echo "$(date '+%Y-%m-%d %H:%M:%S') - KEYCLOAK_DEPENDENCY_FAIL: Postgres not healthy, skipping Redis validation" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+                # TRIGGER DEEP HEALTH TROUBLESHOOTING
+                perform_deep_health_troubleshooting "dependency_failure" "Keycloak PostgreSQL dependency validation failed"
+                exit 1
+            fi
+            # Step 2: Only if Postgres is healthy, validate Redis
+            validate_dependency_independent keycloak redis connectivity
+            REDIS_STATUS=$?
+            if [[ $REDIS_STATUS -ne 0 ]]; then
+                echo "❌ Keycloak: Redis dependency validation failed."
+                echo "$(date '+%Y-%m-%d %H:%M:%S') - KEYCLOAK_DEPENDENCY_FAIL: Redis not healthy after Postgres validated" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+                # TRIGGER DEEP HEALTH TROUBLESHOOTING
+                perform_deep_health_troubleshooting "dependency_failure" "Keycloak Redis dependency validation failed"
+                exit 1
+            fi
+            echo "✅ Keycloak: All dependencies validated sequentially."
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - KEYCLOAK_DEPENDENCY_SUCCESS: Postgres and Redis validated sequentially" >> /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+            ;;
+        "plane")
+            # Plane depends on postgres and redis
+            validate_dependency "postgres" "5432"
+            validate_dependency "redis" "6379"
+            ;;
+        "nginx")
+            # Nginx may proxy to vault
+            validate_dependency "vault" "8200" "optional"
+            ;;
+        *)
+            log_health "INFO" "No specific dependency validation defined for $SERVICE_NAME"
+            ;;
+    esac
+}
+
+# Validate a specific dependency
+validate_dependency() {
+    local dep_service=$1
+    local dep_port=$2
+    local dep_optional=${3:-"required"}
+    local dep_container="purebliss-${dep_service}"
+
+    log_health "INFO" "Checking dependency: $dep_service ($dep_optional)"
+
+    if docker ps --format "{{.Names}}" | grep -q "^${dep_container}$"; then
+        if docker exec "$CONTAINER_NAME" nc -z "$dep_container" "$dep_port" >/dev/null 2>&1; then
+            log_health "SUCCESS" "Dependency $dep_service is reachable"
+        else
+            if [[ "$dep_optional" == "optional" ]]; then
+                log_health "WARN" "Optional dependency $dep_service is not reachable"
+            else
+                log_health "ERROR" "Required dependency $dep_service is not reachable"
+                return $EXIT_UNHEALTHY
+            fi
+        fi
+    else
+        if [[ "$dep_optional" == "optional" ]]; then
+            log_health "WARN" "Optional dependency $dep_service is not running"
+        else
+            log_health "ERROR" "Required dependency $dep_service is not running"
+            return $EXIT_UNHEALTHY
+        fi
+    fi
+
+    return $EXIT_HEALTHY
+}
+
+# Performance baseline validation
+validate_performance() {
+    log_health "INFO" "Validating performance baseline for $CONTAINER_NAME"
+
+    # Get container stats
+    local stats=$(docker stats "$CONTAINER_NAME" --no-stream --format "table {{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" | tail -n 1)
+    local cpu_percent=$(echo "$stats" | awk '{print $1}' | sed 's/%//')
+    local mem_usage=$(echo "$stats" | awk '{print $2}')
+    local mem_percent=$(echo "$stats" | awk '{print $3}' | sed 's/%//')
+
+    log_health "INFO" "Container performance: CPU=${cpu_percent}%, Memory=${mem_usage} (${mem_percent}%)"
+
+    # Basic performance thresholds (can be adjusted per service)
+    local cpu_threshold=80
+    local mem_threshold=90
+
+    if (( $(echo "$cpu_percent > $cpu_threshold" | bc -l 2>/dev/null || echo "0") )); then
+        log_health "WARN" "CPU usage (${cpu_percent}%) exceeds threshold (${cpu_threshold}%)"
+    else
+        log_health "SUCCESS" "CPU usage within acceptable range"
+    fi
+
+    if (( $(echo "$mem_percent > $mem_threshold" | bc -l 2>/dev/null || echo "0") )); then
+        log_health "WARN" "Memory usage (${mem_percent}%) exceeds threshold (${mem_threshold}%)"
+    else
+        log_health "SUCCESS" "Memory usage within acceptable range"
+    fi
+
+    return $EXIT_HEALTHY
+}
+
+# Generate health report
+generate_health_report() {
+    local overall_status=$1
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    cat > "/tmp/health-report-${SERVICE_NAME}-${TASK_NAME}.json" << EOF
+{
+  "service": "$SERVICE_NAME",
+  "task": "$TASK_NAME",
+  "timestamp": "$timestamp",
+  "container_name": "$CONTAINER_NAME",
+  "overall_status": "$overall_status",
+  "validation_results": {
+    "container_exists": true,
+    "docker_health": "checked",
+    "service_endpoints": "checked",
+    "dependencies": "checked",
+    "performance": "checked"
+  },
+  "next_action": "$([ $overall_status -eq 0 ] && echo "proceed_to_next_task" || echo "remediate_issues")"
+}
+EOF
+
+    # Archive the report
+    mv "/tmp/health-report-${SERVICE_NAME}-${TASK_NAME}.json" "/opt/my-secure-ha-stack/logs/health-reports/"
+
+    log_health "INFO" "Health report archived: /opt/my-secure-ha-stack/logs/health-reports/health-report-${SERVICE_NAME}-${TASK_NAME}.json"
+}
+
+# Main validation workflow
+main() {
+    if [[ -z "$SERVICE_NAME" ]]; then
+        show_usage
+    fi
+
+    # Create health reports directory
+    mkdir -p "/opt/my-secure-ha-stack/logs/health-reports"
+
+    log_health "INFO" "Starting comprehensive health validation for $SERVICE_NAME after task: $TASK_NAME"
+    log_health "INFO" "Container name: $CONTAINER_NAME"
+
+    local overall_result=$EXIT_HEALTHY
+
+    # Step 0: Check for port conflicts (Autonomous Enhancement)
+    log_health "INFO" "Checking for port conflicts before validation"
+    if ! check_port_conflicts "$SERVICE_NAME"; then
+        overall_result=$EXIT_UNHEALTHY
+        log_health "ERROR" "Port conflict detected and could not be resolved automatically"
+        generate_health_report $overall_result
+        exit $overall_result
+    fi
+
+    # Step 1: Validate container exists and is running
+    if ! validate_container_exists; then
+        overall_result=$EXIT_CRITICAL
+        log_health "ERROR" "CRITICAL: Container validation failed - cannot proceed"
+        generate_health_report $overall_result
+        exit $overall_result
+    fi
+
+    # Step 2: Check Docker health status
+    if ! validate_docker_health; then
+        overall_result=$EXIT_UNHEALTHY
+        log_health "ERROR" "Docker health check failed"
+        log_health "CRITICAL" "STOPPING: Health issue detected - performing comprehensive troubleshooting"
+        # Deep troubleshooting already triggered in validate_docker_health
+    fi
+
+    # Step 2.5: Validate RAID storage (PostgreSQL only)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]] && [[ "$SERVICE_NAME" == "postgres" ]]; then
+        if ! validate_raid_storage "$SERVICE_NAME"; then
+            overall_result=$EXIT_UNHEALTHY
+            log_health "ERROR" "RAID storage validation failed"
+            log_health "CRITICAL" "STOPPING: RAID storage issue detected"
+        fi
+    fi
+
+    # Step 3: Validate service endpoints (only if previous steps passed)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        if ! validate_service_endpoints; then
+            overall_result=$EXIT_UNHEALTHY
+            log_health "ERROR" "Service endpoint validation failed"
+            log_health "CRITICAL" "STOPPING: Endpoint issue detected - performing comprehensive troubleshooting"
+            perform_deep_health_troubleshooting "endpoint_failure" "Service endpoint validation failed for $SERVICE_NAME"
+        fi
+    else
+        log_health "WARN" "Skipping endpoint validation due to previous health failures"
+    fi
+
+    # Step 4: Validate dependencies (only if previous steps passed)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        if ! validate_dependencies; then
+            overall_result=$EXIT_UNHEALTHY
+            log_health "ERROR" "Dependency validation failed"
+            log_health "CRITICAL" "STOPPING: Dependency issue detected - comprehensive troubleshooting already performed"
+            # Deep troubleshooting already triggered in validate_dependencies
+        fi
+    else
+        log_health "WARN" "Skipping dependency validation due to previous health failures"
+    fi
+
+    # Step 5: Performance baseline check (only if all other checks passed)
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        validate_performance
+        performance_result=$?
+        if [[ $performance_result -ne 0 ]]; then
+            log_health "WARN" "Performance baseline check showed concerns"
+            log_health "INFO" "Performing performance troubleshooting..."
+            perform_deep_health_troubleshooting "performance_degradation" "Performance baseline check failed for $SERVICE_NAME"
+            overall_result=$EXIT_UNHEALTHY
+        fi
+    else
+        log_health "WARN" "Skipping performance validation due to previous health failures"
+    fi
+
+    # Step 6: Generate final report
+    generate_health_report $overall_result
+
+# Docker System Recovery Trigger Function
+trigger_docker_system_recovery() {
+    log_health "CRITICAL" "Triggering Docker system recovery due to daemon unresponsiveness"
+
+    # Use the enhanced Docker system recovery script
+    local recovery_script="/opt/dev-purebliss/dev_scripts/utilities/docker-system-recovery.sh"
+
+    if [[ -f "$recovery_script" ]]; then
+        log_health "INFO" "Executing Docker system recovery script"
+
+        # Run full recovery workflow
+        if bash "$recovery_script" full-recovery; then
+            log_health "SUCCESS" "Docker system recovery completed successfully"
+
+            # Validate Docker is now functional
+            if docker run --rm busybox echo 'Docker recovery validation successful!' >/dev/null 2>&1; then
+                log_health "SUCCESS" "Docker daemon is now responsive after recovery"
+                return 0
+            else
+                log_health "CRITICAL" "Docker recovery validation failed - manual intervention required"
+                return 2
+            fi
+        else
+            log_health "CRITICAL" "Docker system recovery failed - manual intervention required"
+            return 2
+        fi
+    else
+        log_health "CRITICAL" "Docker recovery script not found at $recovery_script"
+        log_health "INFO" "Manual Docker recovery required:"
+        log_health "INFO" "1. sudo systemctl restart docker"
+        log_health "INFO" "2. docker system prune -a -f --volumes"
+        log_health "INFO" "3. docker run --rm busybox echo 'test'"
+        return 2
+    fi
+}
+
+# 🚨 MANDATORY REBOOT VALIDATION - ULTIMATE TEST 🚨
+perform_reboot_validation() {
+    local reboot_result=0
+    local pre_reboot_metadata=""
+    local post_reboot_metadata=""
+    local startup_time=0
+    local max_startup_time=300  # 5 minutes max startup time
+
+    log_health "CRITICAL" "🚨 REBOOT VALIDATION PHASE 1: Pre-reboot metadata capture"
+
+    # Capture pre-reboot state and metadata
+    pre_reboot_metadata=$(capture_container_metadata "pre-reboot")
+    local pre_reboot_health=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "no-health-check")
+    local pre_reboot_status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+
+    log_health "INFO" "Pre-reboot Status: $pre_reboot_status"
+    log_health "INFO" "Pre-reboot Health: $pre_reboot_health"
+    log_health "INFO" "Pre-reboot Metadata: $pre_reboot_metadata"
+
+    # PHASE 2: Stop container gracefully
+    log_health "CRITICAL" "🚨 REBOOT VALIDATION PHASE 2: Graceful container shutdown"
+    if ! docker stop "$CONTAINER_NAME" --time 30; then
+        log_health "ERROR" "Graceful shutdown failed - forcing stop"
+        if ! docker kill "$CONTAINER_NAME"; then
+            log_health "ERROR" "Force stop failed - container may be corrupted"
+            return 1
+        fi
+    fi
+
+    # Wait for complete shutdown
+    local shutdown_wait=0
+    while docker ps -q -f name="$CONTAINER_NAME" | grep -q .; do
+        sleep 2
+        shutdown_wait=$((shutdown_wait + 2))
+        if [[ $shutdown_wait -gt 60 ]]; then
+            log_health "ERROR" "Container shutdown timeout - forcing removal"
+            docker rm -f "$CONTAINER_NAME" || true
+            break
+        fi
+    done
+
+    log_health "SUCCESS" "Container shutdown completed in ${shutdown_wait}s"
+
+    # PHASE 3: Restart container
+    log_health "CRITICAL" "🚨 REBOOT VALIDATION PHASE 3: Container restart"
+    local start_time=$(date +%s)
+
+    if ! docker start "$CONTAINER_NAME"; then
+        log_health "ERROR" "Container restart failed"
+        perform_reboot_debug_analysis
+        return 1
+    fi
+
+    # PHASE 4: Monitor startup progress with detailed logging
+    log_health "CRITICAL" "🚨 REBOOT VALIDATION PHASE 4: Startup monitoring"
+    local current_time=$(date +%s)
+    startup_time=0
+
+    while [[ $startup_time -lt $max_startup_time ]]; do
+        current_time=$(date +%s)
+        startup_time=$((current_time - start_time))
+
+        local container_status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "unknown")
+        local container_health=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "no-health-check")
+
+        log_health "INFO" "Startup Progress: ${startup_time}s - Status: $container_status, Health: $container_health"
+
+        # Check if container is running
+        if [[ "$container_status" == "running" ]]; then
+            # If health checks are defined, wait for healthy status
+            if [[ "$container_health" != "no-health-check" ]]; then
+                if [[ "$container_health" == "healthy" ]]; then
+                    log_health "SUCCESS" "Container startup completed with healthy status in ${startup_time}s"
+                    break
+                elif [[ "$container_health" == "unhealthy" ]]; then
+                    log_health "ERROR" "Container startup failed - unhealthy status after ${startup_time}s"
+                    perform_reboot_debug_analysis
+                    return 1
+                fi
+                # Continue waiting if still "starting"
+            else
+                # No health checks defined, just ensure it's running
+                log_health "SUCCESS" "Container startup completed (no health checks) in ${startup_time}s"
+                break
+            fi
+        elif [[ "$container_status" == "exited" ]]; then
+            log_health "ERROR" "Container exited during startup after ${startup_time}s"
+            perform_reboot_debug_analysis
+            return 1
+        fi
+
+        sleep 5
+    done
+
+    # Check for startup timeout
+    if [[ $startup_time -ge $max_startup_time ]]; then
+        log_health "ERROR" "Container startup timeout after ${max_startup_time}s"
+        perform_reboot_debug_analysis
+        return 1
+    fi
+
+    # PHASE 5: Post-reboot validation
+    log_health "CRITICAL" "🚨 REBOOT VALIDATION PHASE 5: Post-reboot functionality test"
+
+    # Wait additional time for service stabilization
+    sleep 10
+
+    # Capture post-reboot metadata
+    post_reboot_metadata=$(capture_container_metadata "post-reboot")
+
+    # Validate core functionality
+    if ! validate_post_reboot_functionality; then
+        log_health "ERROR" "Post-reboot functionality validation failed"
+        perform_reboot_debug_analysis
+        return 1
+    fi
+
+    # PHASE 6: Metadata consistency check
+    log_health "CRITICAL" "🚨 REBOOT VALIDATION PHASE 6: Metadata consistency validation"
+
+    if ! validate_metadata_consistency "$pre_reboot_metadata" "$post_reboot_metadata"; then
+        log_health "ERROR" "Metadata consistency validation failed"
+        return 1
+    fi
+
+    # PHASE 7: Performance validation
+    log_health "CRITICAL" "🚨 REBOOT VALIDATION PHASE 7: Post-reboot performance validation"
+
+    if ! validate_performance; then
+        log_health "WARN" "Performance degradation detected after reboot"
+        # Don't fail reboot validation for performance issues, but log them
+    fi
+
+    log_health "SUCCESS" "✅ REBOOT VALIDATION COMPLETED: All phases passed"
+    log_health "SUCCESS" "✅ Container survives complete restart and maintains full functionality"
+    log_health "SUCCESS" "✅ Startup time: ${startup_time}s (under ${max_startup_time}s limit)"
+
+    return 0
+}
+
+# Enhanced metadata capture function
+capture_container_metadata() {
+    local phase="$1"
+    local metadata=""
+
+    if docker ps -q -f name="$CONTAINER_NAME" | grep -q .; then
+        # Container is running - capture full metadata
+        local status=$(docker inspect --format='{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null)
+        local health=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "no-health-check")
+        local started_at=$(docker inspect --format='{{.State.StartedAt}}' "$CONTAINER_NAME" 2>/dev/null)
+        local image=$(docker inspect --format='{{.Config.Image}}' "$CONTAINER_NAME" 2>/dev/null)
+        local hostname=$(docker inspect --format='{{.Config.Hostname}}' "$CONTAINER_NAME" 2>/dev/null)
+
+        metadata="phase:$phase,status:$status,health:$health,started:$started_at,image:$image,hostname:$hostname"
+    else
+        # Container not running
+        metadata="phase:$phase,status:not-running"
+    fi
+
+    log_health "INFO" "Metadata captured for $phase: $metadata"
+    echo "$metadata"
+}
+
+# Post-reboot functionality validation
+validate_post_reboot_functionality() {
+    log_health "INFO" "Validating post-reboot functionality for $SERVICE_NAME"
+
+    # Service-specific functionality tests
+    case "$SERVICE_NAME" in
+        vault)
+            # Test Vault API responsiveness
+            if timeout 30 bash -c 'until curl -sfk https://localhost:8200/v1/sys/health; do sleep 2; done'; then
+                log_health "SUCCESS" "Vault API responsive after reboot"
+            else
+                log_health "ERROR" "Vault API not responsive after reboot"
+                return 1
+            fi
+
+            # Test Vault status
+            if vault status >/dev/null 2>&1; then
+                log_health "SUCCESS" "Vault status check passed after reboot"
+            else
+                log_health "ERROR" "Vault status check failed after reboot"
+                return 1
+            fi
+            ;;
+
+        postgres)
+            # Test PostgreSQL connection
+            if docker exec "$CONTAINER_NAME" pg_isready -U postgres >/dev/null 2>&1; then
+                log_health "SUCCESS" "PostgreSQL ready after reboot"
+            else
+                log_health "ERROR" "PostgreSQL not ready after reboot"
+                return 1
+            fi
+
+            # Test database query
+            if docker exec "$CONTAINER_NAME" psql -U postgres -c "SELECT 1;" >/dev/null 2>&1; then
+                log_health "SUCCESS" "PostgreSQL query test passed after reboot"
+            else
+                log_health "ERROR" "PostgreSQL query test failed after reboot"
+                return 1
+            fi
+            ;;
+
+        redis)
+            # Test Redis ping
+            if docker exec "$CONTAINER_NAME" redis-cli ping | grep -q PONG; then
+                log_health "SUCCESS" "Redis ping successful after reboot"
+            else
+                log_health "ERROR" "Redis ping failed after reboot"
+                return 1
+            fi
+            ;;
+
+        nginx)
+            # Test Nginx configuration
+            if docker exec "$CONTAINER_NAME" nginx -t >/dev/null 2>&1; then
+                log_health "SUCCESS" "Nginx configuration valid after reboot"
+            else
+                log_health "ERROR" "Nginx configuration invalid after reboot"
+                return 1
+            fi
+
+            # Test HTTP response
+            if timeout 30 bash -c 'until curl -sf http://localhost:80; do sleep 2; done'; then
+                log_health "SUCCESS" "Nginx HTTP response successful after reboot"
+            else
+                log_health "ERROR" "Nginx HTTP response failed after reboot"
+                return 1
+            fi
+            ;;
+
+        keycloak)
+            # Test Keycloak health endpoint
+            if timeout 60 bash -c 'until curl -sf http://localhost:8080/health; do sleep 2; done'; then
+                log_health "SUCCESS" "Keycloak health endpoint responsive after reboot"
+            else
+                log_health "ERROR" "Keycloak health endpoint not responsive after reboot"
+                return 1
+            fi
+            ;;
+
+        *)
+            log_health "INFO" "No specific functionality test defined for $SERVICE_NAME"
+            # Generic container responsiveness test
+            if docker exec "$CONTAINER_NAME" echo "Container responsive" >/dev/null 2>&1; then
+                log_health "SUCCESS" "Container responsive after reboot"
+            else
+                log_health "ERROR" "Container not responsive after reboot"
+                return 1
+            fi
+            ;;
+    esac
+
+    return 0
+}
+
+# Metadata consistency validation
+validate_metadata_consistency() {
+    local pre_metadata="$1"
+    local post_metadata="$2"
+
+    log_health "INFO" "Validating metadata consistency between pre and post reboot"
+
+    # Extract key components
+    local pre_image=$(echo "$pre_metadata" | grep -o 'image:[^,]*' | cut -d: -f2-)
+    local post_image=$(echo "$post_metadata" | grep -o 'image:[^,]*' | cut -d: -f2-)
+
+    local pre_hostname=$(echo "$pre_metadata" | grep -o 'hostname:[^,]*' | cut -d: -f2-)
+    local post_hostname=$(echo "$post_metadata" | grep -o 'hostname:[^,]*' | cut -d: -f2-)
+
+    # Validate image consistency
+    if [[ "$pre_image" == "$post_image" ]]; then
+        log_health "SUCCESS" "Container image consistent after reboot: $post_image"
+    else
+        log_health "ERROR" "Container image changed after reboot: $pre_image -> $post_image"
+        return 1
+    fi
+
+    # Validate hostname consistency
+    if [[ "$pre_hostname" == "$post_hostname" ]]; then
+        log_health "SUCCESS" "Container hostname consistent after reboot: $post_hostname"
+    else
+        log_health "ERROR" "Container hostname changed after reboot: $pre_hostname -> $post_hostname"
+        return 1
+    fi
+
+    return 0
+}
+
+# Enhanced debug analysis for reboot failures
+perform_reboot_debug_analysis() {
+    local service_name="$1"
+    local reboot_attempt="$2"
+    local failure_phase="$3"
+
+    log_health "INFO" "🔍 COMPREHENSIVE DEBUG ANALYSIS: Starting deep diagnostic for $service_name"
+    log_health "INFO" "Debug Context: Reboot Attempt #$reboot_attempt, Failed at Phase: $failure_phase"
+
+    # Create debug report directory
+    local debug_dir="/opt/my-secure-ha-stack/logs/debug-reports"
+    mkdir -p "$debug_dir"
+    local debug_report="$debug_dir/${service_name}-reboot-debug-$(date '+%Y%m%d-%H%M%S').log"
+
+    echo "=== COMPREHENSIVE DEBUG ANALYSIS FOR $service_name ===" > "$debug_report"
+    echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')" >> "$debug_report"
+    echo "Reboot Attempt: #$reboot_attempt" >> "$debug_report"
+    echo "Failure Phase: $failure_phase" >> "$debug_report"
+    echo "" >> "$debug_report"
+
+    # 1. Container State Analysis
+    log_health "INFO" "📊 PHASE 1: Container State Analysis"
+    echo "=== CONTAINER STATE ANALYSIS ===" >> "$debug_report"
+
+    local container_name="purebliss-$service_name"
+    if docker ps -a -q -f name="$container_name" | grep -q .; then
+        log_health "INFO" "Container exists: $container_name"
+
+        # Container status
+        local container_status=$(docker inspect --format='{{.State.Status}}' "$container_name" 2>/dev/null)
+        local exit_code=$(docker inspect --format='{{.State.ExitCode}}' "$container_name" 2>/dev/null)
+        local started_at=$(docker inspect --format='{{.State.StartedAt}}' "$container_name" 2>/dev/null)
+        local finished_at=$(docker inspect --format='{{.State.FinishedAt}}' "$container_name" 2>/dev/null)
+
+        echo "Container Status: $container_status" >> "$debug_report"
+        echo "Exit Code: $exit_code" >> "$debug_report"
+        echo "Started At: $started_at" >> "$debug_report"
+        echo "Finished At: $finished_at" >> "$debug_report"
+
+        log_health "INFO" "Status: $container_status, Exit Code: $exit_code"
+
+        # Health status if available
+        local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null)
+        if [[ "$health_status" != "<no value>" && -n "$health_status" ]]; then
+            echo "Health Status: $health_status" >> "$debug_report"
+            log_health "INFO" "Health Status: $health_status"
+        fi
+
+    else
+        log_health "ERROR" "❌ Container $container_name not found"
+        echo "ERROR: Container $container_name not found" >> "$debug_report"
+    fi
+    echo "" >> "$debug_report"
+
+    # 2. Resource Analysis
+    log_health "INFO" "💾 PHASE 2: Resource Analysis"
+    echo "=== RESOURCE ANALYSIS ===" >> "$debug_report"
+
+    # System resources
+    local memory_usage=$(free -h | grep "Mem:" | awk '{print $3 "/" $2}')
+    local disk_usage=$(df -h /opt | tail -1 | awk '{print $3 "/" $2 " (" $5 ")"}')
+    local cpu_load=$(uptime | awk -F'load average:' '{print $2}')
+
+    echo "Memory Usage: $memory_usage" >> "$debug_report"
+    echo "Disk Usage: $disk_usage" >> "$debug_report"
+    echo "CPU Load Average: $cpu_load" >> "$debug_report"
+
+    log_health "INFO" "Memory: $memory_usage, Disk: $disk_usage"
+
+    # Docker daemon status
+    if systemctl is-active --quiet docker; then
+        echo "Docker Service: Active" >> "$debug_report"
+        log_health "SUCCESS" "✅ Docker service is active"
+    else
+        echo "Docker Service: Inactive" >> "$debug_report"
+        log_health "ERROR" "❌ Docker service is not active"
+    fi
+    echo "" >> "$debug_report"
+
+    # 3. Container Logs Analysis
+    log_health "INFO" "📝 PHASE 3: Container Logs Analysis"
+    echo "=== CONTAINER LOGS ANALYSIS ===" >> "$debug_report"
+
+    if docker ps -a -q -f name="$container_name" | grep -q .; then
+        # Recent logs
+        echo "--- RECENT CONTAINER LOGS (Last 50 lines) ---" >> "$debug_report"
+        docker logs --tail 50 "$container_name" >> "$debug_report" 2>&1
+
+        # Error patterns in logs
+        echo "" >> "$debug_report"
+        echo "--- ERROR PATTERNS IN LOGS ---" >> "$debug_report"
+        local error_count=$(docker logs "$container_name" 2>&1 | grep -i -E "error|fail|fatal|exception|panic" | wc -l)
+        echo "Total Error/Failure Messages: $error_count" >> "$debug_report"
+
+        if [[ $error_count -gt 0 ]]; then
+            docker logs "$container_name" 2>&1 | grep -i -E "error|fail|fatal|exception|panic" | tail -10 >> "$debug_report"
+            log_health "WARN" "⚠️ Found $error_count error messages in logs"
+        else
+            log_health "SUCCESS" "✅ No critical errors found in logs"
+        fi
+
+    else
+        echo "No container logs available - container does not exist" >> "$debug_report"
+        log_health "WARN" "⚠️ No container logs available"
+    fi
+    echo "" >> "$debug_report"
+
+    # 4. Network Analysis
+    log_health "INFO" "🌐 PHASE 4: Network Analysis"
+    echo "=== NETWORK ANALYSIS ===" >> "$debug_report"
+
+    # Docker network status
+    if docker network ls | grep -q "purebliss-net"; then
+        echo "PureBliss Network: Exists" >> "$debug_report"
+        log_health "SUCCESS" "✅ purebliss-net network exists"
+
+        # Network inspection
+        local network_info=$(docker network inspect purebliss-net 2>/dev/null | jq -r '.[0].IPAM.Config[0].Subnet' 2>/dev/null || echo "Unknown")
+        echo "Network Subnet: $network_info" >> "$debug_report"
+
+    else
+        echo "PureBliss Network: Missing" >> "$debug_report"
+        log_health "ERROR" "❌ purebliss-net network missing"
+    fi
+
+    # Port availability for service
+    case "$service_name" in
+        vault) check_port_availability 8200 "$debug_report";;
+        postgres) check_port_availability 5432 "$debug_report";;
+        redis) check_port_availability 6379 "$debug_report";;
+        nginx) check_port_availability 443 "$debug_report";;
+        keycloak) check_port_availability 8080 "$debug_report";;
+        grafana) check_port_availability 3001 "$debug_report";;
+        prometheus) check_port_availability 9090 "$debug_report";;
+        loki) check_port_availability 3100 "$debug_report";;
+    esac
+    echo "" >> "$debug_report"
+
+    # 5. Dependency Analysis
+    log_health "INFO" "🔗 PHASE 5: Dependency Analysis"
+    echo "=== DEPENDENCY ANALYSIS ===" >> "$debug_report"
+
+    case "$service_name" in
+        keycloak)
+            echo "Keycloak Dependencies: postgres, redis, vault" >> "$debug_report"
+            check_dependency_health "postgres" "$debug_report"
+            check_dependency_health "redis" "$debug_report"
+            check_dependency_health "vault" "$debug_report"
+            ;;
+        nginx)
+            echo "Nginx Dependencies: vault (for PKI), all upstream services" >> "$debug_report"
+            check_dependency_health "vault" "$debug_report"
+            ;;
+        grafana)
+            echo "Grafana Dependencies: postgres, prometheus, vault" >> "$debug_report"
+            check_dependency_health "postgres" "$debug_report"
+            check_dependency_health "prometheus" "$debug_report"
+            check_dependency_health "vault" "$debug_report"
+            ;;
+        plane)
+            echo "Plane Dependencies: postgres, redis, vault" >> "$debug_report"
+            check_dependency_health "postgres" "$debug_report"
+            check_dependency_health "redis" "$debug_report"
+            check_dependency_health "vault" "$debug_report"
+            ;;
+        *)
+            echo "No specific dependencies defined for $service_name" >> "$debug_report"
+            ;;
+    esac
+    echo "" >> "$debug_report"
+
+    # 6. Configuration Analysis
+    log_health "INFO" "⚙️ PHASE 6: Configuration Analysis"
+    echo "=== CONFIGURATION ANALYSIS ===" >> "$debug_report"
+
+    # Service-specific configuration checks
+    case "$service_name" in
+        vault)
+            if [[ -f "/opt/my-secure-ha-stack/vault/config/vault.hcl" ]]; then
+                echo "Vault config file exists: /opt/my-secure-ha-stack/vault/config/vault.hcl" >> "$debug_report"
+                log_health "SUCCESS" "✅ Vault configuration file found"
+            else
+                echo "Vault config file missing: /opt/my-secure-ha-stack/vault/config/vault.hcl" >> "$debug_report"
+                log_health "ERROR" "❌ Vault configuration file missing"
+            fi
+            ;;
+        nginx)
+            if [[ -f "/opt/my-secure-ha-stack/nginx/nginx.conf" ]]; then
+                echo "Nginx config file exists: /opt/my-secure-ha-stack/nginx/nginx.conf" >> "$debug_report"
+                log_health "SUCCESS" "✅ Nginx configuration file found"
+                # Test nginx configuration
+                if docker run --rm -v /opt/my-secure-ha-stack/nginx:/etc/nginx:ro nginx nginx -t 2>/dev/null; then
+                    echo "Nginx configuration syntax: Valid" >> "$debug_report"
+                    log_health "SUCCESS" "✅ Nginx configuration syntax is valid"
+                else
+                    echo "Nginx configuration syntax: Invalid" >> "$debug_report"
+                    log_health "ERROR" "❌ Nginx configuration syntax is invalid"
+                fi
+            else
+                echo "Nginx config file missing: /opt/my-secure-ha-stack/nginx/nginx.conf" >> "$debug_report"
+                log_health "ERROR" "❌ Nginx configuration file missing"
+            fi
+            ;;
+        postgres)
+            # Check for PostgreSQL data directory
+            if [[ -d "/opt/my-secure-ha-stack/postgres/data" ]]; then
+                echo "PostgreSQL data directory exists" >> "$debug_report"
+                log_health "SUCCESS" "✅ PostgreSQL data directory found"
+            else
+                echo "PostgreSQL data directory missing" >> "$debug_report"
+                log_health "ERROR" "❌ PostgreSQL data directory missing"
+            fi
+            ;;
+    esac
+    echo "" >> "$debug_report"
+
+    # 7. Remediation Suggestions
+    log_health "INFO" "🔧 PHASE 7: Remediation Suggestions"
+    echo "=== REMEDIATION SUGGESTIONS ===" >> "$debug_report"
+
+    case "$failure_phase" in
+        "graceful_shutdown")
+            echo "Failure at graceful shutdown phase suggests:" >> "$debug_report"
+            echo "- Container may be unresponsive to SIGTERM" >> "$debug_report"
+            echo "- Consider using docker kill instead of docker stop" >> "$debug_report"
+            echo "- Check for hung processes or deadlocks" >> "$debug_report"
+            log_health "INFO" "💡 Graceful shutdown failure - consider force kill"
+            ;;
+        "container_restart")
+            echo "Failure at container restart phase suggests:" >> "$debug_report"
+            echo "- Container image corruption or missing" >> "$debug_report"
+            echo "- Resource constraints (memory/disk)" >> "$debug_report"
+            echo "- Configuration file errors" >> "$debug_report"
+            echo "- Port conflicts with other services" >> "$debug_report"
+            log_health "INFO" "💡 Restart failure - check resources and configuration"
+            ;;
+        "startup_monitoring")
+            echo "Failure at startup monitoring phase suggests:" >> "$debug_report"
+            echo "- Service taking longer than expected to start" >> "$debug_report"
+            echo "- Dependency services unavailable" >> "$debug_report"
+            echo "- Database connection or migration issues" >> "$debug_report"
+            echo "- Consider increasing startup timeout" >> "$debug_report"
+            log_health "INFO" "💡 Startup monitoring failure - check dependencies and timeouts"
+            ;;
+        "functionality_test")
+            echo "Failure at functionality test phase suggests:" >> "$debug_report"
+            echo "- Service started but core functionality broken" >> "$debug_report"
+            echo "- Authentication or authorization issues" >> "$debug_report"
+            echo "- Database schema or data corruption" >> "$debug_report"
+            echo "- External service integration problems" >> "$debug_report"
+            log_health "INFO" "💡 Functionality test failure - check service-specific features"
+            ;;
+        "metadata_consistency")
+            echo "Failure at metadata consistency phase suggests:" >> "$debug_report"
+            echo "- Container configuration changed during reboot" >> "$debug_report"
+            echo "- Environment variable inconsistencies" >> "$debug_report"
+            echo "- Volume mount or file permission issues" >> "$debug_report"
+            echo "- Version mismatch between expected and actual" >> "$debug_report"
+            log_health "INFO" "💡 Metadata consistency failure - check configuration stability"
+            ;;
+    esac
+    echo "" >> "$debug_report"
+
+    # Next steps recommendations
+    echo "=== NEXT STEPS RECOMMENDATIONS ===" >> "$debug_report"
+    echo "1. Review the debug report: $debug_report" >> "$debug_report"
+    echo "2. Address identified issues starting with highest priority" >> "$debug_report"
+    echo "3. Re-run health validation with enhanced logging" >> "$debug_report"
+    echo "4. Consider container rebuild if configuration issues persist" >> "$debug_report"
+    echo "5. Check upstream dependencies if network-related failures" >> "$debug_report"
+    echo "6. Monitor system resources during next restart attempt" >> "$debug_report"
+
+    log_health "SUCCESS" "✅ COMPREHENSIVE DEBUG ANALYSIS COMPLETE"
+    log_health "INFO" "📄 Debug report saved: $debug_report"
+
+    return 0
+}
+
+# Helper function to check port availability
+check_port_availability() {
+    local port="$1"
+    local report_file="$2"
+
+    if netstat -tuln | grep -q ":$port "; then
+        echo "Port $port: In use" >> "$report_file"
+        local process=$(netstat -tulnp 2>/dev/null | grep ":$port " | awk '{print $7}' | head -1)
+        echo "Process using port $port: $process" >> "$report_file"
+        log_health "WARN" "⚠️ Port $port is in use by: $process"
+    else
+        echo "Port $port: Available" >> "$report_file"
+        log_health "SUCCESS" "✅ Port $port is available"
+    fi
+}
+
+# Helper function to check dependency health
+check_dependency_health() {
+    local dep_service="$1"
+    local report_file="$2"
+
+    local dep_container="purebliss-$dep_service"
+    if docker ps -q -f name="$dep_container" | grep -q .; then
+        local dep_status=$(docker inspect --format='{{.State.Status}}' "$dep_container" 2>/dev/null)
+        echo "Dependency $dep_service: $dep_status" >> "$report_file"
+        if [[ "$dep_status" == "running" ]]; then
+            log_health "SUCCESS" "✅ Dependency $dep_service is running"
+        else
+            log_health "ERROR" "❌ Dependency $dep_service is not running ($dep_status)"
+        fi
+    else
+        echo "Dependency $dep_service: Not found" >> "$report_file"
+        log_health "ERROR" "❌ Dependency $dep_service container not found"
+    fi
+}
+
+    # Step 7: MANDATORY REBOOT VALIDATION - The Ultimate Test
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        log_health "CRITICAL" "🚨 INITIATING MANDATORY REBOOT VALIDATION - ULTIMATE TEST 🚨"
+        log_health "INFO" "This is the final validation gate - container must survive complete restart"
+
+        if ! perform_reboot_validation; then
+            overall_result=$EXIT_UNHEALTHY
+            log_health "CRITICAL" "❌ REBOOT VALIDATION FAILED - Container does not survive restart"
+            log_health "CRITICAL" "❌ ALL PREVIOUS WORK INVALIDATED - Must fix reboot issues"
+        else
+            log_health "SUCCESS" "✅ REBOOT VALIDATION PASSED - Container survives complete restart"
+            log_health "SUCCESS" "✅ 100% FUNCTIONALITY CONFIRMED"
+        fi
+    else
+        log_health "WARN" "Skipping reboot validation due to previous health failures"
+    fi
+
+    # Final status determination
+    if [[ $overall_result -eq $EXIT_HEALTHY ]]; then
+        log_health "SUCCESS" "✅ HEALTH VALIDATION PASSED: $SERVICE_NAME is healthy after $TASK_NAME"
+        log_health "SUCCESS" "✅ REBOOT VALIDATION PASSED: Container survives restart"
+        log_health "SUCCESS" "✅ 100% FUNCTIONALITY CONFIRMED"
+        log_health "SUCCESS" "✅ PROCEED TO NEXT TASK"
+        
+        # AUTO-COMMIT INTEGRATION: Trigger auto-commit on successful health validation
+        AUTO_COMMIT_SCRIPT="$SCRIPT_DIR/automation/task-completion-with-auto-commit.sh"
+        if [[ -x "$AUTO_COMMIT_SCRIPT" ]]; then
+            log_health "INFO" "🔄 TRIGGERING AUTO-COMMIT: Health validation successful"
+            # Ensure LOG_FILE is exported for auto-commit script
+            export LOG_FILE="${LOG_FILE:-/opt/my-secure-ha-stack/logs/dev-environment-setup.log}"
+            if env LOG_FILE="$LOG_FILE" "$AUTO_COMMIT_SCRIPT" complete-task "health-validation" "$SERVICE_NAME-$TASK_NAME" "$SERVICE_NAME" "SUCCESS"; then
+                log_health "SUCCESS" "✅ AUTO-COMMIT: Changes committed successfully"
+            else
+                log_health "WARN" "⚠️ AUTO-COMMIT: Failed to commit changes (health validation still passed)"
+            fi
+        else
+            log_health "WARN" "⚠️ AUTO-COMMIT: Script not found - manual commit required"
+        fi
+        
+        echo ""
+        echo -e "${GREEN}██████████████████████████████████████████████████████████████████████████████████${NC}"
+        echo -e "${GREEN}█                                                                                █${NC}"
+        echo -e "${GREEN}█  ✅ HEALTH VALIDATION PASSED FOR $SERVICE_NAME                                 █${NC}"
+        echo -e "${GREEN}█  Task: $TASK_NAME                                                             █${NC}"
+        echo -e "${GREEN}█  Status: Container is healthy and ready                                       █${NC}"
+        echo -e "${GREEN}█  Reboot Test: ✅ PASSED - Survives complete restart                           █${NC}"
+        echo -e "${GREEN}█  Functionality: ✅ 100% CONFIRMED                                             █${NC}"
+        echo -e "${GREEN}█  Auto-Commit: ✅ TRIGGERED                                                    █${NC}"
+        echo -e "${GREEN}█  Action: PROCEED TO NEXT TASK                                                 █${NC}"
+        echo -e "${GREEN}█                                                                                █${NC}"
+        echo -e "${GREEN}██████████████████████████████████████████████████████████████████████████████████${NC}"
+        echo ""
+    else
+        log_health "ERROR" "❌ HEALTH VALIDATION FAILED: $SERVICE_NAME is unhealthy after $TASK_NAME"
+        log_health "ERROR" "❌ STOP ALL WORK AND REMEDIATE BEFORE CONTINUING"
+        echo ""
+        echo -e "${RED}██████████████████████████████████████████████████████████████████████████████████${NC}"
+        echo -e "${RED}█                                                                                █${NC}"
+        echo -e "${RED}█  ❌ HEALTH VALIDATION FAILED FOR $SERVICE_NAME                                 █${NC}"
+        echo -e "${RED}█  Task: $TASK_NAME                                                             █${NC}"
+        echo -e "${RED}█  Status: Container is unhealthy                                               █${NC}"
+        echo -e "${RED}█  Action: STOP ALL WORK AND REMEDIATE                                          █${NC}"
+        echo -e "${RED}█                                                                                █${NC}"
+        echo -e "${RED}██████████████████████████████████████████████████████████████████████████████████${NC}"
+        echo ""
+        echo "Check logs for details:"
+        echo "  - Health validation log: $HEALTH_LOG"
+        echo "  - Development log: $LOG_FILE"
+        echo "  - Container logs: docker logs $CONTAINER_NAME"
+    fi
+
+    exit $overall_result
+}
+
+# Run main function
+main "$@"

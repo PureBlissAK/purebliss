@@ -5,14 +5,33 @@ set -euo pipefail
 SCRIPT_DIR="/opt/dev-purebliss/dev_scripts"
 DOC_DIR="/opt/dev-purebliss/Documentation"
 
+# MANDATORY LOG FILE DEFINITION (CRITICAL FOR AUTO-COMMIT)
+export LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
+
+# Ensure log directory exists
+mkdir -p "$(dirname "$LOG_FILE")"
+
 # MANDATORY UTILITY IMPORTS (DON'T REINVENT THE WHEEL)
-source "$SCRIPT_DIR/utilities/common-functions-library.sh"
-source "$SCRIPT_DIR/utilities/retry-utils.sh"
-source "$SCRIPT_DIR/utilities/script-communication-bridge.sh"
+if [[ -f "$SCRIPT_DIR/utilities/common-functions-library.sh" ]]; then
+    source "$SCRIPT_DIR/utilities/common-functions-library.sh"
+else
+    # Fallback logging functions if common library not available
+    log_info() { echo "$(date '+%Y-%m-%d %H:%M:%S') - [INFO] $(basename "$0"): $1" | tee -a "$LOG_FILE"; }
+    log_error() { echo "$(date '+%Y-%m-%d %H:%M:%S') - [ERROR] $(basename "$0"): $1" | tee -a "$LOG_FILE"; }
+    log_success() { echo "$(date '+%Y-%m-%d %H:%M:%S') - [SUCCESS] $(basename "$0"): $1" | tee -a "$LOG_FILE"; }
+fi
+
+if [[ -f "$SCRIPT_DIR/utilities/retry-utils.sh" ]]; then
+    source "$SCRIPT_DIR/utilities/retry-utils.sh"
+fi
+
+if [[ -f "$SCRIPT_DIR/utilities/script-communication-bridge.sh" ]]; then
+    source "$SCRIPT_DIR/utilities/script-communication-bridge.sh"
+fi
 
 # SCRIPT METADATA
 SCRIPT_NAME="$(basename "$0")"
-SCRIPT_VERSION="1.0" 
+SCRIPT_VERSION="2.0" 
 SCRIPT_PURPOSE="Auto-commit integration helper for successful task completion"
 
 # Configuration

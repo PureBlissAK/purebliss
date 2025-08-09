@@ -5,6 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="/opt/dev-purebliss/dev_scripts"
 DOC_DIR="/opt/dev-purebliss/Documentation"
 
+# MANDATORY LOG FILE DEFINITION (CRITICAL FOR AUTO-COMMIT)
+export LOG_FILE="/opt/my-secure-ha-stack/logs/dev-environment-setup.log"
+
+# Ensure log directory exists
+mkdir -p "$(dirname "$LOG_FILE")"
+
 # MANDATORY UTILITY IMPORTS (DON'T REINVENT THE WHEEL)
 source "$SCRIPT_DIR/utilities/common-functions-library.sh"
 source "$SCRIPT_DIR/utilities/retry-utils.sh"
@@ -12,7 +18,7 @@ source "$SCRIPT_DIR/utilities/script-communication-bridge.sh"
 
 # SCRIPT METADATA
 SCRIPT_NAME="$(basename "$0")"
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="2.0"
 SCRIPT_PURPOSE="Task completion with mandatory auto-commit integration"
 
 # Auto-commit integration
