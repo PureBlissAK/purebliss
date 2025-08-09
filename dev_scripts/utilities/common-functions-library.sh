@@ -18,7 +18,7 @@ SCRIPT_MODIFIED="2025-08-09"
 SCRIPT_CATEGORY="utilities"
 SCRIPT_TAGS="enhancement,automation,auto-commit"
 SCRIPT_SERVICES="general"
-SCRIPT_DEPENDENCIES="common-functions-library.sh"
+SCRIPT_DEPENDENCIES="none"
 SCRIPT_DESCRIPTION="Enhanced utilities script for general with auto-commit functionality,
 comprehensive error handling, logging integration, and wrapper functions"
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -27,9 +27,7 @@ comprehensive error handling, logging integration, and wrapper functions"
 DOC_DIR="/opt/dev-purebliss/Documentation"
 
 # MANDATORY UTILITY IMPORTS (DON'T REINVENT THE WHEEL)
-if [[ -f "$SCRIPT_DIR/utilities/common-functions-library.sh" ]]; then
-    source "$SCRIPT_DIR/utilities/common-functions-library.sh"
-fi
+# Note: This IS the common-functions-library.sh - no need to source itself
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # AUTO-COMMIT WRAPPER FUNCTIONS - ENSURING CODE REUSE AND GIT AUTOMATION
@@ -139,7 +137,12 @@ log_with_level() {
     local level="$1"
     local message="$2"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local caller_script="${BASH_SOURCE[2]##*/}"
+    local caller_script="unknown"
+    
+    # Safely get caller script name
+    if [[ ${#BASH_SOURCE[@]} -gt 2 ]]; then
+        caller_script="${BASH_SOURCE[2]##*/}"
+    fi
 
     echo "$timestamp - [$level] $caller_script: $message" | tee -a "$LOG_FILE"
 }
@@ -827,6 +830,205 @@ git_status_wrapper() {
 init_common_functions
 
 # Export functions for use in subshells
+# ═══════════════════════════════════════════════════════════════════════════════════
+# SCRIPT INDEX LIBRARY AUTO-UPDATE FUNCTIONS
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+# Auto-update Script Index Library with enhancement session results
+auto_update_script_index() {
+    local session_timestamp="${1:-$(date '+%Y-%m-%d %H:%M:%S')}"
+    local enhanced_count="${2:-0}"
+    local total_count="${3:-0}"
+    local session_details="${4:-Enhancement session completed}"
+    
+    local index_file="/opt/dev-purebliss/dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md"
+    
+    if [[ -f "$index_file" ]]; then
+        log_info "Updating Script Index Library with session results"
+        
+        # Create temporary update
+        local temp_update="/tmp/script_index_update_$$"
+        
+        # Add enhancement session update
+        cat << EOF >> "$temp_update"
+
+### 🎯 Enhancement Session - $session_timestamp
+
+**ENHANCEMENT RESULTS**: Enhanced $enhanced_count out of $total_count scripts
+
+#### Session Details:
+- **Session Date**: $session_timestamp
+- **Scripts Processed**: $total_count
+- **Scripts Enhanced**: $enhanced_count
+- **Success Rate**: $(( enhanced_count * 100 / total_count ))%
+
+#### Session Summary:
+$session_details
+
+EOF
+        
+        # Append to index file
+        cat "$temp_update" >> "$index_file"
+        rm -f "$temp_update"
+        
+        # Update statistics at top of file
+        local new_timestamp=$(date '+%Y-%m-%dT%H:%M:%SZ')
+        sed -i "s/\*\*Last Scan\*\*:.*/\*\*Last Scan\*\*: $new_timestamp/" "$index_file"
+        sed -i "s/\*\*Enhanced Scripts\*\*:.*/\*\*Enhanced Scripts\*\*: $enhanced_count scripts enhanced/" "$index_file"
+        
+        log_success "Script Index Library updated successfully"
+        return 0
+    else
+        log_error "Script Index Library not found: $index_file"
+        return 1
+    fi
+}
+
+# Auto-update common functions library with new functions
+auto_update_functions_library() {
+    local function_name="${1}"
+    local function_description="${2:-New function added}"
+    local function_category="${3:-utilities}"
+    
+    if [[ -z "$function_name" ]]; then
+        log_error "Function name required for library update"
+        return 1
+    fi
+    
+    log_info "Registering new function in common library: $function_name"
+    
+    # Check if function exists in current file
+    if grep -q "^$function_name()" "/opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh"; then
+        log_info "Function $function_name already exists in library"
+        
+        # Update exports if not already included
+        if ! grep -q "$function_name" "/opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh" | grep "export -f"; then
+            # Add to appropriate export line
+            local export_line=""
+            case "$function_category" in
+                "index"|"library")
+                    export_line="export -f auto_update_script_index auto_update_functions_library register_enhanced_script"
+                    ;;
+                "git"|"auto-commit")
+                    export_line="export -f auto_commit_push_wrapper validate_and_commit_wrapper git_status_wrapper $function_name"
+                    ;;
+                *)
+                    export_line="export -f $function_name"
+                    ;;
+            esac
+            
+            # Add export line before AUTO-COMMIT USAGE EXAMPLES section
+            sed -i "/# AUTO-COMMIT USAGE EXAMPLES/i\\$export_line" "/opt/dev-purebliss/dev_scripts/utilities/common-functions-library.sh"
+        fi
+        
+        return 0
+    else
+        log_warn "Function $function_name not found in library - manual addition required"
+        return 1
+    fi
+}
+
+# Register an enhanced script in the index
+register_enhanced_script() {
+    local script_path="${1}"
+    local enhancement_type="${2:-auto-commit}"
+    local enhancement_timestamp="${3:-$(date '+%Y-%m-%d %H:%M:%S')}"
+    
+    if [[ -z "$script_path" ]]; then
+        log_error "Script path required for registration"
+        return 1
+    fi
+    
+    local script_name=$(basename "$script_path")
+    local script_dir=$(dirname "$script_path")
+    
+    log_info "Registering enhanced script: $script_name"
+    
+    # Update the recently enhanced scripts section
+    local index_file="/opt/dev-purebliss/dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md"
+    
+    if [[ -f "$index_file" ]]; then
+        # Add to recently enhanced table
+        local table_entry="| $script_name | $script_path | $enhancement_timestamp | ✅ Enhanced |"
+        
+        # Insert after the table header
+        sed -i "/| Script | Path | Enhancement Date | Status |/a\\$table_entry" "$index_file"
+        
+        log_success "Script $script_name registered in index"
+        return 0
+    else
+        log_error "Script Index Library not found"
+        return 1
+    fi
+}
+
+# Validate and refresh script index completeness
+validate_script_index() {
+    local scan_directory="${1:-/opt/dev-purebliss/dev_scripts}"
+    
+    log_info "Validating Script Index Library completeness"
+    
+    local total_scripts=$(find "$scan_directory" -name "*.sh" -type f | wc -l)
+    local index_file="/opt/dev-purebliss/dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md"
+    
+    if [[ -f "$index_file" ]]; then
+        local indexed_scripts=$(grep -c "✅ Enhanced\|❌ Failed\|⏭️ Skipped" "$index_file" || echo "0")
+        
+        log_info "Index validation: $indexed_scripts/$total_scripts scripts tracked"
+        
+        # Update total script count
+        sed -i "s/\*\*Total Scripts\*\*:.*/\*\*Total Scripts\*\*: $total_scripts scripts discovered/" "$index_file"
+        
+        if [[ $indexed_scripts -lt $total_scripts ]]; then
+            log_warn "Index may be incomplete: $(( total_scripts - indexed_scripts )) scripts not tracked"
+            log_info "Consider running full script scan: /opt/dev-purebliss/dev_scripts/indexing/scan-all-scripts.sh"
+        else
+            log_success "Script Index Library appears complete"
+        fi
+        
+        return 0
+    else
+        log_error "Script Index Library not found"
+        return 1
+    fi
+}
+
+# Auto-commit changes to Script Index Library
+auto_commit_index_updates() {
+    local commit_message="${1:-Auto-update: Script Index Library maintenance}"
+    
+    log_info "Auto-committing Script Index Library updates"
+    
+    cd /opt/dev-purebliss || return 1
+    
+    # Check if there are changes to commit
+    if git diff --quiet dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md; then
+        log_info "No changes to Script Index Library - skipping commit"
+        return 0
+    fi
+    
+    # Stage and commit the index file
+    if git add dev_scripts/indexing/SCRIPT_INDEX_LIBRARY.md 2>/dev/null; then
+        if git commit -m "$commit_message" 2>/dev/null; then
+            log_success "Script Index Library updates committed"
+            
+            # Try to push if we can
+            if git push 2>/dev/null; then
+                log_success "Script Index Library updates pushed to remote"
+            else
+                log_info "Index updates committed locally (push may require manual intervention)"
+            fi
+            return 0
+        else
+            log_error "Failed to commit Script Index Library updates"
+            return 1
+        fi
+    else
+        log_warn "Could not stage Script Index Library changes (permission issues)"
+        return 1
+    fi
+}
+
 export -f log_with_level log_info log_warn log_error log_debug log_success log_action
 export -f container_exists container_running container_healthy get_container_ip get_container_status wait_for_container_healthy
 export -f wait_for_service_endpoint service_ready vault_available vault_auth_approle vault_get_secret
@@ -835,6 +1037,7 @@ export -f ensure_directory backup_file health_check_service port_available wait_
 export -f generate_random_string command_exists get_timestamp get_epoch seconds_to_duration
 export -f validate_env_vars validate_file validate_directory
 export -f auto_commit_push_wrapper validate_and_commit_wrapper git_status_wrapper
+export -f auto_update_script_index auto_update_functions_library register_enhanced_script validate_script_index auto_commit_index_updates
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # AUTO-COMMIT USAGE EXAMPLES - PURE BLISS ELITE SYSTEM
