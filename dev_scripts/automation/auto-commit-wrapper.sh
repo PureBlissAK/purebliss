@@ -13,7 +13,7 @@ mkdir -p "$(dirname "$LOG_FILE")"
 
 # MANDATORY UTILITY IMPORTS (DON'T REINVENT THE WHEEL)
 source "$SCRIPT_DIR/utilities/common-functions-library.sh"
-source "$SCRIPT_DIR/utilities/retry-utils.sh" 
+source "$SCRIPT_DIR/utilities/retry-utils.sh"
 source "$SCRIPT_DIR/utilities/script-communication-bridge.sh"
 
 # SCRIPT METADATA
@@ -27,7 +27,7 @@ log_task_completion() {
     local message="$2"
     local task_context="${3:-general}"
     local auto_commit="${4:-true}"
-    
+
     # Log the message normally
     case "$level" in
         "SUCCESS")
@@ -43,7 +43,7 @@ log_task_completion() {
             log_warn "$message"
             ;;
     esac
-    
+
     # Trigger auto-commit for SUCCESS level messages if enabled
     if [[ "$level" == "SUCCESS" && "$auto_commit" == "true" ]]; then
         trigger_auto_commit_for_success "$message" "$task_context"
@@ -54,20 +54,20 @@ log_task_completion() {
 trigger_auto_commit_for_success() {
     local success_message="$1"
     local task_context="$2"
-    
+
     log_info "AUTO_COMMIT_CHECK: Success detected - checking for auto-commit trigger"
-    
+
     # Extract task information from success message
     local task_type="task-completion"
     local task_name="$task_context"
     local component="scaffolding"
-    
+
     # Auto-commit integration script
     local AUTO_COMMIT_SCRIPT="$SCRIPT_DIR/automation/task-completion-with-auto-commit.sh"
-    
+
     if [[ -x "$AUTO_COMMIT_SCRIPT" ]]; then
         log_info "AUTO_COMMIT_TRIGGER: Executing auto-commit for successful task"
-        
+
         if "$AUTO_COMMIT_SCRIPT" complete-task "$task_type" "$task_name" "$component" "SUCCESS"; then
             log_info "✅ AUTO_COMMIT: Success - changes committed automatically"
         else
@@ -83,9 +83,9 @@ execute_with_auto_commit() {
     local script_path="$1"
     shift
     local script_args="$@"
-    
+
     log_info "EXECUTE_WITH_AUTO_COMMIT: Running $script_path with auto-commit integration"
-    
+
     # Execute the script and capture result
     if "$script_path" "$script_args"; then
         local script_name="$(basename "$script_path")"
@@ -103,9 +103,9 @@ container_operation_with_auto_commit() {
     local operation="$1"
     local container_name="$2"
     local additional_info="${3:-}"
-    
+
     log_info "CONTAINER_OPERATION: $operation for $container_name"
-    
+
     case "$operation" in
         "build")
             log_info "Building container: $container_name"
@@ -138,9 +138,9 @@ service_task_with_auto_commit() {
     local task_number="$2"
     local task_description="$3"
     local validation_command="${4:-true}"
-    
+
     log_info "SERVICE_TASK: $service_name Task $task_number - $task_description"
-    
+
     # Execute validation command
     if eval "$validation_command"; then
         log_task_completion "SUCCESS" "Task $task_number completed: $task_description" "$service_name-task-$task_number" "true"
@@ -161,7 +161,7 @@ Usage: $0 <command> [args...]
 
 Commands:
   execute-script <script_path> [args...]     - Execute script with auto-commit on success
-  container-op <operation> <name> [info]     - Container operation with auto-commit  
+  container-op <operation> <name> [info]     - Container operation with auto-commit
   service-task <service> <num> <desc> [cmd]  - Service task with auto-commit
   log-success <message> [context]            - Log success with auto-commit trigger
 
@@ -179,7 +179,7 @@ EOF
 # Main execution
 main() {
     local command="${1:-help}"
-    
+
     case "$command" in
         "execute-script")
             shift

@@ -75,7 +75,7 @@ auto_commit_workflow() {
 
 **Operational Features:**
 - 🔧 Execute scripts with auto-commit on success
-- 🐳 Container operations with auto-commit integration  
+- 🐳 Container operations with auto-commit integration
 - 📋 Service task completion with auto-commit
 - 📝 Enhanced logging with centralized functions
 - 🔄 Compliance with "DON'T REINVENT THE WHEEL" principles

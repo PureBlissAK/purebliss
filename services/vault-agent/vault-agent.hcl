@@ -24,7 +24,7 @@ auto_auth {
 }
 
 cache {
-  
+
 }
 
 api_proxy {

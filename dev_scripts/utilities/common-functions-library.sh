@@ -1,4 +1,120 @@
 #!/bin/bash
+set -euo pipefail
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# COMMON_FUNCTIONS_LIBRARY_SH
+# ═══════════════════════════════════════════════════════════════════════════════════
+# Pure Bliss Elite Framework - Enhanced Script with Auto-Commit and Metadata
+
+# SCRIPT METADATA
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SCRIPT_DIR="/opt/dev-purebliss/dev_scripts"
+SCRIPT_NAME="common-functions-library.sh"
+SCRIPT_VERSION="1.0.0"
+SCRIPT_PURPOSE="Enhanced utilities script for general operations with auto-commit"
+SCRIPT_AUTHOR="Pure Bliss Elite Framework"
+SCRIPT_CREATED="2025-08-09"
+SCRIPT_MODIFIED="2025-08-09"
+SCRIPT_CATEGORY="utilities"
+SCRIPT_TAGS="enhancement,automation,auto-commit"
+SCRIPT_SERVICES="general"
+SCRIPT_DEPENDENCIES="common-functions-library.sh"
+SCRIPT_DESCRIPTION="Enhanced utilities script for general with auto-commit functionality,
+comprehensive error handling, logging integration, and wrapper functions"
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# CENTRALIZED SCRIPT REFERENCE SYSTEM
+DOC_DIR="/opt/dev-purebliss/Documentation"
+
+# MANDATORY UTILITY IMPORTS (DON'T REINVENT THE WHEEL)
+if [[ -f "$SCRIPT_DIR/utilities/common-functions-library.sh" ]]; then
+    source "$SCRIPT_DIR/utilities/common-functions-library.sh"
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# AUTO-COMMIT WRAPPER FUNCTIONS - ENSURING CODE REUSE AND GIT AUTOMATION
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+# Wrapper for standardized logging with script context
+common_functions_library_log_info() {
+    local message="$1"
+    if command -v log_info >/dev/null 2>&1; then
+        log_info "${SCRIPT_NAME}: $message"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - [INFO] ${SCRIPT_NAME}: $message" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+    fi
+}
+
+# Wrapper for standardized error logging with script context
+common_functions_library_log_error() {
+    local message="$1"
+    if command -v log_error >/dev/null 2>&1; then
+        log_error "${SCRIPT_NAME}: $message"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - [ERROR] ${SCRIPT_NAME}: $message" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+    fi
+}
+
+# Wrapper for standardized success logging with script context
+common_functions_library_log_success() {
+    local message="$1"
+    if command -v log_success >/dev/null 2>&1; then
+        log_success "${SCRIPT_NAME}: $message"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - [SUCCESS] ${SCRIPT_NAME}: $message" | tee -a /opt/my-secure-ha-stack/logs/dev-environment-setup.log
+    fi
+}
+
+# Wrapper for auto-commit and push on successful execution
+common_functions_library_auto_commit_wrapper() {
+    local commit_message="${1:-"Auto-commit: ${SCRIPT_NAME} executed successfully"}"
+    local validation_command="${2:-}"
+    
+    common_functions_library_log_info "Starting auto-commit wrapper for successful execution"
+    
+    # Run validation if provided
+    if [[ -n "$validation_command" ]]; then
+        common_functions_library_log_info "Running validation: $validation_command"
+        if eval "$validation_command"; then
+            common_functions_library_log_success "Validation passed - proceeding with auto-commit"
+        else
+            common_functions_library_log_error "Validation failed - skipping auto-commit"
+            return 1
+        fi
+    fi
+    
+    # Use existing Pure Bliss Elite auto-commit system
+    if [[ -f "/opt/dev-purebliss/dev_scripts/automation/auto-commit-trigger.sh" ]]; then
+        common_functions_library_log_info "Using Pure Bliss Elite auto-commit system"
+        /opt/dev-purebliss/dev_scripts/automation/auto-commit-trigger.sh             "${SCRIPT_CATEGORY}" "$commit_message" "${SCRIPT_NAME}"
+    elif command -v auto_commit_push_wrapper >/dev/null 2>&1; then
+        auto_commit_push_wrapper "${SCRIPT_NAME}" "$commit_message"
+    else
+        common_functions_library_log_info "Auto-commit system not available - manual commit required"
+        common_functions_library_log_info "Recommended commit message: $commit_message"
+        common_functions_library_log_info "See: /opt/dev-purebliss/dev_scripts/automation/AUTO_COMMIT_SYSTEM_GUIDE.md"
+    fi
+}
+
+# Wrapper for comprehensive script completion with auto-commit
+common_functions_library_complete_with_commit() {
+    local final_message="${1:-"${SCRIPT_NAME} completed successfully"}"
+    local validation_command="${2:-}"
+    
+    # Log successful completion
+    common_functions_library_log_success "$final_message"
+    
+    # Execute auto-commit wrapper
+    common_functions_library_auto_commit_wrapper "Auto-commit: $final_message" "$validation_command"
+    
+    # Final status
+    common_functions_library_log_success "${SCRIPT_NAME} execution and auto-commit completed"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# ORIGINAL SCRIPT CONTENT (Enhanced with Auto-Commit Functionality)
+# ═══════════════════════════════════════════════════════════════════════════════════
+
 # COMMON FUNCTIONS LIBRARY
 # Comprehensive shared function library for Pure Bliss Elite Framework
 # Usage: source "$SCRIPT_DIR/utilities/common-functions-library.sh"
@@ -586,30 +702,30 @@ auto_commit_push_wrapper() {
     local script_name="${1:-$(basename "$0")}"
     local commit_message="${2:-"Auto-commit: $script_name executed successfully"}"
     local branch="${3:-$(git branch --show-current 2>/dev/null || echo 'main')}"
-    
+
     log_info "Starting auto-commit and push for $script_name"
-    
+
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         log_warn "Not in a git repository - skipping auto-commit"
         return 0
     fi
-    
+
     # Check for uncommitted changes
     if git diff --quiet && git diff --staged --quiet; then
         log_info "No changes to commit - auto-commit skipped"
         return 0
     fi
-    
+
     # Stage changes with graceful handling of permission issues
     log_info "Staging accessible changes for commit"
-    
+
     # Try to add all changes, but handle permission errors gracefully
     if git add . 2>/dev/null; then
         log_success "Changes staged successfully"
     else
         log_warn "Some files have permission issues - staging accessible files only"
-        
+
         # Stage files one by one, skipping permission-denied files
         local staged_count=0
         while IFS= read -r -d '' file; do
@@ -619,7 +735,7 @@ auto_commit_push_wrapper() {
                 log_warn "Skipping file with permission issues: $file"
             fi
         done < <(git diff --name-only -z 2>/dev/null)
-        
+
         # Also try to stage untracked files that are accessible
         while IFS= read -r -d '' file; do
             if [[ -r "$file" ]] && git add "$file" 2>/dev/null; then
@@ -628,7 +744,7 @@ auto_commit_push_wrapper() {
                 log_warn "Skipping untracked file with permission issues: $file"
             fi
         done < <(git ls-files --others --exclude-standard -z 2>/dev/null)
-        
+
         if [[ $staged_count -gt 0 ]]; then
             log_success "$staged_count files staged successfully (skipped permission-denied files)"
         else
@@ -636,7 +752,7 @@ auto_commit_push_wrapper() {
             return 1
         fi
     fi
-    
+
     # Commit changes
     if git commit -m "$commit_message" -m "Script: $script_name" -m "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')"; then
         log_success "Changes committed successfully"
@@ -644,11 +760,11 @@ auto_commit_push_wrapper() {
         log_error "Failed to commit changes"
         return 1
     fi
-    
+
     # Push to remote (with retry logic)
     local push_attempts=0
     local max_push_attempts=3
-    
+
     while [[ $push_attempts -lt $max_push_attempts ]]; do
         if git push origin "$branch"; then
             log_success "Changes pushed to origin/$branch successfully"
@@ -659,7 +775,7 @@ auto_commit_push_wrapper() {
             sleep 5
         fi
     done
-    
+
     log_error "Failed to push after $max_push_attempts attempts"
     return 1
 }
@@ -669,9 +785,9 @@ validate_and_commit_wrapper() {
     local script_name="${1:-$(basename "$0")}"
     local validation_command="$2"
     local commit_message="${3:-"Auto-commit: $script_name validation successful"}"
-    
+
     log_info "Running validation and auto-commit wrapper for $script_name"
-    
+
     # Run validation if provided
     if [[ -n "$validation_command" ]]; then
         log_info "Running validation: $validation_command"
@@ -682,7 +798,7 @@ validate_and_commit_wrapper() {
             return 1
         fi
     fi
-    
+
     # Execute auto-commit and push
     auto_commit_push_wrapper "$script_name" "$commit_message"
 }
@@ -690,17 +806,17 @@ validate_and_commit_wrapper() {
 # Git status check wrapper
 git_status_wrapper() {
     local script_name="${1:-$(basename "$0")}"
-    
+
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         log_warn "$script_name: Not in a git repository"
         return 1
     fi
-    
+
     log_info "$script_name: Git repository status:"
     git status --porcelain | while read -r line; do
         log_info "  $line"
     done
-    
+
     # Show current branch and remote tracking
     local current_branch=$(git branch --show-current 2>/dev/null)
     local upstream=$(git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "No upstream")
@@ -719,3 +835,45 @@ export -f ensure_directory backup_file health_check_service port_available wait_
 export -f generate_random_string command_exists get_timestamp get_epoch seconds_to_duration
 export -f validate_env_vars validate_file validate_directory
 export -f auto_commit_push_wrapper validate_and_commit_wrapper git_status_wrapper
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# AUTO-COMMIT USAGE EXAMPLES - PURE BLISS ELITE SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════════
+#
+# 📚 COMPLETE GUIDE: /opt/dev-purebliss/dev_scripts/automation/AUTO_COMMIT_SYSTEM_GUIDE.md
+#
+# BASIC AUTO-COMMIT ON SUCCESS:
+# Add this at the end of your main script logic:
+#   ${WRAPPER_PREFIX}_complete_with_commit "Script completed successfully"
+#
+# AUTO-COMMIT WITH VALIDATION:
+# Add validation command to ensure script worked correctly:
+#   ${WRAPPER_PREFIX}_complete_with_commit "Script completed with validation" "docker ps | grep -q my-service"
+#
+# MANUAL AUTO-COMMIT TRIGGER:
+# Use auto-commit wrapper directly with custom message:
+#   ${WRAPPER_PREFIX}_auto_commit_wrapper "Custom commit: Feature implemented successfully"
+#
+# DIRECT PURE BLISS ELITE SYSTEM (Recommended):
+# Use the official auto-commit trigger system:
+#   /opt/dev-purebliss/dev_scripts/automation/auto-commit-trigger.sh \
+#       "${SCRIPT_CATEGORY}" "Description of accomplishment" "${SCRIPT_NAME}"
+#
+# CONDITIONAL AUTO-COMMIT:
+# Only commit if certain conditions are met:
+#   if [[ \$SUCCESS_FLAG == "true" ]]; then
+#       ${WRAPPER_PREFIX}_auto_commit_wrapper "Conditional commit: Success flag set"
+#   fi
+#
+# VALIDATION COMMAND EXAMPLES:
+# - Container health check: "docker ps | grep -q healthy"
+# - File existence: "test -f /path/to/expected/file"
+# - Service response: "curl -s http://service/health | grep -q ok"
+# - Custom function: "my_validation_function"
+#
+# ELITE COMMIT MESSAGE FORMAT:
+# The Pure Bliss Elite system automatically generates comprehensive commit messages
+# following the standard format with safety guarantees, validation results, and
+# proper documentation references. See the AUTO_COMMIT_SYSTEM_GUIDE.md for details.
+#
+# ═══════════════════════════════════════════════════════════════════════════════════

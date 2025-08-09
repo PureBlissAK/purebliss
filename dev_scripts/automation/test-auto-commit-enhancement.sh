@@ -67,11 +67,11 @@ log_success "Test script created at $TEST_SCRIPT_PATH"
 log_info "TEST 1: Enhancing script with auto-commit functionality"
 if [[ -f "$ENHANCER_SCRIPT" ]]; then
     cd "$TEST_SCRIPT_DIR"
-    
+
     # Run the enhancer on our test script
     if "$ENHANCER_SCRIPT" "$TEST_SCRIPT_PATH"; then
         log_success "Script enhancement completed"
-        
+
         # Check if auto-commit functions were added
         if grep -q "auto_commit_wrapper\|complete_with_commit" "$TEST_SCRIPT_PATH"; then
             log_success "Auto-commit wrapper functions found in enhanced script"
@@ -79,7 +79,7 @@ if [[ -f "$ENHANCER_SCRIPT" ]]; then
             log_error "Auto-commit wrapper functions NOT found in enhanced script"
             exit 1
         fi
-        
+
         # Check if usage examples were added
         if grep -q "AUTO-COMMIT USAGE EXAMPLES" "$TEST_SCRIPT_PATH"; then
             log_success "Auto-commit usage examples found in enhanced script"
@@ -87,7 +87,7 @@ if [[ -f "$ENHANCER_SCRIPT" ]]; then
             log_error "Auto-commit usage examples NOT found in enhanced script"
             exit 1
         fi
-        
+
     else
         log_error "Script enhancement failed"
         exit 1
@@ -112,7 +112,7 @@ log_info "TEST 3: Testing auto-commit wrapper function availability"
 WRAPPER_FUNCTION=$(grep -o '[a-z_]*_auto_commit_wrapper' "$TEST_SCRIPT_PATH" | head -1)
 if [[ -n "$WRAPPER_FUNCTION" ]]; then
     log_success "Auto-commit wrapper function identified: $WRAPPER_FUNCTION"
-    
+
     # Test if function can be sourced and called
     if source "$TEST_SCRIPT_PATH" && declare -F "$WRAPPER_FUNCTION" >/dev/null; then
         log_success "Auto-commit wrapper function is properly defined"
@@ -139,7 +139,7 @@ log_info "TEST 5: Testing git repository detection"
 cd /opt
 if git rev-parse --git-dir > /dev/null 2>&1; then
     log_success "Git repository detected - auto-commit functionality will work"
-    
+
     # Test git status wrapper
     if command -v auto_commit_push_wrapper >/dev/null 2>&1; then
         log_success "Auto-commit push wrapper is available"

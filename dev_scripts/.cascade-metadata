@@ -1,0 +1,5 @@
+2025-08-09 13:59:38|keycloak|container-build|CASCADE_ENFORCED|bb963ba30
+2025-08-09 13:59:46|keycloak|phase1-validation|CASCADE_ENFORCED|bb963ba30
+2025-08-09 13:59:46|keycloak|phase1|FUTURE_COMPLIANCE_VALIDATED|bb963ba30
+2025-08-09 13:59:48|keycloak|container-validation|CASCADE_ENFORCED|bb963ba30
+2025-08-09 13:59:50|keycloak|container-scaffold|CASCADE_ENFORCED|bb963ba30

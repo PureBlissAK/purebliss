@@ -1,0 +1,48 @@
+# Multi-phase codeserver container scaffolding - Enhanced from existing Pure Bliss work
+# Based on: /opt/dev-purebliss/services/codeserver/Dockerfile
+ARG BUILD_PHASE=6
+
+# Phase 1: Minimal Container (Base from existing)
+FROM codercom/code-server:4.20.0 AS phase1
+RUN apt-get update && apt-get install -y \
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=3 \
+EXPOSE 8080
+
+# Phase 2: Enhanced Configuration (Existing configs)
+FROM phase1 AS phase2
+RUN apt-get install -y jq openssl
+COPY /opt/dev-purebliss/services/codeserver/configs/ /opt/config/ 2>/dev/null || true
+COPY /opt/dev-purebliss/services/codeserver/*.conf /opt/config/ 2>/dev/null || true
+
+
+# Phase 3: Service Integration (Vault integration from existing)
+FROM phase2 AS phase3
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+COPY /opt/dev-purebliss/services/codeserver/scripts/ /opt/scripts/ 2>/dev/null || true
+
+
+# Phase 4: Advanced Features
+FROM phase3 AS phase4
+COPY /opt/dev-purebliss/services/codeserver/templates/ /opt/templates/ 2>/dev/null || true
+COPY /opt/dev-purebliss/services/codeserver/*.sh /opt/scripts/ 2>/dev/null || true
+RUN chmod +x /opt/scripts/*.sh 2>/dev/null || true
+
+
+# Phase 5: Production Readiness
+FROM phase4 AS phase5
+RUN mkdir -p /opt/my-secure-ha-stack/logs
+COPY /opt/dev-purebliss/services/codeserver/best-practices/ /opt/best-practices/ 2>/dev/null || true
+USER root
+USER coder
+
+# Phase 6: Elite Features (Full existing functionality)
+FROM phase5 AS phase6
+COPY /opt/dev-purebliss/services/codeserver/ /opt/codeserver-config/ 2>/dev/null || true
+ENV ADVANCED_MONITORING=true
+ENV AUTO_HEALING=true
+
+# Final stage selection based on BUILD_PHASE
+FROM phase${BUILD_PHASE} AS final
+ENTRYPOINT ["/entrypoint.sh"]

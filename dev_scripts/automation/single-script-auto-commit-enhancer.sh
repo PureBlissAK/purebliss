@@ -137,9 +137,9 @@ ${WRAPPER_PREFIX}_log_success() {
 ${WRAPPER_PREFIX}_auto_commit_wrapper() {
     local commit_message="\${1:-"Auto-commit: \${SCRIPT_NAME} executed successfully"}"
     local validation_command="\${2:-}"
-    
+
     ${WRAPPER_PREFIX}_log_info "Starting auto-commit wrapper for successful execution"
-    
+
     # Run validation if provided
     if [[ -n "\$validation_command" ]]; then
         ${WRAPPER_PREFIX}_log_info "Running validation: \$validation_command"
@@ -150,7 +150,7 @@ ${WRAPPER_PREFIX}_auto_commit_wrapper() {
             return 1
         fi
     fi
-    
+
     # Use existing Pure Bliss Elite auto-commit system
     if [[ -f "/opt/dev-purebliss/dev_scripts/automation/auto-commit-trigger.sh" ]]; then
         ${WRAPPER_PREFIX}_log_info "Using Pure Bliss Elite auto-commit system"
@@ -169,13 +169,13 @@ ${WRAPPER_PREFIX}_auto_commit_wrapper() {
 ${WRAPPER_PREFIX}_complete_with_commit() {
     local final_message="\${1:-"\${SCRIPT_NAME} completed successfully"}"
     local validation_command="\${2:-}"
-    
+
     # Log successful completion
     ${WRAPPER_PREFIX}_log_success "\$final_message"
-    
+
     # Execute auto-commit wrapper
     ${WRAPPER_PREFIX}_auto_commit_wrapper "Auto-commit: \$final_message" "\$validation_command"
-    
+
     # Final status
     ${WRAPPER_PREFIX}_log_success "\${SCRIPT_NAME} execution and auto-commit completed"
 }
@@ -241,7 +241,7 @@ if bash -n "$TEMP_ENHANCED"; then
     mv "$TEMP_ENHANCED" "$TARGET_SCRIPT"
     chmod +x "$TARGET_SCRIPT"
     log_success "Script enhanced successfully with auto-commit functionality"
-    
+
     # Show what was added
     echo ""
     echo "🚀 AUTO-COMMIT ENHANCEMENTS ADDED:"
@@ -257,7 +257,7 @@ if bash -n "$TEMP_ENHANCED"; then
     echo "  2. Optionally add validation commands for automated testing"
     echo "  3. Run your enhanced script to test auto-commit functionality"
     echo ""
-    
+
 else
     log_error "Enhanced script has syntax errors - reverting"
     rm -f "$TEMP_ENHANCED"

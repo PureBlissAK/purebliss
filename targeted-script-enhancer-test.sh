@@ -57,34 +57,34 @@ analyze_script_consolidation() {
     local script_path="$1"
     local script_name="$(basename "$script_path")"
     local consolidation_suggestions=()
-    
+
     targeted_script_enhancer_test_log_info "Analyzing $script_name for consolidation opportunities"
-    
+
     # Read script content
     local script_content
     script_content=$(cat "$script_path" 2>/dev/null || echo "")
-    
+
     # Check for common vault functions
     if echo "$script_content" | grep -q "vault.*auth\|vault.*read\|vault.*write"; then
         if [[ ! "$script_content" =~ "consolidated-vault-integration" ]]; then
             consolidation_suggestions+=("VAULT_INTEGRATION: Consider using consolidated-vault-integration.sh functions")
         fi
     fi
-    
+
     # Check for deployment patterns
     if echo "$script_content" | grep -q "docker.*compose\|docker.*start\|docker.*up"; then
         if [[ ! "$script_content" =~ "consolidated-deployment" ]]; then
             consolidation_suggestions+=("DEPLOYMENT: Consider using consolidated-deployment.sh functions")
         fi
     fi
-    
+
     # Check for health validation patterns
     if echo "$script_content" | grep -q "health\|validate\|check.*status"; then
         if [[ ! "$script_content" =~ "consolidated-validation" ]]; then
             consolidation_suggestions+=("VALIDATION: Consider using consolidated-validation.sh functions")
         fi
     fi
-    
+
     # Check for duplicate function patterns
     local function_patterns=(
         "wait_for_service"
@@ -94,14 +94,14 @@ analyze_script_consolidation() {
         "configure_ssl"
         "generate_password"
     )
-    
+
     for pattern in "${function_patterns[@]}"; do
-        if echo "$script_content" | grep -q "function.*$pattern\|$pattern()" && 
+        if echo "$script_content" | grep -q "function.*$pattern\|$pattern()" &&
            [[ ! "$script_content" =~ "source.*common-functions-library" ]]; then
             consolidation_suggestions+=("DUPLICATE_FUNCTION: Function '$pattern' may be duplicated - check common-functions-library.sh")
         fi
     done
-    
+
     # Output suggestions
     if [[ ${#consolidation_suggestions[@]} -gt 0 ]]; then
         echo "  🔍 CONSOLIDATION ANALYSIS:"
@@ -111,7 +111,7 @@ analyze_script_consolidation() {
     else
         echo "  ✅ No obvious consolidation opportunities found"
     fi
-    
+
     return ${#consolidation_suggestions[@]}
 }
 
@@ -120,53 +120,53 @@ suggest_additional_wrappers() {
     local script_path="$1"
     local script_name="$(basename "$script_path")"
     local wrapper_suggestions=()
-    
+
     targeted_script_enhancer_test_log_info "Analyzing $script_name for additional wrapper suggestions"
-    
+
     # Read script content
     local script_content
     script_content=$(cat "$script_path" 2>/dev/null || echo "")
-    
+
     # Check for vault operations
     if echo "$script_content" | grep -q "vault.*read\|vault.*write\|vault.*auth"; then
         wrapper_suggestions+=("VAULT_WRAPPER: Add vault_safe_read() and vault_safe_write() wrappers with error handling")
     fi
-    
+
     # Check for docker operations
     if echo "$script_content" | grep -q "docker.*exec\|docker.*run\|docker.*compose"; then
         wrapper_suggestions+=("DOCKER_WRAPPER: Add docker_safe_exec() wrapper with container validation")
     fi
-    
+
     # Check for curl/HTTP operations
     if echo "$script_content" | grep -q "curl\|wget\|http"; then
         wrapper_suggestions+=("HTTP_WRAPPER: Add http_request_with_retry() wrapper for reliable HTTP calls")
     fi
-    
+
     # Check for file operations
     if echo "$script_content" | grep -q "cp\|mv\|rm.*-rf\|chmod\|chown"; then
         wrapper_suggestions+=("FILE_WRAPPER: Add safe_file_operation() wrapper with backup and validation")
     fi
-    
+
     # Check for database operations
     if echo "$script_content" | grep -q "psql\|mysql\|redis-cli\|createdb"; then
         wrapper_suggestions+=("DB_WRAPPER: Add database_safe_query() wrapper with connection validation")
     fi
-    
+
     # Check for service management
     if echo "$script_content" | grep -q "systemctl\|service.*start\|service.*stop"; then
         wrapper_suggestions+=("SERVICE_WRAPPER: Add service_safe_control() wrapper with status validation")
     fi
-    
+
     # Check for SSL/TLS operations
     if echo "$script_content" | grep -q "openssl\|certbot\|ssl\|tls"; then
         wrapper_suggestions+=("SSL_WRAPPER: Add ssl_cert_management() wrapper for certificate operations")
     fi
-    
+
     # Check for inter-script communication
     if echo "$script_content" | grep -q "source.*\.sh\|bash.*\.sh\|\.\/.*\.sh"; then
         wrapper_suggestions+=("COMMUNICATION_WRAPPER: Add script_safe_invoke() wrapper for reliable script execution")
     fi
-    
+
     # Output suggestions
     if [[ ${#wrapper_suggestions[@]} -gt 0 ]]; then
         echo "  💡 WRAPPER SUGGESTIONS:"
@@ -176,7 +176,7 @@ suggest_additional_wrappers() {
     else
         echo "  ✅ Current wrapper functions appear sufficient"
     fi
-    
+
     return ${#wrapper_suggestions[@]}
 }
 
@@ -185,30 +185,30 @@ detect_script_similarity() {
     local script_path="$1"
     local script_name="$(basename "$script_path")"
     local similar_scripts=()
-    
+
     targeted_script_enhancer_test_log_info "Checking $script_name for similar scripts in workspace"
-    
+
     # Get script's main functions and patterns
     local script_functions
     script_functions=$(grep -o "function [a-zA-Z_][a-zA-Z0-9_]*\|^[a-zA-Z_][a-zA-Z0-9_]*\s*()" "$script_path" 2>/dev/null | head -10 || echo "")
-    
+
     # Get script keywords
     local script_keywords
     script_keywords=$(grep -o "\(vault\|docker\|postgres\|redis\|nginx\|keycloak\|health\|deploy\|setup\|init\|config\)" "$script_path" 2>/dev/null | sort | uniq | tr '\n' ' ' || echo "")
-    
+
     # Check for similar scripts
     while IFS= read -r -d '' other_script; do
         if [[ "$other_script" != "$script_path" ]]; then
             local other_name="$(basename "$other_script")"
             local similarity_score=0
-            
+
             # Check function similarity
             if [[ -n "$script_functions" ]]; then
                 local common_functions
                 common_functions=$(grep -F "$script_functions" "$other_script" 2>/dev/null | wc -l || echo "0")
                 similarity_score=$((similarity_score + common_functions * 20))
             fi
-            
+
             # Check keyword similarity
             if [[ -n "$script_keywords" ]]; then
                 for keyword in $script_keywords; do
@@ -217,19 +217,19 @@ detect_script_similarity() {
                     fi
                 done
             fi
-            
+
             # Check filename similarity
             if echo "$other_name" | grep -q "${script_name%.*}\|${script_name%%.*}"; then
                 similarity_score=$((similarity_score + 30))
             fi
-            
+
             # If similarity is high, suggest consolidation
             if [[ $similarity_score -gt 40 ]]; then
                 similar_scripts+=("$other_name (similarity: ${similarity_score}%)")
             fi
         fi
     done < <(find /opt -name "*.sh" -type f -print0 2>/dev/null | head -50)
-    
+
     # Output similar scripts
     if [[ ${#similar_scripts[@]} -gt 0 ]]; then
         echo "  🔗 SIMILAR SCRIPTS FOUND:"
@@ -240,7 +240,7 @@ detect_script_similarity() {
     else
         echo "  ✅ No highly similar scripts detected"
     fi
-    
+
     return ${#similar_scripts[@]}
 }
 
@@ -515,7 +515,7 @@ EOF
             # Update Script Index Library
             update_script_index_library "$script_path" "enhanced" "$category" "$services" "$tags"
             echo "  📚 Updated Script Index Library"
-            
+
             # Perform intelligent analysis
             echo "  🧠 INTELLIGENT ANALYSIS:"
             analyze_script_consolidation "$script_path"
@@ -630,7 +630,7 @@ cat << EOF > "$INTELLIGENCE_REPORT"
 
 ## Summary
 
-This report provides intelligent analysis of enhanced scripts including consolidation opportunities, 
+This report provides intelligent analysis of enhanced scripts including consolidation opportunities,
 wrapper suggestions, and duplicate detection to improve code reuse and maintainability.
 
 ## Scripts Processed
@@ -643,7 +643,7 @@ for script_path in "${SAFE_SCRIPTS[@]}"; do
     echo "### $script_name" >> "$INTELLIGENCE_REPORT"
     echo "**Path**: \`$script_path\`" >> "$INTELLIGENCE_REPORT"
     echo "" >> "$INTELLIGENCE_REPORT"
-    
+
     # Add analysis results to report
     echo "**Analysis performed**: ✅" >> "$INTELLIGENCE_REPORT"
     echo "" >> "$INTELLIGENCE_REPORT"
@@ -656,7 +656,7 @@ cat << EOF >> "$INTELLIGENCE_REPORT"
 Based on the intelligent analysis performed during enhancement:
 
 1. **Consolidation Opportunities**: Scripts with vault, deployment, or validation patterns should leverage consolidated utility functions
-2. **Wrapper Functions**: Additional wrapper functions suggested for improved error handling and reliability  
+2. **Wrapper Functions**: Additional wrapper functions suggested for improved error handling and reliability
 3. **Duplicate Detection**: Similar scripts identified for potential consolidation using existing patterns
 4. **Integration**: All enhanced scripts now integrate with centralized function libraries
 

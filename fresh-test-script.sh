@@ -69,9 +69,9 @@ fresh_test_script_log_success() {
 fresh_test_script_auto_commit_wrapper() {
     local commit_message="${1:-"Auto-commit: ${SCRIPT_NAME} executed successfully"}"
     local validation_command="${2:-}"
-    
+
     fresh_test_script_log_info "Starting auto-commit wrapper for successful execution"
-    
+
     # Run validation if provided
     if [[ -n "$validation_command" ]]; then
         fresh_test_script_log_info "Running validation: $validation_command"
@@ -82,7 +82,7 @@ fresh_test_script_auto_commit_wrapper() {
             return 1
         fi
     fi
-    
+
     # Use existing Pure Bliss Elite auto-commit system
     if [[ -f "/opt/dev-purebliss/dev_scripts/automation/auto-commit-trigger.sh" ]]; then
         fresh_test_script_log_info "Using Pure Bliss Elite auto-commit system"
@@ -100,13 +100,13 @@ fresh_test_script_auto_commit_wrapper() {
 fresh_test_script_complete_with_commit() {
     local final_message="${1:-"${SCRIPT_NAME} completed successfully"}"
     local validation_command="${2:-}"
-    
+
     # Log successful completion
     fresh_test_script_log_success "$final_message"
-    
+
     # Execute auto-commit wrapper
     fresh_test_script_auto_commit_wrapper "Auto-commit: $final_message" "$validation_command"
-    
+
     # Final status
     fresh_test_script_log_success "${SCRIPT_NAME} execution and auto-commit completed"
 }
@@ -184,9 +184,9 @@ fresh_test_script_log_success() {
 fresh_test_script_auto_commit_wrapper() {
     local commit_message="${1:-"Auto-commit: ${SCRIPT_NAME} executed successfully"}"
     local validation_command="${2:-}"
-    
+
     fresh_test_script_log_info "Starting auto-commit wrapper for successful execution"
-    
+
     # Run validation if provided
     if [[ -n "$validation_command" ]]; then
         fresh_test_script_log_info "Running validation: $validation_command"
@@ -197,7 +197,7 @@ fresh_test_script_auto_commit_wrapper() {
             return 1
         fi
     fi
-    
+
     # Use common library function if available
     if command -v auto_commit_push_wrapper >/dev/null 2>&1; then
         auto_commit_push_wrapper "${SCRIPT_NAME}" "$commit_message"
@@ -211,13 +211,13 @@ fresh_test_script_auto_commit_wrapper() {
 fresh_test_script_complete_with_commit() {
     local final_message="${1:-"${SCRIPT_NAME} completed successfully"}"
     local validation_command="${2:-}"
-    
+
     # Log successful completion
     fresh_test_script_log_success "$final_message"
-    
+
     # Execute auto-commit wrapper
     fresh_test_script_auto_commit_wrapper "Auto-commit: $final_message" "$validation_command"
-    
+
     # Final status
     fresh_test_script_log_success "${SCRIPT_NAME} execution and auto-commit completed"
 }
@@ -226,7 +226,7 @@ fresh_test_script_complete_with_commit() {
 # ORIGINAL SCRIPT CONTENT (Enhanced with Auto-Commit Functionality)
 # ═══════════════════════════════════════════════════════════════════════════════════
 
-# Simple fresh test script for auto-commit testing  
+# Simple fresh test script for auto-commit testing
 fresh_test_script_log_info "Fresh test script running..."
 echo "This script has been enhanced with auto-commit functionality"
 fresh_test_script_log_info "Testing auto-commit enhancement functionality"
