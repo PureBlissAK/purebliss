@@ -1,23 +1,9 @@
-# Vault Server Configuration
-# Development mode with file storage
+###############################################
+# Deprecated config (disabled by automation)  #
+# This file previously defined a non-TLS tcp  #
+# listener that conflicts with the TLS config #
+# in vault.hcl. It is intentionally disabled  #
+# to enforce HTTPS-only Vault.                #
+###############################################
 
-storage "file" {
-  path = "/vault/data"
-}
-
-listener "tcp" {
-  address       = "0.0.0.0:8200"
-  tls_disable   = 1
-}
-
-# API address for client connections
-api_addr = "http://0.0.0.0:8200"
-
-# Enable UI
-ui = true
-
-# Disable mlock for development
-disable_mlock = true
-
-# Log level
-log_level = "debug"
+# Intentionally left blank.

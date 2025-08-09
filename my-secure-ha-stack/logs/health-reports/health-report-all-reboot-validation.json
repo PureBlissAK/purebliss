@@ -1,0 +1,15 @@
+{
+  "service": "all",
+  "task": "reboot-validation",
+  "timestamp": "2025-08-08 00:19:44",
+  "container_name": "purebliss-all",
+  "overall_status": "2",
+  "validation_results": {
+    "container_exists": true,
+    "docker_health": "checked",
+    "service_endpoints": "checked",
+    "dependencies": "checked",
+    "performance": "checked"
+  },
+  "next_action": "remediate_issues"
+}

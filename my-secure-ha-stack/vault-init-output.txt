@@ -1,0 +1,1 @@
+DRY_RUN: curl -s -X POST -d {"secret_shares": 5, "secret_threshold": 3} http://127.0.0.1:18200/v1/sys/init

@@ -1,0 +1,15 @@
+{
+  "service": "vault",
+  "task": "post-https-file-storage-fix",
+  "timestamp": "2025-08-09 11:57:08",
+  "container_name": "purebliss-vault",
+  "overall_status": "1",
+  "validation_results": {
+    "container_exists": true,
+    "docker_health": "checked",
+    "service_endpoints": "checked",
+    "dependencies": "checked",
+    "performance": "checked"
+  },
+  "next_action": "remediate_issues"
+}

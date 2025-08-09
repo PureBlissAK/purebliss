@@ -34,6 +34,51 @@ MANDATORY: All actions, troubleshooting steps, and progress must be logged in /o
 
 CRITICAL ENHANCEMENT: All development work must now implement MANDATORY HEALTH VALIDATION after every task. The comprehensive health validation system at `/opt/dev-purebliss/validate-container-health.sh` must be executed after every build, configuration change, or integration step. NO FORWARD PROGRESS is permitted until container health validation passes with exit code 0.
 
+� MANDATORY HTTPS-ONLY ENFORCEMENT 🔒
+
+**ABSOLUTE SECURITY REQUIREMENT**: ALL SERVICE COMMUNICATIONS MUST USE HTTPS/TLS EXCLUSIVELY
+
+**HTTPS-ONLY PROTOCOL ENFORCEMENT**:
+- ALL Vault API calls MUST use https://vault.purebliss.app:8200 or https://127.0.0.1:8200 with TLS
+- ALL health checks MUST use HTTPS endpoints with proper certificate validation
+- ALL service-to-service communication MUST be encrypted with TLS
+- NO HTTP plaintext connections allowed for any service API calls
+- ALL scripts, health validation, and automation MUST enforce HTTPS-only
+- ALL entrypoint scripts MUST use HTTPS for service readiness checks
+- SELF-SIGNED certificates are acceptable for development with proper validation
+
+**HTTPS VALIDATION REQUIREMENTS**:
+- Every script MUST validate HTTPS connectivity before proceeding
+- Health validation MUST verify TLS certificate presence and validity
+- Service startup MUST fail fast if HTTPS endpoints are unavailable
+- All API clients MUST be configured for HTTPS with certificate validation
+- Protocol mismatch errors (HTTP to HTTPS) are considered CRITICAL failures
+
+�🚨 UNBREAKABLE VALIDATION RULE - MANDATORY REBOOT VALIDATION 🚨
+
+**ABSOLUTE ULTIMATE REQUIREMENT**: TRUE VALIDATION OF SUCCESSFUL TASK COMPLETION IS TO REBOOT THE SERVICE AND RUN CHECKS UNTIL ITS WORKING ON REBOOT AND FULLY 100% HEALTHY.
+
+**MANDATORY REBOOT VALIDATION PROTOCOL**:
+- EVERY task completion MUST be validated by full service reboot
+- EVERY configuration change MUST survive container restart and achieve 100% health
+- EVERY integration MUST function perfectly after complete system reboot
+- NO task is considered complete until reboot validation passes
+- ALL services must achieve and maintain 100% health status post-reboot
+- FAILURE to pass reboot validation invalidates ALL previous work
+- REBOOT testing is the ULTIMATE and FINAL validation gate
+
+**REBOOT VALIDATION WORKFLOW**:
+1. Complete task implementation
+2. Run initial health validation
+3. MANDATORY: Kill all containers (docker kill $(docker ps -q))
+4. MANDATORY: Restart all services from scratch
+5. MANDATORY: Run comprehensive health validation
+6. MANDATORY: Achieve 100% health status across all services
+7. MANDATORY: Validate all integrations function post-reboot
+8. Only after 100% reboot validation SUCCESS can task be marked complete
+
+**THIS RULE CAN NEVER BE BROKEN - REBOOT VALIDATION IS ABSOLUTE**
+
 Overview
 This document outlines the guidelines for using Copilot Enterprise within the Pure Bliss ecosystem, ensuring consistency, security, and adherence to elite standards of modularity and microservices architecture. Copilot is trained on all Pure Bliss repositories and understands the distinct boundaries and responsibilities of each service, with mandatory health validation gates enforcing container integrity throughout all development workflows.
 

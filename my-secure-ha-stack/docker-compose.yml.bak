@@ -1,0 +1,101 @@
+version: '3.8'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: purebliss-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+
+    environment:
+      - VAULT_ADDR=https://purebliss-vault:8200
+      - VAULT_SKIP_VERIFY=1
+      - DOMAIN=dev.purebliss.app
+
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - /opt/dev-purebliss/web/tools:/opt/dev-purebliss/web/tools:ro
+      - ./config.env:/opt/my-secure-ha-stack/config.env:ro
+      # CENTRALIZED VAULT-INTEGRATED ENTRYPOINT
+      - /opt/dev-purebliss/dev_scripts/services/nginx/entrypoints/vault-entrypoint.sh:/usr/local/bin/vault-entrypoint.sh:ro
+      # Logging
+      - /opt/my-secure-ha-stack/logs:/opt/logs:rw
+
+      # Mount Vault token for PKI integration
+      - ./secrets/vault_token:/vault-token:ro
+
+    entrypoint: ["/usr/local/bin/vault-entrypoint.sh"]
+    command: ["nginx", "-g", "daemon off;"]
+
+    networks:
+      - purebliss-net
+    depends_on:
+      - vault
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    restart: unless-stopped
+  vault:
+    image: vault:1.13.3
+    container_name: purebliss-vault
+    volumes:
+      - ./vault/config:/vault/config:ro
+      - vault_data:/vault/data
+      - /opt/dev-purebliss/dev_scripts/services/vault/automation/vault-minimal-init.sh:/vault-dev-init.sh:ro
+      - /opt/my-secure-ha-stack/secrets:/opt/my-secure-ha-stack/secrets:rw
+      - /opt/my-secure-ha-stack/logs:/opt/my-secure-ha-stack/logs:rw
+      - /opt/my-secure-ha-stack/vault-keys.txt:/opt/my-secure-ha-stack/vault-keys.txt:ro
+    ports:
+      - "18200:8200"
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8200/v1/sys/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+      - VAULT_SKIP_VERIFY=true
+    networks:
+      - purebliss-net
+    restart: unless-stopped
+      - /opt/dev-purebliss/dev_scripts/services/vault/automation/vault-entrypoint-wrapper.sh:/vault-entrypoint-wrapper.sh:ro
+
+  vault-agent:
+    image: vault:1.13.3
+    container_name: purebliss-vault-agent
+    depends_on:
+      vault:
+        condition: service_healthy
+    volumes:
+      - ./vault/agent:/vault/config:ro
+      - ./vault/unseal:/vault/unseal
+      - ./secrets:/opt/my-secure-ha-stack/secrets:ro
+    command: sh -c "sleep 5 && vault agent -config=/vault/config/agent-config.hcl"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "ps aux | grep -v grep | grep 'vault agent' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    environment:
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_SKIP_VERIFY=true
+    networks:
+      - purebliss-net
+    restart: unless-stopped
+
+volumes:
+  vault_data:
+
+networks:
+  purebliss-net:
+    external: true
